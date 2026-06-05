@@ -1,0 +1,17 @@
+# Never commit secrets or local overrides
+*.local
+*.local.*
+.env
+.env.*
+*.credentials.json
+.credentials.json
+
+# OS junk
+.DS_Store
+Thumbs.db
+*.stackdump
+
+# Editor junk
+.vscode/
+.idea/
+*.swp
