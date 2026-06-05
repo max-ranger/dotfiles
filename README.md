@@ -11,7 +11,8 @@ claude/
     pr-draft/
     verify/
   hooks/                # Shell + PowerShell hooks referenced by settings.json
-Brewfile                # Homebrew packages (regenerate with `brew bundle dump`)
+brew/
+  Brewfile              # Homebrew packages, casks, VS Code ext. (regenerate with `brew bundle dump`)
 ```
 
 ## Bootstrap a new machine
@@ -50,7 +51,7 @@ ln -sf "$PWD/claude/skills/pr-draft" ~/.claude/skills/pr-draft
 ln -sf "$PWD/claude/skills/verify"   ~/.claude/skills/verify
 
 # Homebrew packages
-brew bundle --file=Brewfile
+brew bundle --file=brew/Brewfile
 ```
 
 ## Updating
@@ -60,7 +61,7 @@ After tweaking a Claude skill, hook, or setting locally, commit and push from th
 To refresh the Brewfile from your current Mac:
 
 ```bash
-brew bundle dump --file=Brewfile --force
+brew bundle dump --file=brew/Brewfile --force --describe
 git commit -am "brew: refresh package list"
 ```
 
