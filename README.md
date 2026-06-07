@@ -7,8 +7,10 @@ Personal machine setup — Claude Code configs, hooks, custom skills, and packag
 ```
 claude/
   settings.json         # Claude Code user settings (hooks, plugins, flags)
-  skills/               # Custom user-level skills
-    pr-draft/
+  skills/               # User-level skills
+    pr-draft/               # own — draft PR generator
+    emil-design-eng/        # vendored — emilkowalski/skill (motion/design eng)
+    design-taste-frontend/  # vendored — bnd-1/taste-skill (anti-generic UI)
   hooks/                # Shell + PowerShell hooks referenced by settings.json
 brew/
   Brewfile              # Homebrew packages, casks, VS Code ext. (regenerate with `brew bundle dump`)
@@ -61,6 +63,17 @@ To refresh the Brewfile from your current Mac:
 brew bundle dump --file=brew/Brewfile --force --describe
 git commit -am "brew: refresh package list"
 ```
+
+## Third-party skills & plugins
+
+**Vendored skills** (copied into `claude/skills/`, pinned — refresh by re-downloading `SKILL.md`):
+- `emil-design-eng` — [emilkowalski/skill](https://github.com/emilkowalski/skill)
+- `design-taste-frontend` — [bnd-1/taste-skill](https://github.com/bnd-1/taste-skill)
+
+**Plugins** (declared in `settings.json` → `enabledPlugins` + `extraKnownMarketplaces`, installed by Claude Code on startup):
+- `andrej-karpathy-skills@karpathy-skills` — [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)
+- `ui-ux-pro-max@ui-ux-pro-max-skill` — [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+- `impeccable@impeccable` — [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
 
 ## What's intentionally NOT here
 

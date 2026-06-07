@@ -83,7 +83,6 @@
     "frontend-design@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
@@ -94,7 +93,10 @@
     "feature-dev@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true
+    "commit-commands@claude-plugins-official": true,
+    "andrej-karpathy-skills@karpathy-skills": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
+    "impeccable@impeccable": true
   },
   "extraKnownMarketplaces": {
     "thedotmack": {
@@ -108,10 +110,28 @@
         "source": "github",
         "repo": "warpdotdev/claude-code-warp"
       }
+    },
+    "karpathy-skills": {
+      "source": {
+        "source": "github",
+        "repo": "forrestchang/andrej-karpathy-skills"
+      }
+    },
+    "ui-ux-pro-max-skill": {
+      "source": {
+        "source": "github",
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
+      }
+    },
+    "impeccable": {
+      "source": {
+        "source": "github",
+        "repo": "pbakaus/impeccable"
+      }
     }
   },
   "effortLevel": "xhigh",
   "autoUpdatesChannel": "latest",
-  "agentPushNotifEnabled": true,
-  "theme": "auto"
+  "theme": "auto",
+  "agentPushNotifEnabled": true
 }
