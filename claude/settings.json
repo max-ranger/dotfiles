@@ -6,15 +6,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "any-buddy apply --silent"
-          }
-        ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
             "command": "bash ~/.claude/hooks/push-notify-reminder.sh",
             "timeout": 5
           }
@@ -66,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:/Users/max/.claude/hooks/notify-toast.ps1\"",
+            "command": "bash ~/.claude/hooks/notify.sh",
             "timeout": 5,
             "statusMessage": "WinToast",
             "async": true
@@ -79,7 +70,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:/Users/max/.claude/hooks/notify-toast.ps1\"",
+            "command": "bash ~/.claude/hooks/notify.sh",
             "timeout": 5,
             "statusMessage": "WinToast",
             "async": true
@@ -98,7 +89,12 @@
     "superpowers@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "claude-mem@thedotmack": true,
-    "warp@claude-code-warp": true
+    "warp@claude-code-warp": true,
+    "skill-creator@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "thedotmack": {
@@ -116,7 +112,6 @@
   },
   "effortLevel": "xhigh",
   "autoUpdatesChannel": "latest",
-  "skipDangerousModePermissionPrompt": true,
   "agentPushNotifEnabled": true,
-  "skipAutoPermissionPrompt": true
+  "theme": "auto"
 }

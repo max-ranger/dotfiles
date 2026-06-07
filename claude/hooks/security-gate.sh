@@ -19,12 +19,12 @@ C="$HOOK_COMMAND"
 # ── Git push protections ──
 if echo "$C" | grep -qE '(^|[;&|()]+[[:space:]]*)git[[:space:]]+push'; then
   if echo "$C" | grep -qE 'git[[:space:]]+push.*(origin[[:space:]]+|:)(main|master)(\b|$)'; then
-    deny "push to main/master blocked. Use a feature branch + PR."
+    ask "pushing to main/master. Fine for personal repos; use a branch + PR for shared/client repos. Confirm?"
   fi
   if echo "$C" | grep -qE 'git[[:space:]]+push[[:space:]]*($|[;&|])'; then
     CB=$(git branch --show-current 2>/dev/null)
     if [ "$CB" = "main" ] || [ "$CB" = "master" ]; then
-      deny "you are on $CB. Push blocked."
+      ask "you are on $CB. Confirm push?"
     fi
   fi
   if echo "$C" | grep -qE 'git[[:space:]]+push.*(-[a-zA-Z]*f([[:space:]]|$)|--force([[:space:]]|$))' && ! echo "$C" | grep -q '\-\-force-with-lease'; then
@@ -51,7 +51,7 @@ fi
 
 # ── System / disk ──
 echo "$C" | grep -qE '(mkfs|dd[[:space:]]+if=|>[[:space:]]*/dev/sd|>[[:space:]]*/dev/nvme)' && deny "destructive disk op blocked."
-echo "$C" | grep -qE '(curl|wget)[[:space:]][^|]*\|[[:space:]]*(sudo[[:space:]]+)?(bash|sh|zsh)([[:space:]]|$)' && deny "pipe-to-shell blocked."
+echo "$C" | grep -qE '(curl|wget)[[:space:]][^|]*\|[[:space:]]*(sudo[[:space:]]+)?(bash|sh|zsh)([[:space:]]|$)' && ask "pipe-to-shell. Confirm the source is trusted (e.g. a known install script)?"
 echo "$C" | grep -qE 'chmod[[:space:]]+(-R[[:space:]]+)?777' && ask "chmod 777 gives world write+exec. Confirm?"
 
 # ── Accidental publishing ──
