@@ -87,7 +87,6 @@
     "code-simplifier@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "claude-mem@thedotmack": true,
     "warp@claude-code-warp": true,
     "skill-creator@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
@@ -99,12 +98,6 @@
     "impeccable@impeccable": true
   },
   "extraKnownMarketplaces": {
-    "thedotmack": {
-      "source": {
-        "source": "github",
-        "repo": "thedotmack/claude-mem"
-      }
-    },
     "claude-code-warp": {
       "source": {
         "source": "github",
