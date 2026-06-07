@@ -12,6 +12,8 @@ claude/
     emil-design-eng/        # vendored — emilkowalski/skill (motion/design eng)
     design-taste-frontend/  # vendored — bnd-1/taste-skill (anti-generic UI)
   hooks/                # Shell + PowerShell hooks referenced by settings.json
+  templates/
+    CLAUDE.md           # Starter CLAUDE.md to drop into new project repos
 brew/
   Brewfile              # Homebrew packages, casks, VS Code ext. (regenerate with `brew bundle dump`)
 ```
@@ -52,6 +54,16 @@ ln -sf "$PWD/claude/skills/pr-draft" ~/.claude/skills/pr-draft
 # Homebrew packages
 brew bundle --file=brew/Brewfile
 ```
+
+## Starting a new project
+
+Seed the project's `CLAUDE.md` from the template, then tailor:
+
+```bash
+cp ~/dotfiles/claude/templates/CLAUDE.md ./CLAUDE.md   # Windows: copy from C:\Dev\ranger\dotfiles\
+```
+
+The template is a living document — improvements you discover in a project worth keeping across all projects should be ported back into `claude/templates/CLAUDE.md` here.
 
 ## Updating
 
