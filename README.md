@@ -19,6 +19,8 @@ git/
   gitignore             # Generic all-purpose .gitignore to drop into new project repos
 brew/
   Brewfile              # Homebrew packages, casks, VS Code ext. (regenerate with `brew bundle dump`)
+scripts/
+  install-dotnet.sh     # Install .NET SDK (latest LTS) — .NET isn't in Homebrew
 ```
 
 ## Bootstrap a new machine
@@ -58,6 +60,10 @@ ln -sf "$PWD/claude/skills/pr-draft" ~/.claude/skills/pr-draft
 
 # Homebrew packages
 brew bundle --file=brew/Brewfile
+
+# .NET SDK — not managed by Homebrew; installs via Microsoft's official
+# installer (latest LTS). Idempotent: skips if .NET is already present.
+./scripts/install-dotnet.sh
 ```
 
 ## Starting a new project
