@@ -1,0 +1,234 @@
+# ──────────────────────────────────────────────────────────────
+# Generic all-purpose .gitignore
+# Stack: C# / .NET · TypeScript · Vue · Tailwind · Node (Vite)
+# IDEs:  Visual Studio · JetBrains (Rider / WebStorm) · VS Code
+#
+# Canonical copy lives in dotfiles/git/gitignore.
+# Drop into a project with:  cp ~/dotfiles/git/gitignore ./.gitignore
+# Reconciled against the github/gitignore templates (VisualStudio,
+# JetBrains, VisualStudioCode, Node, macOS, Windows) for this stack.
+# Lockfiles (package-lock.json, pnpm-lock.yaml, yarn.lock) stay COMMITTED.
+# ──────────────────────────────────────────────────────────────
+
+
+# ── Secrets & environment ─────────────────────────────────────
+.env
+.env.*
+*.env
+!.env.example
+*.local
+
+# Private keys, certificates, credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.credentials.json
+.credentials.json
+credentials.json
+*-credentials.json
+service-account*.json
+.npmrc.local
+
+# JetBrains HTTP client — private env (tokens / secrets)
+http-client.private.env.json
+
+# ASP.NET app settings — appsettings*.json holds real data, so ignore it.
+# Commit a secret-free sample instead (e.g. appsettings.sample.json).
+appsettings*.json
+!appsettings.[Ss]ample.json
+!appsettings.[Ee]xample.json
+
+
+# ── Node / JavaScript / TypeScript ────────────────────────────
+node_modules/
+.pnpm-store/
+.yarn/
+*.tsbuildinfo
+.npm
+.eslintcache
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+
+# ── Build output ──────────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+[Oo]ut/
+.vite/
+dev-dist/
+
+# Vite / Vue / Tailwind generated artifacts
+vite.config.*.timestamp-*
+*.vue.js
+*.vue.jsx
+*.css.map
+
+
+# ── Testing & coverage ────────────────────────────────────────
+coverage/
+.nyc_output/
+playwright-report/
+playwright/.cache/
+test-results/
+cypress/videos/
+cypress/screenshots/
+stats.html
+
+
+# ── .NET / C# build results ───────────────────────────────────
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+.artifacts/
+publish/
+Generated\ Files/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.VisualState.xml
+TestResult.xml
+BenchmarkDotNet.Artifacts/
+
+# Build logs & symbols
+*.pdb
+*.tmp_proj
+*.tlog
+*.binlog
+MSBuild_Logs/
+
+# Publish profiles (may contain connection strings)
+*.[Pp]ublish.xml
+*.pubxml
+*.pubxml.user
+*.publishproj
+*.azurePubxml
+*.publishsettings
+PublishScripts/
+
+# User / cache / generated files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.cache
+*.dbmdl
+*.jfm
+launchSettings.json
+project.lock.json
+project.fragment.lock.json
+ScaffoldingReadMe.txt
+StyleCopReport.xml
+~$*
+
+# Coverage (Coverlet / Visual Studio / dotCover)
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+*.dotCover
+
+# Local SQL Server databases
+*.mdf
+*.ldf
+*.ndf
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+
+# ── IDE: Visual Studio ────────────────────────────────────────
+.vs/
+MigrationBackup/
+.localhistory/
+.vshistory/
+*.vsix
+
+
+# ── IDE: JetBrains (Rider / WebStorm / IntelliJ) ──────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+*.sln.iml
+
+# ReSharper / Rider .NET add-ins
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+
+# ── IDE: VS Code ──────────────────────────────────────────────
+# (*.code-workspace is intentionally NOT ignored — commit it if used)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+.history/
+
+
+# ── OS junk ───────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+*.swp
+*.swo
+*.sw?
+*~
+
+
+# ── Personal tooling ──────────────────────────────────────────
+.zero/
+.worktrees/
+
+
+# ── Claude / AI assistant files (personal — not for the repo) ─
+# Project memory lives at .claude/CLAUDE.md (auto-loaded like a root CLAUDE.md).
+# Tip: for shared repos, prefer .git/info/exclude so the rule stays local to you.
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.claudeignore
+.superpowers/
+docs/superpowers/
+.impeccable/
+
+# Claude Code local settings may hold API keys — never commit, anywhere.
+**/settings.local.json

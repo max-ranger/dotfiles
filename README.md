@@ -13,7 +13,9 @@ claude/
     design-taste-frontend/  # vendored — bnd-1/taste-skill (anti-generic UI)
   hooks/                # Shell + PowerShell hooks referenced by settings.json
   templates/
-    CLAUDE.md           # Starter CLAUDE.md to drop into new project repos
+    CLAUDE.md           # Starter CLAUDE.md → copy into a project's .claude/
+git/
+  gitignore             # Generic all-purpose .gitignore to drop into new project repos
 brew/
   Brewfile              # Homebrew packages, casks, VS Code ext. (regenerate with `brew bundle dump`)
 ```
@@ -57,10 +59,13 @@ brew bundle --file=brew/Brewfile
 
 ## Starting a new project
 
-Seed the project's `CLAUDE.md` from the template, then tailor:
+Seed the project's Claude memory from the template — it lives in `.claude/`
+(`.claude/CLAUDE.md` auto-loads exactly like a root `CLAUDE.md`) — then tailor:
 
 ```bash
-cp ~/dotfiles/claude/templates/CLAUDE.md ./CLAUDE.md   # Windows: copy from C:\Dev\ranger\dotfiles\
+mkdir -p .claude
+cp ~/dotfiles/claude/templates/CLAUDE.md ./.claude/CLAUDE.md   # Windows: copy from C:\Dev\ranger\dotfiles\
+cp ~/dotfiles/git/gitignore ./.gitignore                       # generic all-purpose ignore for the stack
 ```
 
 The template is a living document — improvements you discover in a project worth keeping across all projects should be ported back into `claude/templates/CLAUDE.md` here.
