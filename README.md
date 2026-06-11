@@ -6,6 +6,7 @@ Personal machine setup — Claude Code configs, hooks, custom skills, and packag
 
 ```
 claude/
+  CLAUDE.md             # Global user instructions (basic-memory protocol) → ~/.claude/CLAUDE.md
   settings.json         # Claude Code user settings (hooks, plugins, flags)
   skills/               # User-level skills
     pr-draft/               # own — draft PR generator
@@ -31,6 +32,7 @@ cd C:\Dev\ranger\dotfiles
 
 # 2. Link Claude config into %USERPROFILE%\.claude\
 #    (Run as admin OR enable Developer Mode for symlinks)
+New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\CLAUDE.md" -Target "$PWD\claude\CLAUDE.md"
 New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\settings.json" -Target "$PWD\claude\settings.json"
 New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\hooks" -Target "$PWD\claude\hooks"
 New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\pr-draft" -Target "$PWD\claude\skills\pr-draft"
@@ -49,6 +51,7 @@ git clone git@github.com-ranger:max-ranger/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
 mkdir -p ~/.claude/skills
+ln -sf "$PWD/claude/CLAUDE.md"     ~/.claude/CLAUDE.md
 ln -sf "$PWD/claude/settings.json" ~/.claude/settings.json
 ln -sf "$PWD/claude/hooks"         ~/.claude/hooks
 ln -sf "$PWD/claude/skills/pr-draft" ~/.claude/skills/pr-draft
