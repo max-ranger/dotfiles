@@ -43,6 +43,8 @@ brew "uv"
 brew "wget"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
+# Application uninstaller
+cask "appcleaner"
 # Not so boring notch That Rocks 🎸🎶 
 cask "theboredteam/boring-notch/boring-notch"
 # Anthropic's official Claude AI desktop app
@@ -50,6 +52,8 @@ cask "claude"
 # UI toolkit for building applications for mobile, web and desktop
 cask "flutter"
 cask "font-hack-nerd-font"
+# GIT client
+cask "fork"
 # Web browser
 cask "google-chrome"
 # JetBrains tools manager
@@ -60,6 +64,8 @@ cask "obsidian"
 cask "orbstack"
 # App wrapper for Postgres
 cask "postgres-app"
+# Move and resize windows using keyboard shortcuts or snap areas
+cask "rectangle"
 # Music streaming service
 cask "spotify"
 # Open-source code editor
