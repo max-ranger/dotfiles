@@ -8,6 +8,11 @@
             "type": "command",
             "command": "bash ~/.claude/hooks/push-notify-reminder.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/basic-memory-context.sh",
+            "timeout": 5
           }
         ]
       }
