@@ -1,0 +1,133 @@
+{
+  // ─── Window ──────────────────────────────────────────────────────────────
+  "window.titleBarStyle": "native",
+  "window.customTitleBarVisibility": "never",
+
+  // ─── Workbench ───────────────────────────────────────────────────────────
+  "workbench.startupEditor": "welcomePage",
+  "workbench.statusBar.visible": true,
+  "workbench.editor.enablePreview": true,
+  "workbench.editor.restoreViewState": true,
+  "workbench.colorTheme": "Dark 2026",
+  "workbench.secondarySideBar.defaultVisibility": "visible",
+
+  // ─── Editor: font & layout ───────────────────────────────────────────────
+  "editor.fontFamily": "Hack Nerd Font Mono",
+  "editor.fontSize": 12,
+  "editor.lineHeight": 0,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.wordWrap": "off",
+  "editor.lineNumbers": "on",
+  "editor.minimap.enabled": true,
+  "editor.stickyScroll.enabled": false,
+  "editor.scrollBeyondLastLine": true,
+  "editor.renderWhitespace": "none",
+  "editor.renderLineHighlight": "all",
+
+  // ─── Editor: behavior ────────────────────────────────────────────────────
+  "editor.lightbulb.enabled": "on",
+  "editor.inlineSuggest.enabled": true,
+  "editor.find.addExtraSpaceOnTop": true,
+  "editor.find.seedSearchStringFromSelection": "never",
+
+  // ─── Files & Explorer ────────────────────────────────────────────────────
+  "files.trimTrailingWhitespace": true,
+  "files.associations": {
+    ".env*": "makefile",
+  },
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.compactFolders": false,
+
+  // ─── Terminal ────────────────────────────────────────────────────────────
+  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.fontFamily": "Hack Nerd Font Mono",
+
+  // ─── Formatting (Prettier) ───────────────────────────────────────────────
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+  "[javascript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[javascriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "prettier.documentSelectors": ["**/*.astro"],
+  "[astro]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+
+  // ─── Linting (ESLint) ────────────────────────────────────────────────────
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.fixAll.eslint": "explicit",
+    "source.addMissingImports": "explicit",
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+  ],
+
+  // ─── JavaScript / TypeScript ─────────────────────────────────────────────
+  "js/ts.updateImportsOnFileMove.enabled": "never",
+  "js/ts.preferences.autoImportFileExcludePatterns": ["@radix-ui"],
+  "js/ts.implicitProjectConfig.checkJs": true,
+  "debug.javascript.codelens.npmScripts": "never",
+
+  // ─── Git / GitLens ───────────────────────────────────────────────────────
+  "git.openRepositoryInParentFolders": "never",
+  "gitlens.advanced.messages": {
+    "suppressCommitHasNoPreviousCommitWarning": true,
+  },
+
+  // ─── GitHub Copilot ──────────────────────────────────────────────────────
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true,
+    "scminput": false,
+  },
+
+  // ─── Extensions: Todo Highlight ──────────────────────────────────────────
+  "todohighlight.isEnable": true,
+  "todohighlight.isCaseSensitive": true,
+  "auto-close-tag.activationOnLanguage": [
+    "xml",
+    "php",
+    "blade",
+    "ejs",
+    "jinja",
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "plaintext",
+    "markdown",
+    "vue",
+    "liquid",
+    "erb",
+    "lang-cfml",
+    "cfml",
+    "HTML (EEx)",
+    "HTML (Eex)",
+    "plist",
+  ],
+  "claudeCode.preferredLocation": "sidebar",
+}

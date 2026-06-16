@@ -21,6 +21,9 @@ brew/
   Brewfile              # Homebrew packages, casks, VS Code ext. (regenerate with `brew bundle dump`)
 scripts/
   install-dotnet.sh     # Install .NET SDK (latest LTS) — .NET isn't in Homebrew
+vscode/
+  settings.json         # VS Code user settings → ~/Library/Application Support/Code/User/
+  keybindings.json      # VS Code user keybindings (extensions tracked in brew/Brewfile)
 ```
 
 ## Bootstrap a new machine
@@ -38,6 +41,10 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\CLAUDE.md" -Targ
 New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\settings.json" -Target "$PWD\claude\settings.json"
 New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\hooks" -Target "$PWD\claude\hooks"
 New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\pr-draft" -Target "$PWD\claude\skills\pr-draft"
+
+# VS Code user config (settings + keybindings; extensions install via the Brewfile)
+New-Item -ItemType SymbolicLink -Path "$env:APPDATA\Code\User\settings.json"    -Target "$PWD\vscode\settings.json"
+New-Item -ItemType SymbolicLink -Path "$env:APPDATA\Code\User\keybindings.json" -Target "$PWD\vscode\keybindings.json"
 ```
 
 If symlinks aren't an option, just copy:
@@ -58,7 +65,12 @@ ln -sf "$PWD/claude/settings.json" ~/.claude/settings.json
 ln -sf "$PWD/claude/hooks"         ~/.claude/hooks
 ln -sf "$PWD/claude/skills/pr-draft" ~/.claude/skills/pr-draft
 
-# Homebrew packages
+# VS Code user config (settings + keybindings; extensions install via the Brewfile)
+VSC="$HOME/Library/Application Support/Code/User"
+ln -sf "$PWD/vscode/settings.json"    "$VSC/settings.json"
+ln -sf "$PWD/vscode/keybindings.json" "$VSC/keybindings.json"
+
+# Homebrew packages (installs casks + VS Code extensions too)
 brew bundle --file=brew/Brewfile
 
 # .NET SDK — not managed by Homebrew; installs via Microsoft's official
@@ -83,12 +95,14 @@ The template is a living document — improvements you discover in a project wor
 
 After tweaking a Claude skill, hook, or setting locally, commit and push from this repo. If you edited a symlinked file in `~/.claude/`, the change is already in the repo — just `git status` here.
 
-To refresh the Brewfile from your current Mac:
+To refresh the Brewfile from your current Mac (package descriptions are included by default now):
 
 ```bash
-brew bundle dump --file=brew/Brewfile --force --describe
+brew bundle dump --file=brew/Brewfile --force
 git commit -am "brew: refresh package list"
 ```
+
+VS Code `settings.json` and `keybindings.json` are symlinked into `~/Library/Application Support/Code/User/`, so edits you make in VS Code land in this repo automatically — just `git status` here. Installed extensions are tracked inline in `brew/Brewfile` (the `vscode "..."` lines) and refresh with the `brew bundle dump` above.
 
 ## Third-party skills & plugins
 
