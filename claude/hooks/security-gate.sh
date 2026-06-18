@@ -9,7 +9,10 @@ emit() {
   reason=${reason//\\/\\\\}
   reason=${reason//\"/\\\"}
   printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' "$decision" "$reason"
-  exit 2
+  # exit 0 so Claude Code honors the JSON permissionDecision (allow/ask/deny).
+  # exit 2 would force a hard block and read stderr (empty here) instead,
+  # silently swallowing every ask/deny — which is the bug this replaces.
+  exit 0
 }
 deny() { emit deny "DANGER: $1"; }
 ask()  { emit ask  "DANGER: $1"; }
