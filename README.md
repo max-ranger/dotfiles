@@ -1,20 +1,26 @@
 # dotfiles
 
-Personal machine setup — Claude Code configs, hooks, custom skills, and package lists. Shared across machines.
+A reference for setting up a new machine the way I like it — Claude Code configs, hooks,
+custom skills, VS Code settings, package lists, and notes on what I actually use.
+
+**This is documentation, not an auto-syncing setup.** Nothing here is symlinked or run
+automatically. On a new machine you *copy* what you want into place. When you find a better
+way to do something, update the live file and copy it back here by hand. The repo is the
+canonical record of the preferred setup — kept current manually.
 
 ## Layout
 
 ```
-claude/
+claude/                 # mirrors ~/.claude/ — copy these into ~/.claude/
   CLAUDE.md             # Global user instructions (basic-memory protocol) → ~/.claude/CLAUDE.md
-  settings.json         # Claude Code user settings (hooks, plugins, flags)
-  skills/               # User-level skills
+  settings.json         # Claude Code user settings (hooks, plugins, flags)  → ~/.claude/settings.json
+  hooks/                # Shell + PowerShell hooks referenced by settings.json → ~/.claude/hooks/
+  skills/               # User-level skills → ~/.claude/skills/
     pr-draft/               # own — draft PR generator
     emil-design-eng/        # vendored — emilkowalski/skill (motion/design eng)
     design-taste-frontend/  # vendored — bnd-1/taste-skill (anti-generic UI)
-  hooks/                # Shell + PowerShell hooks referenced by settings.json
-  templates/
-    CLAUDE.md           # Starter CLAUDE.md → copy into a project's .claude/
+  repo-template/        # NOT part of ~/.claude — seed for a new project's .claude/
+    CLAUDE.md           # Per-project working-principles base → a project's .claude/CLAUDE.md
 git/
   gitignore             # Generic all-purpose .gitignore to drop into new project repos
 brew/
@@ -26,32 +32,16 @@ vscode/
   keybindings.json      # VS Code user keybindings (extensions tracked in brew/Brewfile)
 ```
 
+> Two distinct `CLAUDE.md` files, separated by destination: `claude/CLAUDE.md` is the **global**
+> one — it seeds `~/.claude/CLAUDE.md` (cross-project behavior — knowledge graph / basic-memory
+> flows). `claude/repo-template/CLAUDE.md` is the **repo** one — it seeds a project's
+> `.claude/CLAUDE.md` (per-project working principles). Both load and compose: Claude Code reads
+> the global file *and* the repo file. Don't restate the global rules in a repo file — only add
+> or override project-specifics.
+
 ## Bootstrap a new machine
 
-### Windows
-
-```powershell
-# 1. Clone
-git clone git@github.com-ranger:max-ranger/dotfiles.git C:\Dev\ranger\dotfiles
-cd C:\Dev\ranger\dotfiles
-
-# 2. Link Claude config into %USERPROFILE%\.claude\
-#    (Run as admin OR enable Developer Mode for symlinks)
-New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\CLAUDE.md" -Target "$PWD\claude\CLAUDE.md"
-New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\settings.json" -Target "$PWD\claude\settings.json"
-New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\hooks" -Target "$PWD\claude\hooks"
-New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\pr-draft" -Target "$PWD\claude\skills\pr-draft"
-
-# VS Code user config (settings + keybindings; extensions install via the Brewfile)
-New-Item -ItemType SymbolicLink -Path "$env:APPDATA\Code\User\settings.json"    -Target "$PWD\vscode\settings.json"
-New-Item -ItemType SymbolicLink -Path "$env:APPDATA\Code\User\keybindings.json" -Target "$PWD\vscode\keybindings.json"
-```
-
-If symlinks aren't an option, just copy:
-
-```powershell
-Copy-Item -Recurse -Force claude\* "$env:USERPROFILE\.claude\"
-```
+Everything below is a **copy** — no symlinks. Re-run any line to refresh from the repo.
 
 ### macOS / Linux
 
@@ -59,16 +49,20 @@ Copy-Item -Recurse -Force claude\* "$env:USERPROFILE\.claude\"
 git clone git@github.com-ranger:max-ranger/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
+# Claude config — copy into ~/.claude/ (real files, not links)
 mkdir -p ~/.claude/skills
-ln -sf "$PWD/claude/CLAUDE.md"     ~/.claude/CLAUDE.md
-ln -sf "$PWD/claude/settings.json" ~/.claude/settings.json
-ln -sf "$PWD/claude/hooks"         ~/.claude/hooks
-ln -sf "$PWD/claude/skills/pr-draft" ~/.claude/skills/pr-draft
+cp    claude/CLAUDE.md                    ~/.claude/CLAUDE.md
+cp    claude/settings.json                ~/.claude/settings.json
+cp -R claude/hooks                        ~/.claude/hooks
+cp -R claude/skills/pr-draft              ~/.claude/skills/pr-draft
+cp -R claude/skills/emil-design-eng       ~/.claude/skills/emil-design-eng
+cp -R claude/skills/design-taste-frontend ~/.claude/skills/design-taste-frontend
 
-# VS Code user config (settings + keybindings; extensions install via the Brewfile)
+# VS Code user config (extensions install via the Brewfile)
 VSC="$HOME/Library/Application Support/Code/User"
-ln -sf "$PWD/vscode/settings.json"    "$VSC/settings.json"
-ln -sf "$PWD/vscode/keybindings.json" "$VSC/keybindings.json"
+mkdir -p "$VSC"
+cp vscode/settings.json    "$VSC/settings.json"
+cp vscode/keybindings.json "$VSC/keybindings.json"
 
 # Homebrew packages (installs casks + VS Code extensions too)
 brew bundle --file=brew/Brewfile
@@ -78,31 +72,60 @@ brew bundle --file=brew/Brewfile
 ./scripts/install-dotnet.sh
 ```
 
+### Windows
+
+```powershell
+git clone git@github.com-ranger:max-ranger/dotfiles.git C:\Dev\ranger\dotfiles
+cd C:\Dev\ranger\dotfiles
+
+# Claude config — copy into %USERPROFILE%\.claude\
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\skills" | Out-Null
+Copy-Item        claude\CLAUDE.md                    "$env:USERPROFILE\.claude\CLAUDE.md"
+Copy-Item        claude\settings.json                "$env:USERPROFILE\.claude\settings.json"
+Copy-Item -Recurse claude\hooks                      "$env:USERPROFILE\.claude\hooks"
+Copy-Item -Recurse claude\skills\pr-draft            "$env:USERPROFILE\.claude\skills\pr-draft"
+Copy-Item -Recurse claude\skills\emil-design-eng     "$env:USERPROFILE\.claude\skills\emil-design-eng"
+Copy-Item -Recurse claude\skills\design-taste-frontend "$env:USERPROFILE\.claude\skills\design-taste-frontend"
+
+# VS Code user config (extensions install separately)
+Copy-Item vscode\settings.json    "$env:APPDATA\Code\User\settings.json"
+Copy-Item vscode\keybindings.json "$env:APPDATA\Code\User\keybindings.json"
+```
+
 ## Starting a new project
 
-Seed the project's Claude memory from the template — it lives in `.claude/`
-(`.claude/CLAUDE.md` auto-loads exactly like a root `CLAUDE.md`) — then tailor:
+Seed the project's Claude memory from the **repo** template — it lives in `.claude/`
+(`.claude/CLAUDE.md` auto-loads exactly like a root `CLAUDE.md`, and composes with your
+global `~/.claude/CLAUDE.md`) — then tailor it to the project:
 
 ```bash
 mkdir -p .claude
-cp ~/dotfiles/claude/templates/CLAUDE.md ./.claude/CLAUDE.md   # Windows: copy from C:\Dev\ranger\dotfiles\
-cp ~/dotfiles/git/gitignore ./.gitignore                       # generic all-purpose ignore for the stack
+cp ~/dotfiles/claude/repo-template/CLAUDE.md ./.claude/CLAUDE.md    # Windows: copy from C:\Dev\ranger\dotfiles\
+cp ~/dotfiles/git/gitignore ./.gitignore                           # generic all-purpose ignore for the stack
 ```
 
-The template is a living document — improvements you discover in a project worth keeping across all projects should be ported back into `claude/templates/CLAUDE.md` here.
+The repo template is a living base — if you discover an improvement worth keeping across all
+projects, port it back into `claude/repo-template/CLAUDE.md` here.
 
-## Updating
+## Keeping it current (by hand)
 
-After tweaking a Claude skill, hook, or setting locally, commit and push from this repo. If you edited a symlinked file in `~/.claude/`, the change is already in the repo — just `git status` here.
+Nothing is symlinked, so the live files and this repo **do not sync automatically** — that's
+the point. When you improve a hook, skill, setting, or template:
 
-To refresh the Brewfile from your current Mac (package descriptions are included by default now):
+1. Make the change in the live location (or here in the repo).
+2. Copy it the other way so both match — re-run the relevant `cp` line above, or copy the
+   edited live file back into the repo.
+3. Commit and push from this repo.
+
+To refresh the Brewfile from your current Mac (package descriptions are included by default):
 
 ```bash
 brew bundle dump --file=brew/Brewfile --force
 git commit -am "brew: refresh package list"
 ```
 
-VS Code `settings.json` and `keybindings.json` are symlinked into `~/Library/Application Support/Code/User/`, so edits you make in VS Code land in this repo automatically — just `git status` here. Installed extensions are tracked inline in `brew/Brewfile` (the `vscode "..."` lines) and refresh with the `brew bundle dump` above.
+VS Code extensions are tracked inline in `brew/Brewfile` (the `vscode "..."` lines) and refresh
+with the `brew bundle dump` above.
 
 ## Third-party skills & plugins
 
