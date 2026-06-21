@@ -92,6 +92,52 @@ Copy-Item vscode\settings.json    "$env:APPDATA\Code\User\settings.json"
 Copy-Item vscode\keybindings.json "$env:APPDATA\Code\User\keybindings.json"
 ```
 
+## Git commit signing & verification (SSH)
+
+Commits are **SSH-signed** with the machine's one key (`~/.ssh/ssh-key`) — not GPG — so they
+show **Verified** on GitHub. "One key to rule them all": the *same* key both authenticates
+pushes and signs commits. Three steps, with two non-obvious gotchas that cause the dreaded
+**Unverified** badge.
+
+**1. Tell git to SSH-sign every commit** (global settings, machine-local — they live in
+`~/.gitconfig`, which this repo does not track):
+
+```bash
+git config --global gpg.format ssh
+git config --global user.signingkey ~/.ssh/ssh-key
+git config --global commit.gpgsign true
+```
+
+**2. Register the key on GitHub _twice_ — Gotcha #1.** GitHub treats *Authentication* and
+*Signing* keys as separate entries even for identical key bytes. Adding the key for push/pull
+does **not** make signatures verify. Add the same `~/.ssh/ssh-key.pub` a second time at
+**Settings → SSH and GPG keys → New SSH key → Key type: _Signing Key_**. Also make sure the
+commit email is a **verified** email on the account (**Gotcha #2** — otherwise GitHub reports
+`unverified_email` instead of `valid`). GitHub verifies signatures *dynamically*, so getting
+this right flips already-pushed commits to Verified too — no re-commit needed.
+
+**3. Let git verify signatures locally.** Without this, `git log --show-signature` errors with
+`gpg.ssh.allowedSignersFile needs to be configured`. Build the allowed-signers file from your
+own key (principal = your commit email) and point git at it:
+
+```bash
+mkdir -p ~/.config/git
+echo "$(git config user.email) $(cat ~/.ssh/ssh-key.pub)" >> ~/.config/git/allowed_signers
+git config --global gpg.ssh.allowedSignersFile ~/.config/git/allowed_signers
+# verify — should print: Good "git" signature for <email>
+git log --show-signature -1
+```
+
+> **Windows:** same three steps with `%USERPROFILE%\.ssh\ssh-key` and
+> `%USERPROFILE%\.config\git\allowed_signers`. Git for Windows may ship its own `ssh-keygen`
+> that can't sign — if signing fails, point git at OpenSSH's:
+> `git config --global gpg.ssh.program "C:/Windows/System32/OpenSSH/ssh-keygen.exe"`.
+
+> **No keys or signer files are tracked in this repo — by design.** `~/.ssh/*` and
+> `~/.config/git/allowed_signers` are machine-local identity/secrets; the commands above
+> regenerate the signer file from whatever key the new machine already holds. This section is
+> the record of *how*, not the material itself.
+
 ## Starting a new project
 
 Seed the project's Claude memory from the **repo** template — it lives in `.claude/`
@@ -143,4 +189,5 @@ with the `brew bundle dump` above.
 - `~/.claude/projects/` — per-project memory and history, machine-local
 - `~/.claude/plugins/` — managed by Claude Code's plugin system, restored via `enabledPlugins` in `settings.json`
 - `~/.claude/cache/`, `~/.claude/telemetry/`, session state — ephemeral
+- `~/.ssh/` keys and `~/.config/git/allowed_signers` — machine-local SSH identity/signer list; see *Git commit signing & verification* to recreate the signer file
 - Anything matching `.gitignore` (env files, credentials, local overrides)
