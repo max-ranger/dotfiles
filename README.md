@@ -1,55 +1,50 @@
 # dotfiles
 
-A reference for setting up a new machine the way I like it — Claude Code configs, hooks,
-custom skills, VS Code settings, package lists, and notes on what I actually use.
+A reference for setting up a new machine the way I like it — Claude Code, VS Code, Homebrew,
+.NET, and Git config, each with notes on what it's for and how to put it in place.
 
-**This is documentation, not an auto-syncing setup.** Nothing here is symlinked or run
-automatically. On a new machine you *copy* what you want into place. When you find a better
-way to do something, update the live file and copy it back here by hand. The repo is the
-canonical record of the preferred setup — kept current manually.
+**It's documentation, not an auto-syncing setup.** Nothing here is symlinked or run
+automatically — on a new machine you *copy* what you want into place. When you find a better way
+to do something, change the live file and copy it back here by hand. The repo is the canonical
+record of the preferred setup, kept current manually.
 
-## Layout
+## Clone first
 
-```
-claude/                 # mirrors ~/.claude/ — copy these into ~/.claude/
-  CLAUDE.md             # Global user instructions (basic-memory protocol) → ~/.claude/CLAUDE.md
-  settings.json         # Claude Code user settings (hooks, plugins, flags)  → ~/.claude/settings.json
-  hooks/                # Shell + PowerShell hooks referenced by settings.json → ~/.claude/hooks/
-  skills/               # User-level skills → ~/.claude/skills/
-    pr-draft/               # own — draft PR generator
-    emil-design-eng/        # vendored — emilkowalski/skill (motion/design eng)
-    design-taste-frontend/  # vendored — bnd-1/taste-skill (anti-generic UI)
-  repo-template/        # NOT part of ~/.claude — seed for a new project's .claude/
-    CLAUDE.md           # Per-project working-principles base → a project's .claude/CLAUDE.md
-git/
-  gitignore             # Generic all-purpose .gitignore to drop into new project repos
-brew/
-  Brewfile              # Homebrew packages, casks, VS Code ext. (regenerate with `brew bundle dump`)
-scripts/
-  install-dotnet.sh     # Install .NET SDK (latest LTS) — .NET isn't in Homebrew
-vscode/
-  settings.json         # VS Code user settings → ~/Library/Application Support/Code/User/
-  keybindings.json      # VS Code user keybindings (extensions tracked in brew/Brewfile)
-```
-
-> Two distinct `CLAUDE.md` files, separated by destination: `claude/CLAUDE.md` is the **global**
-> one — it seeds `~/.claude/CLAUDE.md` (cross-project behavior — knowledge graph / basic-memory
-> flows). `claude/repo-template/CLAUDE.md` is the **repo** one — it seeds a project's
-> `.claude/CLAUDE.md` (per-project working principles). Both load and compose: Claude Code reads
-> the global file *and* the repo file. Don't restate the global rules in a repo file — only add
-> or override project-specifics.
-
-## Bootstrap a new machine
-
-Everything below is a **copy** — no symlinks. Re-run any line to refresh from the repo.
-
-### macOS / Linux
+Every tool's setup below runs from inside the cloned repo, so start here:
 
 ```bash
+# macOS / Linux
 git clone git@github.com-ranger:max-ranger/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+```
 
-# Claude config — copy into ~/.claude/ (real files, not links)
+```powershell
+# Windows
+git clone git@github.com-ranger:max-ranger/dotfiles.git C:\Dev\ranger\dotfiles
+cd C:\Dev\ranger\dotfiles
+```
+
+## Tools
+
+Each tool: what it's for, the files involved, and how to set it up. All `cp` / `Copy-Item`
+commands assume you're in the cloned repo. Re-run any of them to refresh from the repo — they
+just overwrite.
+
+### Claude Code config
+
+*Global Claude Code setup that applies across every project.* Instructions, automation hooks,
+enabled plugins, and personal skills.
+
+- `claude/CLAUDE.md` — global user instructions (the basic-memory knowledge-graph protocol).
+- `claude/settings.json` — hooks wiring, `enabledPlugins` + `extraKnownMarketplaces` (installed
+  on Claude Code startup), and flags (`effortLevel`, `theme`, push notifications).
+- `claude/hooks/` — shell + PowerShell hooks: security gate, secure-commits, pre-commit checks,
+  format-on-save, desktop notifications, and basic-memory session context.
+- `claude/skills/` — user-level skills: `pr-draft` (own), `emil-design-eng`,
+  `design-taste-frontend` (both vendored — see credits below).
+
+```bash
+# macOS / Linux
 mkdir -p ~/.claude/skills
 cp    claude/CLAUDE.md                    ~/.claude/CLAUDE.md
 cp    claude/settings.json                ~/.claude/settings.json
@@ -57,121 +52,167 @@ cp -R claude/hooks                        ~/.claude/hooks
 cp -R claude/skills/pr-draft              ~/.claude/skills/pr-draft
 cp -R claude/skills/emil-design-eng       ~/.claude/skills/emil-design-eng
 cp -R claude/skills/design-taste-frontend ~/.claude/skills/design-taste-frontend
+```
 
-# VS Code user config (extensions install via the Brewfile)
+```powershell
+# Windows
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\skills" | Out-Null
+Copy-Item          claude\CLAUDE.md                       "$env:USERPROFILE\.claude\CLAUDE.md"
+Copy-Item          claude\settings.json                   "$env:USERPROFILE\.claude\settings.json"
+Copy-Item -Recurse claude\hooks                           "$env:USERPROFILE\.claude\hooks"
+Copy-Item -Recurse claude\skills\pr-draft                 "$env:USERPROFILE\.claude\skills\pr-draft"
+Copy-Item -Recurse claude\skills\emil-design-eng          "$env:USERPROFILE\.claude\skills\emil-design-eng"
+Copy-Item -Recurse claude\skills\design-taste-frontend    "$env:USERPROFILE\.claude\skills\design-taste-frontend"
+```
+
+> The two `CLAUDE.md` files differ by destination. `claude/CLAUDE.md` is the **global** one
+> (cross-project behavior). `claude/repo-template/CLAUDE.md` (next tool) is the **per-project**
+> seed. Both load and compose — don't restate global rules in a project file.
+
+### Claude project template
+
+*Seeds a new project's `.claude/` so Claude has per-project working principles.* Used when
+starting a repo, not when bootstrapping a machine. `.claude/CLAUDE.md` auto-loads like a root
+`CLAUDE.md` and composes with your global one.
+
+- `claude/repo-template/CLAUDE.md` — the per-project base to tailor.
+
+```bash
+# macOS / Linux — run inside the new project
+mkdir -p .claude
+cp ~/dotfiles/claude/repo-template/CLAUDE.md ./.claude/CLAUDE.md
+cp ~/dotfiles/git/gitignore                  ./.gitignore
+```
+
+```powershell
+# Windows — run inside the new project
+New-Item -ItemType Directory -Force .claude | Out-Null
+Copy-Item C:\Dev\ranger\dotfiles\claude\repo-template\CLAUDE.md .\.claude\CLAUDE.md
+Copy-Item C:\Dev\ranger\dotfiles\git\gitignore                  .\.gitignore
+```
+
+> The template is a living base — if you discover an improvement worth keeping across all
+> projects, port it back into `claude/repo-template/CLAUDE.md` here.
+
+### VS Code
+
+*Editor settings and keybindings.* Extensions are not here — they install via the Brewfile.
+
+- `vscode/settings.json`, `vscode/keybindings.json`.
+
+```bash
+# macOS / Linux
 VSC="$HOME/Library/Application Support/Code/User"
 mkdir -p "$VSC"
 cp vscode/settings.json    "$VSC/settings.json"
 cp vscode/keybindings.json "$VSC/keybindings.json"
-
-# Homebrew packages (installs casks + VS Code extensions too)
-brew bundle --file=brew/Brewfile
-
-# .NET SDK — not managed by Homebrew; installs via Microsoft's official
-# installer (latest LTS). Idempotent: skips if .NET is already present.
-./scripts/install-dotnet.sh
 ```
 
-### Windows
-
 ```powershell
-git clone git@github.com-ranger:max-ranger/dotfiles.git C:\Dev\ranger\dotfiles
-cd C:\Dev\ranger\dotfiles
-
-# Claude config — copy into %USERPROFILE%\.claude\
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\skills" | Out-Null
-Copy-Item        claude\CLAUDE.md                    "$env:USERPROFILE\.claude\CLAUDE.md"
-Copy-Item        claude\settings.json                "$env:USERPROFILE\.claude\settings.json"
-Copy-Item -Recurse claude\hooks                      "$env:USERPROFILE\.claude\hooks"
-Copy-Item -Recurse claude\skills\pr-draft            "$env:USERPROFILE\.claude\skills\pr-draft"
-Copy-Item -Recurse claude\skills\emil-design-eng     "$env:USERPROFILE\.claude\skills\emil-design-eng"
-Copy-Item -Recurse claude\skills\design-taste-frontend "$env:USERPROFILE\.claude\skills\design-taste-frontend"
-
-# VS Code user config (extensions install separately)
+# Windows
 Copy-Item vscode\settings.json    "$env:APPDATA\Code\User\settings.json"
 Copy-Item vscode\keybindings.json "$env:APPDATA\Code\User\keybindings.json"
 ```
 
-## Git commit signing & verification (SSH)
+### Homebrew
 
-Commits are **SSH-signed** with the machine's one key (`~/.ssh/ssh-key`) — not GPG — so they
-show **Verified** on GitHub. "One key to rule them all": the *same* key both authenticates
-pushes and signs commits. Three steps, with two non-obvious gotchas that cause the dreaded
-**Unverified** badge.
+*Packages, casks, and VS Code extensions in one manifest.* The `vscode "..."` lines in the
+Brewfile install editor extensions, so VS Code extensions are managed here.
 
-**1. Tell git to SSH-sign every commit** (global settings, machine-local — they live in
-`~/.gitconfig`, which this repo does not track):
+- `brew/Brewfile`.
 
 ```bash
-git config --global gpg.format ssh
-git config --global user.signingkey ~/.ssh/ssh-key
-git config --global commit.gpgsign true
+# macOS / Linux
+brew bundle --file=brew/Brewfile
 ```
 
-**2. Register the key on GitHub _twice_ — Gotcha #1.** GitHub treats *Authentication* and
-*Signing* keys as separate entries even for identical key bytes. Adding the key for push/pull
-does **not** make signatures verify. Add the same `~/.ssh/ssh-key.pub` a second time at
-**Settings → SSH and GPG keys → New SSH key → Key type: _Signing Key_**. Also make sure the
-commit email is a **verified** email on the account (**Gotcha #2** — otherwise GitHub reports
-`unverified_email` instead of `valid`). GitHub verifies signatures *dynamically*, so getting
-this right flips already-pushed commits to Verified too — no re-commit needed.
+```powershell
+# Windows — Homebrew isn't supported; install equivalents with winget/scoop by hand.
+# The Brewfile is the macOS/Linux source of truth for what to install.
+```
 
-**3. Let git verify signatures locally.** Without this, `git log --show-signature` errors with
-`gpg.ssh.allowedSignersFile needs to be configured`. Build the allowed-signers file from your
-own key (principal = your commit email) and point git at it:
+### .NET SDK
+
+*Installs the .NET SDK, which Homebrew doesn't manage here.* Uses Microsoft's official
+`dotnet-install.sh` into `~/.dotnet`, pinned to the latest LTS. Idempotent — skips if .NET is
+already present. Pass a channel to override (`STS`, `10.0`, …).
+
+- `scripts/install-dotnet.sh`.
 
 ```bash
-mkdir -p ~/.config/git
-echo "$(git config user.email) $(cat ~/.ssh/ssh-key.pub)" >> ~/.config/git/allowed_signers
-git config --global gpg.ssh.allowedSignersFile ~/.config/git/allowed_signers
-# verify — should print: Good "git" signature for <email>
-git log --show-signature -1
+# macOS / Linux
+./scripts/install-dotnet.sh          # LTS by default
 ```
 
-> **Windows:** same three steps with `%USERPROFILE%\.ssh\ssh-key` and
-> `%USERPROFILE%\.config\git\allowed_signers`. Git for Windows may ship its own `ssh-keygen`
-> that can't sign — if signing fails, point git at OpenSSH's:
-> `git config --global gpg.ssh.program "C:/Windows/System32/OpenSSH/ssh-keygen.exe"`.
+```powershell
+# Windows — the shell script doesn't run; use winget (or the official installer)
+winget install Microsoft.DotNet.SDK.10
+```
 
-> **No keys or signer files are tracked in this repo — by design.** `~/.ssh/*` and
+### Git — ignore rules + signed commits
+
+*A generic project `.gitignore` and SSH commit signing.*
+
+**Generic `.gitignore`** (`git/gitignore`) — an all-purpose ignore for the C#/.NET · TS/Vue ·
+Node stack. Drop into a new project (also copied by the project-template step above):
+
+```bash
+cp ~/dotfiles/git/gitignore ./.gitignore          # macOS / Linux
+```
+```powershell
+Copy-Item C:\Dev\ranger\dotfiles\git\gitignore .\.gitignore   # Windows
+```
+
+**Signed commits (SSH).** Commits are SSH-signed with the machine's one key (`~/.ssh/ssh-key`)
+so they show **Verified** on GitHub — same key authenticates pushes *and* signs commits. Three
+steps, with two gotchas that otherwise cause the **Unverified** badge.
+
+1. **Tell git to SSH-sign** (global; lives in `~/.gitconfig`, which this repo does not track):
+   ```bash
+   git config --global gpg.format ssh
+   git config --global user.signingkey ~/.ssh/ssh-key
+   git config --global commit.gpgsign true
+   ```
+   On Windows, point git at OpenSSH's signer if signing fails:
+   `git config --global gpg.ssh.program "C:/Windows/System32/OpenSSH/ssh-keygen.exe"`.
+
+2. **Register the key on GitHub _twice_ — gotcha #1.** *Authentication* and *Signing* keys are
+   separate entries even for identical key bytes; adding it for push/pull does **not** verify
+   signatures. Add the same `~/.ssh/ssh-key.pub` again at **Settings → SSH and GPG keys → New
+   SSH key → Key type: _Signing Key_**. Also make sure the commit email is a **verified** email
+   on the account (**gotcha #2** — else GitHub reports `unverified_email`). GitHub verifies
+   dynamically, so this flips already-pushed commits to Verified too — no re-commit needed.
+
+3. **Let git verify locally** (else `git log --show-signature` errors on a missing
+   `allowedSignersFile`). Build the allowed-signers file from your own key and point git at it:
+   ```bash
+   mkdir -p ~/.config/git
+   echo "$(git config user.email) $(cat ~/.ssh/ssh-key.pub)" >> ~/.config/git/allowed_signers
+   git config --global gpg.ssh.allowedSignersFile ~/.config/git/allowed_signers
+   git log --show-signature -1     # should print: Good "git" signature for <email>
+   ```
+   Windows paths: `%USERPROFILE%\.ssh\ssh-key` and `%USERPROFILE%\.config\git\allowed_signers`.
+
+> No keys or signer files are tracked in this repo — by design. `~/.ssh/*` and
 > `~/.config/git/allowed_signers` are machine-local identity/secrets; the commands above
-> regenerate the signer file from whatever key the new machine already holds. This section is
-> the record of *how*, not the material itself.
+> regenerate the signer file from whatever key the machine already holds.
 
-## Starting a new project
+## Maintaining this repo
 
-Seed the project's Claude memory from the **repo** template — it lives in `.claude/`
-(`.claude/CLAUDE.md` auto-loads exactly like a root `CLAUDE.md`, and composes with your
-global `~/.claude/CLAUDE.md`) — then tailor it to the project:
-
-```bash
-mkdir -p .claude
-cp ~/dotfiles/claude/repo-template/CLAUDE.md ./.claude/CLAUDE.md    # Windows: copy from C:\Dev\ranger\dotfiles\
-cp ~/dotfiles/git/gitignore ./.gitignore                           # generic all-purpose ignore for the stack
-```
-
-The repo template is a living base — if you discover an improvement worth keeping across all
-projects, port it back into `claude/repo-template/CLAUDE.md` here.
-
-## Keeping it current (by hand)
-
-Nothing is symlinked, so the live files and this repo **do not sync automatically** — that's
-the point. When you improve a hook, skill, setting, or template:
+Nothing is symlinked, so live files and this repo **don't sync automatically** — that's the
+point. When you improve a hook, skill, setting, or template:
 
 1. Make the change in the live location (or here in the repo).
-2. Copy it the other way so both match — re-run the relevant `cp` line above, or copy the
-   edited live file back into the repo.
+2. Copy it the other way so both match — re-run the relevant command above, or copy the edited
+   live file back into the repo.
 3. Commit and push from this repo.
 
-To refresh the Brewfile from your current Mac (package descriptions are included by default):
+Refresh the Brewfile (and tracked VS Code extensions) from the current Mac:
 
 ```bash
 brew bundle dump --file=brew/Brewfile --force
 git commit -am "brew: refresh package list"
 ```
-
-VS Code extensions are tracked inline in `brew/Brewfile` (the `vscode "..."` lines) and refresh
-with the `brew bundle dump` above.
 
 ## Third-party skills & plugins
 
@@ -179,15 +220,20 @@ with the `brew bundle dump` above.
 - `emil-design-eng` — [emilkowalski/skill](https://github.com/emilkowalski/skill)
 - `design-taste-frontend` — [bnd-1/taste-skill](https://github.com/bnd-1/taste-skill)
 
-**Plugins** (declared in `settings.json` → `enabledPlugins` + `extraKnownMarketplaces`, installed by Claude Code on startup):
+**Plugin marketplaces** (declared in `settings.json` → `enabledPlugins` + `extraKnownMarketplaces`,
+installed by Claude Code on startup):
 - `andrej-karpathy-skills@karpathy-skills` — [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)
 - `ui-ux-pro-max@ui-ux-pro-max-skill` — [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
 - `impeccable@impeccable` — [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
+- `warp@claude-code-warp` — [warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)
 
-## What's intentionally NOT here
+Other enabled plugins come from the official `claude-plugins-official` marketplace.
 
-- `~/.claude/projects/` — per-project memory and history, machine-local
-- `~/.claude/plugins/` — managed by Claude Code's plugin system, restored via `enabledPlugins` in `settings.json`
-- `~/.claude/cache/`, `~/.claude/telemetry/`, session state — ephemeral
-- `~/.ssh/` keys and `~/.config/git/allowed_signers` — machine-local SSH identity/signer list; see *Git commit signing & verification* to recreate the signer file
-- Anything matching `.gitignore` (env files, credentials, local overrides)
+## Not tracked here (on purpose)
+
+- `~/.claude/projects/` — per-project memory and history, machine-local.
+- `~/.claude/plugins/` — managed by Claude Code's plugin system, restored via `enabledPlugins`.
+- `~/.claude/cache/`, `~/.claude/telemetry/`, session state — ephemeral.
+- `~/.ssh/` keys and `~/.config/git/allowed_signers` — machine-local SSH identity/signer list;
+  see *Git → signed commits* to recreate the signer file.
+- Anything matching `.gitignore` (env files, credentials, local overrides).
