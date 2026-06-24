@@ -15,7 +15,10 @@ emit() {
   reason=${reason//\\/\\\\}
   reason=${reason//\"/\\\"}
   printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' "$decision" "$reason"
-  exit 2
+  # exit 0 so the deny + the lint/test output (the reason) actually reach Claude.
+  # exit 2 discards the JSON and reads empty stderr — the commit gets blocked with
+  # no visible reason, so the failure can't be fixed. (Matches security-gate.sh.)
+  exit 0
 }
 
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null)

@@ -1,7 +1,6 @@
 ---
 name: pr-draft
 description: Use when the user wants to create a pull request, generate a PR description, write a draft PR, or asks for /pr-draft or /pr. Analyzes branch diff and commits to produce a filled PR and creates a draft PR via gh CLI.
-disable-model-invocation: true
 ---
 
 # Draft PR Creator

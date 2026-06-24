@@ -14,7 +14,10 @@ emit() {
   reason=${reason//\\/\\\\}
   reason=${reason//\"/\\\"}
   printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' "$decision" "$reason"
-  exit 2
+  # exit 0 so Claude Code honors the JSON ask/deny. exit 2 would DISCARD the JSON
+  # and read empty stderr instead — swallowing the reason and turning every ask
+  # into a silent hard block. (Same fix already applied in security-gate.sh.)
+  exit 0
 }
 deny() { emit deny "DANGER - SecureCommits: $1"; }
 ask()  { emit ask  "SecureCommits: $1"; }

@@ -35,6 +35,12 @@
           },
           {
             "type": "command",
+            "command": "bash ~/.claude/hooks/commit-hygiene.sh",
+            "timeout": 10,
+            "statusMessage": "CommitHygiene"
+          },
+          {
+            "type": "command",
             "command": "bash ~/.claude/hooks/pre-commit-checks.sh",
             "timeout": 180,
             "statusMessage": "PreCommitChecks"

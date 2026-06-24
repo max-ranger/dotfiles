@@ -1,5 +1,31 @@
 # Claude — Global Instructions
 
+## Harness & Workflow Rules
+
+Hooks enforce these where possible; honor them even where they cannot.
+
+**Commit hygiene.** Stage explicitly — check `git status` first; never blanket
+`git add -A` / `git add .` without knowing what it sweeps in. Never commit OS/editor
+junk (`.DS_Store`, `*.log`, swap/backup files), scratch/temp files, build or dependency
+output, or skill-produced artifacts under `docs/superpowers/`. The `commit-hygiene` hook
+will `ask` before such a commit — treat that prompt as a stop sign, not a speed bump.
+
+**Pull requests.** ALWAYS create PRs through the `pr-draft` skill (trigger it on "create
+a PR", "open a PR", "/pr", "/pr-draft", etc.). Do not hand-roll `gh pr create`, and do not
+use other PR skills (e.g. `commit-push-pr`) for PR creation — `pr-draft` is authoritative.
+
+**Skill artifacts → basic-memory.** Files written by skills (brainstorming specs,
+writing-plans plans, ADR/design `.md`) are scratch copies, not the system of record.
+Distill the durable decisions into basic-memory (confirm-first); do not commit the scratch
+artifacts. Details in Knowledge Memory below.
+
+**Hooks are hard gates.** A hook `deny` is final. A hook `ask` means stop and get a real
+decision — never reword or re-chain a command to slip past a gate.
+
+**Loop discipline.** Before any iterative/agentic loop, state a machine-checkable success
+signal (tests / types / build / lint) and a bound (max iterations or token budget). No
+signal, no loop. Reference: `~/.claude/docs/loop-engineering.md`.
+
 ## Knowledge Memory (basic-memory)
 
 Durable, non-code project knowledge lives in **basic-memory**, structured so it
@@ -38,14 +64,21 @@ before a commit, session wind-down) present the draft note(s) — title, folder,
 key observations + relations — get approval, then `write_note` / `edit_note`.
 Nothing is written without approval.
 
-**Skill-produced artifacts (specs, plans, design docs):** Skills that emit
-knowledge as files — e.g. superpowers `brainstorming` (`docs/superpowers/specs/`)
-and `writing-plans` (`docs/superpowers/plans/`), or any ADR / design / product
-`.md` a skill writes — are **working artifacts, not the system of record.**
+**Skill-produced artifacts (specs, plans, design docs):** Skills and design
+plugins that emit knowledge as files — e.g. superpowers `brainstorming`
+(`docs/superpowers/specs/`) and `writing-plans` (`docs/superpowers/plans/`),
+design skills, or any ADR / design / product `.md` a skill writes — are
+**working artifacts, not the system of record.** Their durable content **always
+lands in basic-memory, never in the repo as the source of truth.**
 Writing such a file does **not** satisfy this protocol: distill the durable
 decisions within it into basic-memory (`decisions/` `design/` `architecture/`),
 confirm-first. Where a skill says "user preference for location overrides the
 default," that preference **is basic-memory** — the repo path is a scratch copy.
 
-**Non-coding / cowork sessions:** the same capture discipline applies; the target
-project convention for non-repo work will be defined when that is enabled.
+**Non-repo / cowork sessions (no git root):** there is no automatic project
+mapping. Before capturing — and before any plugin/skill writes durable output
+(design skills, superpowers, etc.) — resolve a target basic-memory project: if an
+existing project clearly fits the work, use it; otherwise **ask which project to
+use, or whether to create a new one — confirm first, never auto-create.** Once
+resolved, the same capture discipline applies. Plugin/skill output lands in that
+basic-memory project, not in stray files in the working directory.

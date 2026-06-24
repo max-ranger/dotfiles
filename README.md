@@ -38,8 +38,8 @@ enabled plugins, and personal skills.
 - `claude/CLAUDE.md` — global user instructions (the basic-memory knowledge-graph protocol).
 - `claude/settings.json` — hooks wiring, `enabledPlugins` + `extraKnownMarketplaces` (installed
   on Claude Code startup), and flags (`effortLevel`, `theme`, push notifications).
-- `claude/hooks/` — shell + PowerShell hooks: security gate, secure-commits, pre-commit checks,
-  format-on-save, desktop notifications, and basic-memory session context.
+- `claude/hooks/` — shell + PowerShell hooks: security gate, secure-commits, commit hygiene,
+  pre-commit checks, format-on-save, desktop notifications, and basic-memory session context.
 - `claude/skills/` — user-level skills: `pr-draft` (own), `emil-design-eng`,
   `design-taste-frontend` (both vendored — see credits below).
 
