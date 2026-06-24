@@ -1,4 +1,4 @@
-tap "theboredteam/boring-notch"
+tap "theboredteam/boring-notch", "https://github.com/TheBoredTeam/homebrew-boring-notch"
 # Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
 # Dependency manager for Cocoa projects
@@ -74,6 +74,8 @@ cask "spotify"
 cask "visual-studio-code"
 # Rust-based terminal
 cask "warp"
+# Video communication and virtual meeting platform
+cask "zoom"
 vscode "aaron-bond.better-comments"
 vscode "anthropic.claude-code"
 vscode "austenc.tailwind-docs"
