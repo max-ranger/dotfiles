@@ -123,6 +123,7 @@ winget install Microsoft.VisualStudioCode Google.Chrome Obsidian.Obsidian `
 | `pnpm` | Fast, disk-efficient package manager |
 | `ripgrep` | Blazing-fast `grep` replacement |
 | `starship` | Cross-shell prompt |
+| `supabase` | Supabase CLI — local stack, migrations, type-gen (via `supabase/tap`) |
 | `tree` | Render directories as trees |
 | `uv` | Extremely fast Python package installer (Rust) |
 | `wget` | Internet file retriever |
