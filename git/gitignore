@@ -1,6 +1,7 @@
 # ──────────────────────────────────────────────────────────────
 # Generic all-purpose .gitignore
 # Stack: C# / .NET · TypeScript · Vue · Tailwind · Node (Vite)
+#        Flutter / Dart · Supabase (CLI)
 # IDEs:  Visual Studio · JetBrains (Rider / WebStorm) · VS Code
 #
 # Canonical copy lives in dotfiles/git/gitignore.
@@ -82,6 +83,46 @@ test-results/
 cypress/videos/
 cypress/screenshots/
 stats.html
+
+
+# ── Flutter / Dart ────────────────────────────────────────────
+# pubspec.lock stays COMMITTED for apps (ignore it only in pub packages).
+# Generated code (*.g.dart, *.freezed.dart) stays COMMITTED — CI must not
+# need a codegen step to build. .metadata stays committed too (flutter upgrade).
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+.fvm/flutter_sdk
+*.dill
+
+# Android (local.properties = SDK paths; key.properties + keystores = signing secrets)
+**/android/local.properties
+**/android/key.properties
+**/android/.gradle/
+*.jks
+*.keystore
+
+# iOS / macOS
+**/ios/Pods/
+**/macos/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/ios/Flutter/.last_build_id
+**/xcuserdata/
+
+# Obfuscation / debug-symbol output (--split-debug-info)
+app.*.symbols
+app.*.map.json
+
+
+# ── Supabase (CLI) ────────────────────────────────────────────
+# Migrations + config.toml + seed.sql stay COMMITTED; only CLI scratch is ignored.
+supabase/.temp/
+supabase/.branches/
 
 
 # ── .NET / C# build results ───────────────────────────────────
