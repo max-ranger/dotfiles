@@ -10,6 +10,7 @@ EXTENSION="${HOOK_FILE_PATH##*.}"
 case "$EXTENSION" in
   rs) command -v rustfmt >/dev/null 2>&1 && rustfmt "$HOOK_FILE_PATH" 2>/dev/null || true; exit 0 ;;
   go) command -v gofmt >/dev/null 2>&1 && gofmt -w "$HOOK_FILE_PATH" 2>/dev/null || true; exit 0 ;;
+  dart) command -v dart >/dev/null 2>&1 && dart format "$HOOK_FILE_PATH" >/dev/null 2>&1 || true; exit 0 ;;
 esac
 
 case "$EXTENSION" in

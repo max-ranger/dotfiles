@@ -60,6 +60,47 @@
 
 ---
 
+## Vue (if applicable)
+
+- Composition API with `<script setup lang="ts">` only — no Options API in new code.
+- Props via `defineProps<T>()` (+ `withDefaults`), events via `defineEmits<T>()` — both fully typed; no untyped `$emit` strings.
+- Multi-word PascalCase component names/filenames (`CourseCard.vue`, never `Card.vue`).
+- `v-for` always with `:key`; never `v-if` and `v-for` on the same element.
+- Shared stateful logic goes into composables (`useX`); components stay thin and presentational.
+- State: Pinia for cross-cutting/global state; props down + emits up for parent-child — don't reach for the store when a prop does the job.
+- Styles `scoped` (or CSS modules); no global style leaks from components.
+- Template expressions stay trivial — anything with logic becomes a `computed`.
+
+---
+
+## C# / .NET (if applicable)
+
+- Nullable reference types enabled; warnings are errors. No `!` (null-forgiving) unless the invariant is locally provable.
+- Naming: PascalCase public members, `_camelCase` private fields, `Async` suffix on async methods, `I` prefix on interfaces.
+- `async`/`await` all the way down — never `.Result` / `.Wait()` (deadlocks). `ConfigureAwait(false)` in library code.
+- Immutable data as `record` types / `init` setters; mutate only where mutation is the point.
+- Dependency injection via constructor; no service-locator pattern, no `new`-ing services inside classes.
+- Exceptions are for exceptional cases — no exception-driven control flow; validate and return early instead.
+- LINQ when it's clearer than a loop; watch for multiple enumeration of `IEnumerable`.
+- `.editorconfig` + `dotnet format` are the formatting truth; don't fight them.
+
+---
+
+## Flutter / Dart (if applicable)
+
+- Lints: `very_good_analysis` (or an equally strict set); `dart format` is enforced — CI fails on unformatted code.
+- Imports ordered `dart:` → `package:` → relative (`directives_ordering`). Pick package-style or relative-style for internal `lib/` imports once per repo and never mix.
+- Null safety: no `!` unless the invariant is locally provable — prefer `??`, pattern matching, or early exit. `dynamic` only at JSON/platform boundaries, converted to typed models immediately.
+- Data classes are immutable (`freezed` / `@immutable`); use `const` constructors and `const` widgets wherever the lint allows.
+- Extract widget **classes**, not `Widget _buildX()` helper methods (rebuild granularity, const-ability). `build` stays pure — no side effects, no business logic, no async.
+- Business logic lives in providers/notifiers (Riverpod et al.); widgets only read state and dispatch intents.
+- Async: no unawaited futures (`unawaited_futures`); never use a `BuildContext` after an `await` without a `mounted` check (`use_build_context_synchronously`).
+- User-facing strings only via l10n/ARB — no hardcoded UI text, from the first commit.
+- Never hand-edit generated files (`*.g.dart`, `*.freezed.dart`); re-run `build_runner` after model changes.
+- Screens get widget tests against user-visible semantics (finders on text/labels, not implementation internals); golden tests only for layout-critical custom widgets.
+
+---
+
 ## Testing
 
 - Write unit tests for business logic and non-trivial transformations.
@@ -72,7 +113,7 @@
 ## Verification Before Done
 
 - Never claim a task is complete without running the verification commands and seeing them pass. Quote the pass count in your summary (e.g. "158/158 passing").
-- After code edits, run the project's type-check/build **and** test suite before reporting done — use the project's own scripts (`package.json`, `Makefile`, `Taskfile`, `dotnet test`, `cargo test`, `pytest`, etc.).
+- After code edits, run the project's type-check/build **and** test suite before reporting done — use the project's own scripts (`package.json`, `Makefile`, `Taskfile`, `dotnet test`, `cargo test`, `pytest`, `flutter analyze && flutter test`, etc.).
 - When adding a dependency that already exists in a sibling workspace or package, match its version exactly — don't scaffold with a fresh `^latest`.
 - If verification fails: fix and re-run. No partial success.
 

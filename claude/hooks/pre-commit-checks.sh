@@ -23,12 +23,39 @@ emit() {
 
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 [ -z "$ROOT" ] && exit 0
-[ ! -f "$ROOT/package.json" ] && exit 0
+FAILURES=""
+
+# --- Flutter / Dart (pubspec.yaml projects) ---
+if [ -f "$ROOT/pubspec.yaml" ]; then
+  STAGED_DART=$(git -C "$ROOT" diff --cached --name-only --diff-filter=ACMR 2>/dev/null \
+    | grep -E '\.dart$' || true)
+
+  if [ -n "$STAGED_DART" ]; then
+    if command -v flutter >/dev/null 2>&1; then
+      ANALYZE_OUTPUT=$(cd "$ROOT" && flutter analyze --no-pub 2>&1)
+      ANALYZE_STATUS=$?
+      if [ "$ANALYZE_STATUS" -ne 0 ]; then
+        FAILURES="${FAILURES}flutter analyze failed:\n$(printf '%s' "$ANALYZE_OUTPUT" | tail -40)\n\n"
+      fi
+
+      DART_TEST_OUTPUT=$(cd "$ROOT" && flutter test 2>&1)
+      DART_TEST_STATUS=$?
+      if [ "$DART_TEST_STATUS" -ne 0 ]; then
+        FAILURES="${FAILURES}flutter tests failed:\n$(printf '%s' "$DART_TEST_OUTPUT" | tail -40)\n\n"
+      fi
+    else
+      echo "[pre-commit-checks] flutter not on PATH — skipping Dart checks"
+    fi
+  fi
+fi
+
+if [ ! -f "$ROOT/package.json" ]; then
+  [ -n "$FAILURES" ] && emit deny "PreCommit: $(printf '%b' "$FAILURES")"
+  exit 0
+fi
 
 STAGED_JS=$(git -C "$ROOT" diff --cached --name-only --diff-filter=ACMR 2>/dev/null \
   | grep -E '\.(js|jsx|ts|tsx|vue|mjs|cjs)$' || true)
-
-FAILURES=""
 
 if [ -n "$STAGED_JS" ]; then
   ESLINT_BIN=""
