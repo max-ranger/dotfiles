@@ -101,53 +101,28 @@ git log <base>..HEAD --oneline
 
 ### Step 3: Generate PR body
 
-Use this template structure:
+**Select the template that matches the PR type from Step 2, then fill it from the diff and commits.** Each template has its own sections, icons, and layout tuned to that kind of change — do not force every PR into the feature shape.
 
-```markdown
-# <title line from step 2>
+| PR type (from Step 2) | Template file |
+|---|---|
+| Feature | `templates/feature.md` |
+| Fix | `templates/bugfix.md` |
+| Hotfix | `templates/hotfix.md` |
+| Refactor | `templates/refactor.md` |
+| Chore | `templates/chore.md` |
+| Docs | `templates/feature.md` (trim to Description + Highlights) |
+| Change (fallback) | `templates/feature.md` |
 
-### 📝 Description
+Read the chosen template file and use the fenced ```markdown block inside it as the body structure. Replace every `<…>` placeholder with real content derived from the actual changes; delete any section a template marks as optional when it doesn't apply.
 
-<2-4 sentence summary of what changed and why, based on the diff and commits>
-
-💪 **Highlights**
-
-<bullet list of key changes — derived from the actual diff, not generic>
-
----
-
-### 🧪 Testing Instructions
-
-<numbered steps a reviewer should follow to validate the changes — be specific to what actually changed>
-
----
-
-### 📷 Screenshots & Recordings
-
-|         |         |
-|  :----  | :-----: |
-| Before | _to be added_ |
-| After  | _to be added_ |
-
----
-
-### 🧰 Dependencies & Requirements
-
-<list new dependencies, or "None" if no new dependencies were added>
-
----
-
-### 💥 Breaking Changes & Alerts
-
-<describe breaking changes, or "None" if backwards compatible>
-```
-
-**Rules for generating content:**
-- Description: focus on the WHY, not just the WHAT
-- Highlights: concrete, specific to the diff — no filler
-- Testing instructions: actionable steps tied to the actual changes
-- Dependencies: check package.json diff for new deps
-- Breaking changes: check for removed/renamed exports, changed interfaces, API changes
+**Rules for generating content (apply to whichever template is used):**
+- Focus on the WHY, not just the WHAT.
+- Every bullet is concrete and specific to the diff — no filler or generic boilerplate.
+- Testing/verification steps are actionable and tied to what actually changed.
+- Dependencies: check the package manifest diff (package.json, pubspec.yaml, *.csproj, etc.) for new/updated deps.
+- Breaking changes / risk: check for removed or renamed exports, changed signatures, and API changes.
+- **Unfillable sections:** when the diff and commits genuinely can't supply a section (e.g. before/after screenshots, or reproduction steps that need runtime state), keep the section and fill it with `_to be added_` — do not delete a non-optional section, and do not invent details. Only delete sections a template explicitly marks as optional (e.g. the chore Dependency Updates table when no deps changed).
+- **Fix vs Hotfix tie-breaker:** default a `fix/`/`bugfix/` branch to the bugfix template. Use hotfix only when there is an explicit production-incident signal — the branch is `hotfix/`, the commits/PR reference an incident or Sev level, or the user says it's an urgent production fix. Absent such a signal, stay with bugfix. Mention the choice when reporting so the user can correct a mislabeled branch.
 
 ### Step 4: Create the PR
 
@@ -157,12 +132,11 @@ Use this template structure:
 # Push branch if not tracking remote
 git push -u origin <branch>
 
-# Create draft PR targeting the detected base branch
-# Include the H1 title line inside the body so it appears above the description on GitHub
+# Create draft PR targeting the detected base branch.
+# The <title> goes ONLY in --title (GitHub renders it as the PR title). The body
+# starts directly at the first section — do NOT repeat the title as an H1 in the body.
 gh pr create --draft --base <base-branch> --title "<title>" --body "$(cat <<'EOF'
-# <title>
-
-<rest of body from the template>
+<filled template body from Step 3 — starts with the first section, no title H1>
 EOF
 )"
 ```
@@ -171,10 +145,10 @@ Report the draft PR URL to the user.
 
 **If `gh` CLI is NOT available:**
 
-Save the full body (including the H1 title line) to a file in the current working directory and report:
+Save the body to a file in the current working directory. Since the body no longer contains the title, put the title on the first line as an `# H1` in the saved file (so the file is self-describing), then report:
 ```
 PR description saved to pr-<ticket-or-slug>.md
-gh CLI not found — install it to create draft PRs directly, or paste the description manually.
+gh CLI not found — install it to create draft PRs directly, or paste the title + description manually.
 ```
 
 ### Step 5: Report to user
