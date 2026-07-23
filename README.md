@@ -336,6 +336,15 @@ New-Item -ItemType Directory -Force .claude | Out-Null
 Copy-Item C:\Dev\ranger\dotfiles\claude\repo-template\CLAUDE.md .\.claude\CLAUDE.md     # Windows
 ```
 
+### ☁️ Cowork project-instructions template
+
+[`claude/cowork-template/project-instructions.md`](claude/cowork-template/project-instructions.md)
+is the generic template for **Claude Cowork Project** custom instructions — sparring-partner
+role, the "Cowork never writes code" boundary (implementation stays with Claude Code in the
+repo), and the basic-memory capture protocol. Nothing to copy into place on the machine:
+fill in the placeholders (`<PROJECT>`, `<DESCRIPTION>`, `<REPO_PATH>`, `<SCOPE>`, `<OPS>`)
+and paste the body into the Cowork project's instructions in the cloud UI.
+
 ### 🔌 Plugins & skills in use
 
 Installed automatically on startup from `settings.json` → `enabledPlugins`.
