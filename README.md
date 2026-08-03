@@ -68,8 +68,14 @@ winget install Git.Git
 git clone https://github.com/max-ranger/dotfiles.git C:\Dev\ranger\dotfiles
 cd C:\Dev\ranger\dotfiles
 
-# 2. No Homebrew on Windows — install the apps you want with winget (see the Homebrew section)
-# 3. Install Claude Code and let the AI finish the rest
+# 2. No Homebrew on Windows — winget/packages.json is the Brewfile's stand-in:
+winget import --import-file winget\packages.json
+
+# 3. VS Code extensions, read straight from the Brewfile (single source of truth):
+Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
+  ForEach-Object { code --install-extension $_.Matches.Groups[1].Value }
+
+# 4. Install Claude Code and let the AI finish the rest
 irm https://claude.ai/install.ps1 | iex                # or: npm install -g @anthropic-ai/claude-code
 claude
 ```
@@ -95,12 +101,35 @@ brew bundle --file=brew/Brewfile
 ```
 
 ```powershell
-# Windows — Homebrew isn't supported. Install equivalents with winget by hand
-# (the Brewfile stays the macOS/Linux source of truth for what to install):
-winget install Microsoft.VisualStudioCode Google.Chrome Obsidian.Obsidian `
-               Docker.DockerDesktop JetBrains.Toolbox Spotify.Spotify Zoom.Zoom `
-               Git.Git GitHub.cli BurntSushi.ripgrep.MSVC jqlang.jq Schniz.fnm
+# Windows — Homebrew isn't supported. winget/packages.json mirrors the Brewfile
+# (every tool that exists on winget, IDs verified against microsoft/winget-pkgs):
+winget import --import-file winget\packages.json
+
+# VS Code extensions aren't winget packages — install them from the Brewfile's
+# `vscode "…"` lines, so the Brewfile stays the single source of truth:
+Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
+  ForEach-Object { code --install-extension $_.Matches.Groups[1].Value }
 ```
+
+**Windows substitutions & gaps** (macOS-only brews and their winget stand-ins):
+
+| Brewfile entry | On Windows |
+|---|---|
+| `orbstack` / `docker` · `docker-compose` | `Docker.DockerDesktop` (bundles the CLI + compose) |
+| `postgres-app` | `PostgreSQL.PostgreSQL.18` (full server + psql) |
+| `rectangle` | `Microsoft.PowerToys` (FancyZones window snapping) |
+| `supabase` | Not on winget — per project: `pnpm add -D supabase`, or [Scoop](https://supabase.com/docs/guides/local-development/cli/getting-started?platform=windows) |
+| `fvm` / `flutter` | Not on winget — grab the [fvm release binary](https://github.com/leoafarias/fvm/releases) onto `PATH`, let fvm manage Flutter |
+| `font-hack-nerd-font` | Manual — download from [nerdfonts.com](https://www.nerdfonts.com/font-downloads), right-click → *Install* |
+| `cocoapods` | macOS/iOS-only — skip |
+| `htop` · `tree` | Skip — Task Manager / built-in `tree` |
+| `whisper-cpp` · `appcleaner` · `dockdoor` · `boring-notch` | No equivalent — skip |
+| `uv "basic-memory"` | Same as macOS: `uv tool install basic-memory` (uv is in the manifest) |
+| `npm "corepack"` | Ships with Node — `fnm install --lts`, then `corepack enable` |
+
+> 🔄 When the Brewfile changes, update [`winget/packages.json`](winget/packages.json) to match
+> (`winget search <name>` finds the ID). No Chocolatey — winget + the fallbacks above cover
+> everything.
 
 ### 🛠️ CLI tools (formulae)
 
@@ -182,6 +211,36 @@ After install, open a new shell (or `source ~/.zshrc`) and verify:
 
 ```bash
 dotnet --version
+```
+
+### 🔄 Updating an existing .NET SDK
+
+The install script deliberately **skips** if .NET is already present — updates go through the
+same channel the SDK was originally installed from:
+
+- **Microsoft .pkg installer** (SDK lives in `/usr/local/share/dotnet`): download and run the
+  latest SDK .pkg — new patch versions install side-by-side, no uninstall needed.
+
+  ```bash
+  curl -fsSLO https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.302/dotnet-sdk-10.0.302-osx-arm64.pkg
+  sudo installer -pkg dotnet-sdk-10.0.302-osx-arm64.pkg -target /
+  dotnet --version
+  ```
+
+  Find the current latest version + URL on the
+  [.NET 10 download page](https://dotnet.microsoft.com/download/dotnet/10.0) (or
+  `curl -s https://builds.dotnet.microsoft.com/dotnet/release-metadata/10.0/releases.json | jq -r '.["latest-sdk"]'`).
+
+- **dotnet-install.sh** (SDK lives in `~/.dotnet`, i.e. installed via the script): re-run the
+  installer directly — it fetches the newest SDK in the channel side-by-side:
+
+  ```bash
+  curl -fsSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel LTS --install-dir ~/.dotnet
+  ```
+
+```powershell
+# Windows
+winget upgrade Microsoft.DotNet.SDK.10
 ```
 
 ---
@@ -299,6 +358,9 @@ irm https://claude.ai/install.ps1 | iex              # Windows
   **basic-memory session context**.
 - [`claude/skills/`](claude/skills) — user-level skills: `pr-draft` (own), plus the vendored
   `emil-design-eng` and `design-taste-frontend` (see credits).
+- [`claude/prompts/prompt-templates.md`](claude/prompts/prompt-templates.md) — reusable prompt
+  snippets (pre-planning confidence gate, plan risk review, self code-review). Reference only —
+  nothing to copy into place.
 
 ```bash
 # macOS / Linux
@@ -437,6 +499,10 @@ Refresh the Brewfile (and tracked VS Code extensions) from the current Mac:
 brew bundle dump --file=brew/Brewfile --force
 git commit -am "chore(brew): refresh package list"
 ```
+
+When the Brewfile gains or loses a package, mirror the change in
+[`winget/packages.json`](winget/packages.json) (and the substitutions table above) so the
+Windows manifest stays in lockstep.
 
 ### 🙈 Not tracked here (on purpose)
 
