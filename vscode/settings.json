@@ -130,4 +130,6 @@
     "plist",
   ],
   "claudeCode.preferredLocation": "sidebar",
+  "security.workspace.trust.untrustedFiles": "open",
+  "security.promptForLocalFileProtocolHandling": false,
 }
