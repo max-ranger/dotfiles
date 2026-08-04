@@ -3,8 +3,7 @@
 ## Workflow
 
 - **Pull requests:** always create PRs via the `pr-draft` skill (any "create/open a PR",
-  `/pr`, `/pr-draft`). Never hand-roll `gh pr create`; don't use other PR skills
-  (e.g. `commit-push-pr`) for PR creation — `pr-draft` is authoritative.
+  `/pr`, `/pr-draft`). Never hand-roll `gh pr create` — `pr-draft` is authoritative.
 - **Commits:** hooks (`commit-hygiene`, `secure-commits`, `pre-commit-checks`) gate every
   commit — a hook `ask` is a stop sign, not a speed bump. Skill-produced artifacts
   (e.g. `docs/superpowers/**`) never get committed; their content belongs in basic-memory.

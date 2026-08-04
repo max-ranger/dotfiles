@@ -182,6 +182,13 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 > ➕ The Brewfile also installs two non-brew bits via `brew bundle`: **`basic-memory`** (through
 > `uv` — the knowledge-graph backend Claude uses) and **`corepack`** (through `npm`).
 
+### 🖱️ Outside any package manager
+
+- **[Synergy](https://symless.com/synergy)** — keyboard/mouse sharing across the Mac and the
+  Windows PC. No Homebrew cask exists (only the GUI-less `synergy-core` formula), so on macOS
+  install it manually from the [download page](https://symless.com/synergy/download). On
+  Windows it's `Symless.Synergy` (included in `winget/packages.json`).
+
 ---
 
 ## 📜 Scripts — .NET SDK (outside brew)
@@ -356,9 +363,11 @@ irm https://claude.ai/install.ps1 | iex              # Windows
 - [`claude/settings.json`](claude/settings.json) — hooks wiring, `enabledPlugins` +
   `extraKnownMarketplaces` (installed on Claude Code startup), and flags (`effortLevel`, `theme`,
   push notifications).
-- [`claude/hooks/`](claude/hooks) — shell + PowerShell hooks: **security gate**, **secure-commits**,
-  **commit-hygiene**, **pre-commit checks**, **format-on-save**, **desktop notifications**, and
-  **basic-memory session context**.
+- [`claude/hooks/`](claude/hooks) — deterministic gates (kept precisely because they don't
+  depend on model behavior): **security gate**, **secure-commits**, **commit-hygiene**,
+  **pre-commit checks**, **format-on-save**, plus the **basic-memory session context**
+  injector. Notification hooks were retired in favor of Claude Code's native push/desktop
+  notifications (`agentPushNotifEnabled`, `inputNeededNotifEnabled`).
 - [`claude/skills/`](claude/skills) — user-level skills: `pr-draft` (own), plus the vendored
   `emil-design-eng` and `design-taste-frontend` (see credits).
 - [`claude/prompts/prompt-templates.md`](claude/prompts/prompt-templates.md) — reusable prompt
@@ -426,12 +435,14 @@ and paste the body into the Cowork project's instructions in the cloud UI.
 Installed automatically on startup from `settings.json` → `enabledPlugins`.
 
 **From the official `claude-plugins-official` marketplace:**
-`frontend-design` · `code-review` · `claude-md-management` · `claude-code-setup` ·
-`code-simplifier` · `superpowers` · `context7` · `skill-creator` · `feature-dev` ·
-`typescript-lsp` · `security-guidance` · `commit-commands`.
+`frontend-design` · `claude-md-management` · `claude-code-setup` · `superpowers` ·
+`context7` · `typescript-lsp`.
+
+> ✂️ Pruned in the Claude 5 era (behaviors now native to the model or the harness):
+> `code-review`, `code-simplifier`, `skill-creator`, `feature-dev`, `commit-commands`,
+> `security-guidance`, and `andrej-karpathy-skills`.
 
 **Third-party marketplaces** (declared in `extraKnownMarketplaces`):
-- `andrej-karpathy-skills` — [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)
 - `ui-ux-pro-max` — [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
 - `impeccable` — [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
 - `warp` — [warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)
@@ -535,7 +546,6 @@ Windows manifest stays in lockstep.
 - `design-taste-frontend` — [bnd-1/taste-skill](https://github.com/bnd-1/taste-skill)
 
 **Plugin marketplaces** (declared in `settings.json`, installed by Claude Code on startup):
-- `andrej-karpathy-skills@karpathy-skills` — [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)
 - `ui-ux-pro-max@ui-ux-pro-max-skill` — [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
 - `impeccable@impeccable` — [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
 - `warp@claude-code-warp` — [warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)

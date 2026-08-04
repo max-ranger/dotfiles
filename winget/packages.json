@@ -38,7 +38,8 @@
         { "PackageIdentifier": "Anthropic.Claude" },
         { "PackageIdentifier": "Spotify.Spotify" },
         { "PackageIdentifier": "Zoom.Zoom" },
-        { "PackageIdentifier": "Microsoft.PowerToys" }
+        { "PackageIdentifier": "Microsoft.PowerToys" },
+        { "PackageIdentifier": "Symless.Synergy" }
       ]
     }
   ]
