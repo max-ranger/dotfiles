@@ -5,7 +5,7 @@
 
 ## Before planning
 
-Please do not create a plan until you have over 96% confidence you know what to plan for. Ask me follow up questions until you reach that confidence level.
+Before you create a plan: list the open decisions that would change the plan's shape and ask me only those questions. State the assumptions you'll proceed on for everything else, then plan.
 
 ## Plan review
 
@@ -13,4 +13,4 @@ Please review your plan and identify the areas that introduce the most amount of
 
 ## Code review
 
-I want you to act as a senior engineer and do a thorough code review of your work and identify all errors, inconsistent logic, inefficiencies and anything that can create bugs. Prioritize your findings in a list from the most critical to the least critical before you fix them.
+Run /code-review on the current working diff. Then fix the confirmed findings in priority order, most critical first, and re-run the review to verify nothing regressed.

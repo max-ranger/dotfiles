@@ -347,9 +347,12 @@ irm https://claude.ai/install.ps1 | iex              # Windows
 
 ### ⚙️ Config files
 
-- [`claude/CLAUDE.md`](claude/CLAUDE.md) — global user instructions: harness/workflow rules
-  (commit hygiene, PR-via-`pr-draft`, hard-gate hooks, loop discipline) + the **basic-memory**
-  knowledge-graph protocol.
+- [`claude/CLAUDE.md`](claude/CLAUDE.md) — global user instructions, kept deliberately lean
+  for modern (Claude 5-class) models: workflow routing (PRs via `pr-draft`, hook gates,
+  loop bounds) + the **basic-memory** protocol. Detail that's only needed on demand lives in
+  `claude/docs/` and is referenced by pointer.
+- [`claude/docs/`](claude/docs) — on-demand references: `basic-memory-markup.md` (note
+  structure & graph markup) and `loop-engineering.md` (closed-loop working guide).
 - [`claude/settings.json`](claude/settings.json) — hooks wiring, `enabledPlugins` +
   `extraKnownMarketplaces` (installed on Claude Code startup), and flags (`effortLevel`, `theme`,
   push notifications).
@@ -363,39 +366,50 @@ irm https://claude.ai/install.ps1 | iex              # Windows
   nothing to copy into place.
 
 ```bash
-# macOS / Linux
-mkdir -p ~/.claude/skills
-cp    claude/CLAUDE.md                    ~/.claude/CLAUDE.md
-cp    claude/settings.json                ~/.claude/settings.json
-cp -R claude/hooks                        ~/.claude/hooks
-cp -R claude/skills/pr-draft              ~/.claude/skills/pr-draft
-cp -R claude/skills/emil-design-eng       ~/.claude/skills/emil-design-eng
-cp -R claude/skills/design-taste-frontend ~/.claude/skills/design-taste-frontend
+# macOS / Linux  (the /. form stays correct on re-runs — no nested dirs)
+mkdir -p ~/.claude/hooks ~/.claude/docs ~/.claude/skills
+cp    claude/CLAUDE.md      ~/.claude/CLAUDE.md
+cp    claude/settings.json  ~/.claude/settings.json
+cp -R claude/hooks/.        ~/.claude/hooks/
+cp -R claude/docs/.         ~/.claude/docs/
+cp -R claude/skills/.       ~/.claude/skills/
 ```
 
 ```powershell
-# Windows
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\skills" | Out-Null
-Copy-Item          claude\CLAUDE.md                    "$env:USERPROFILE\.claude\CLAUDE.md"
-Copy-Item          claude\settings.json                "$env:USERPROFILE\.claude\settings.json"
-Copy-Item -Recurse claude\hooks                        "$env:USERPROFILE\.claude\hooks"
-Copy-Item -Recurse claude\skills\pr-draft              "$env:USERPROFILE\.claude\skills\pr-draft"
-Copy-Item -Recurse claude\skills\emil-design-eng       "$env:USERPROFILE\.claude\skills\emil-design-eng"
-Copy-Item -Recurse claude\skills\design-taste-frontend "$env:USERPROFILE\.claude\skills\design-taste-frontend"
+# Windows  (\* + -Force stays correct on re-runs — no nested dirs)
+"hooks", "docs", "skills" | ForEach-Object {
+  New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\$_" | Out-Null }
+Copy-Item        claude\CLAUDE.md      "$env:USERPROFILE\.claude\CLAUDE.md"
+Copy-Item        claude\settings.json  "$env:USERPROFILE\.claude\settings.json"
+Copy-Item -Recurse -Force claude\hooks\*  "$env:USERPROFILE\.claude\hooks\"
+Copy-Item -Recurse -Force claude\docs\*   "$env:USERPROFILE\.claude\docs\"
+Copy-Item -Recurse -Force claude\skills\* "$env:USERPROFILE\.claude\skills\"
 ```
 
 ### 🧠 Per-project template
 
 [`claude/repo-template/CLAUDE.md`](claude/repo-template/CLAUDE.md) seeds a new project's
 `.claude/CLAUDE.md` (auto-loads like a root `CLAUDE.md` and **composes** with the global one —
-don't restate global rules in a project file).
+don't restate global rules in a project file). It's a **thin scaffold** — project description,
+commands, architecture, gotchas — plus per-stack convention snippets in
+[`claude/repo-template/stacks/`](claude/repo-template/stacks) (`typescript` · `vue` ·
+`csharp-dotnet` · `flutter-dart`). Copy the base, append **only the stacks the repo uses**,
+then fill the placeholders — generic best practices stay out; modern models don't need them,
+and every appended section costs context in every session.
 
 ```bash
-mkdir -p .claude && cp ~/dotfiles/claude/repo-template/CLAUDE.md ./.claude/CLAUDE.md   # macOS/Linux
+# macOS / Linux — base + e.g. a Vue+TS project:
+mkdir -p .claude
+cp  ~/dotfiles/claude/repo-template/CLAUDE.md          ./.claude/CLAUDE.md
+cat ~/dotfiles/claude/repo-template/stacks/typescript.md \
+    ~/dotfiles/claude/repo-template/stacks/vue.md      >> ./.claude/CLAUDE.md
 ```
 ```powershell
+# Windows — base + e.g. a .NET project:
 New-Item -ItemType Directory -Force .claude | Out-Null
-Copy-Item C:\Dev\ranger\dotfiles\claude\repo-template\CLAUDE.md .\.claude\CLAUDE.md     # Windows
+Copy-Item C:\Dev\ranger\dotfiles\claude\repo-template\CLAUDE.md .\.claude\CLAUDE.md
+Get-Content C:\Dev\ranger\dotfiles\claude\repo-template\stacks\csharp-dotnet.md |
+  Add-Content .\.claude\CLAUDE.md
 ```
 
 ### ☁️ Cowork project-instructions template
