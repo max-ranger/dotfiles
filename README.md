@@ -22,8 +22,9 @@ Windows 10/11 — Homebrew doesn't run on Windows, so winget is its stand-in the
 4. [🌿 Git — config, SSH keys & signed commits](#-git--config-ssh-keys--signed-commits)
 5. [🤖 Claude Code — config, hooks, plugins & skills](#-claude-code--config-hooks-plugins--skills)
 6. [🧩 VS Code — settings, keybindings & extensions](#-vs-code--settings-keybindings--extensions)
-7. [🔄 Maintaining this repo](#-maintaining-this-repo)
-8. [🙏 Credits — third-party skills & plugins](#-credits--third-party-skills--plugins)
+7. [🐚 PowerShell — profile (Windows)](#-powershell--profile-windows)
+8. [🔄 Maintaining this repo](#-maintaining-this-repo)
+9. [🙏 Credits — third-party skills & plugins](#-credits--third-party-skills--plugins)
 
 ---
 
@@ -508,6 +509,33 @@ faster multi-cursor editing.
 | **Git** | Git Graph |
 | **AI** | Claude Code |
 | **Editor UX** | Better Comments, GitHub Theme, Color Highlight, Todo Highlight, dotenv, font-size shortcuts, status-bar format toggle |
+
+---
+
+## 🐚 PowerShell — profile (Windows)
+
+**What it is:** the Windows counterpart of `~/.zshrc` — without it, the shell-integrated CLIs
+from the manifest (fnm, starship, zoxide, direnv) install fine but never activate in a session.
+[`powershell/Microsoft.PowerShell_profile.ps1`](powershell/Microsoft.PowerShell_profile.ps1)
+wires them up, with every hook guarded so a missing tool degrades silently.
+
+- **fnm** — `--use-on-cd`: auto-switches Node on entering a repo with `.nvmrc` / `.node-version`
+- **direnv** — per-directory env vars (its `pwsh` hook needs PowerShell 7+, guarded)
+- **zoxide** — `z` / `zi` smarter-cd commands
+- **starship** — the prompt (kept last so it owns the `prompt` function)
+
+Copy it to **both** profile locations so Windows PowerShell 5.1 and PowerShell 7 match
+(`$docs` resolves the Documents folder even when OneDrive redirects it):
+
+```powershell
+$docs = [Environment]::GetFolderPath('MyDocuments')
+"WindowsPowerShell", "PowerShell" | ForEach-Object {
+  New-Item -ItemType Directory -Force "$docs\$_" | Out-Null
+  Copy-Item powershell\Microsoft.PowerShell_profile.ps1 "$docs\$_\Microsoft.PowerShell_profile.ps1"
+}
+```
+
+> 🍎 macOS equivalent: `~/.zshrc` — deliberately not tracked here (yet).
 
 ---
 
