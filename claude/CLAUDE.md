@@ -5,8 +5,8 @@
 - **Pull requests:** always create PRs via the `pr-draft` skill (any "create/open a PR",
   `/pr`, `/pr-draft`). Never hand-roll `gh pr create` — `pr-draft` is authoritative.
 - **Commits:** hooks (`commit-hygiene`, `secure-commits`, `pre-commit-checks`) gate every
-  commit — a hook `ask` is a stop sign, not a speed bump. Skill-produced artifacts
-  (e.g. `docs/superpowers/**`) never get committed; their content belongs in basic-memory.
+  commit — a hook `ask` is a stop sign, not a speed bump. Skill-produced artifact files
+  (specs, plans, design docs) never get committed; their content belongs in basic-memory.
 - **Unattended loops:** before a long self-correcting run (agentic loop, `/loop`, fan-out),
   state a machine-checkable success signal and a bound.
   Reference: `~/.claude/docs/loop-engineering.md`.

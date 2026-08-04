@@ -34,12 +34,11 @@ JUNK=$(echo "$STAGED" | grep -iE \
   -e '(^|/)[^/]+~$' \
   -e '(^|/)(scratch|\.scratch|tmp)/' \
   -e '(^|/)(node_modules|coverage|\.next|\.turbo|\.cache)/' \
-  -e '(^|/)docs/superpowers/' \
   || true)
 
 if [ -n "$JUNK" ]; then
   LIST=$(echo "$JUNK" | tr '\n' ',' | sed 's/,$//')
-  ask "commit stages likely-unwanted file(s): ${LIST}. These look like OS/editor junk, build/dep output, scratch, or skill-produced artifacts (docs/superpowers/* belong in basic-memory, not the repo). Unstage with: git restore --staged <file> — or add to .gitignore. Confirm only if committing them is intended."
+  ask "commit stages likely-unwanted file(s): ${LIST}. These look like OS/editor junk, build/dep output, or scratch files. Unstage with: git restore --staged <file> — or add to .gitignore. Confirm only if committing them is intended."
 fi
 
 exit 0

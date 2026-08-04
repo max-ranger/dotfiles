@@ -369,7 +369,7 @@ irm https://claude.ai/install.ps1 | iex              # Windows
   injector. Notification hooks were retired in favor of Claude Code's native push/desktop
   notifications (`agentPushNotifEnabled`, `inputNeededNotifEnabled`).
 - [`claude/skills/`](claude/skills) — user-level skills: `pr-draft` (own), plus the vendored
-  `emil-design-eng` and `design-taste-frontend` (see credits).
+  `emil-design-eng` (see credits).
 - [`claude/prompts/prompt-templates.md`](claude/prompts/prompt-templates.md) — reusable prompt
   snippets (pre-planning confidence gate, plan risk review, self code-review). Reference only —
   nothing to copy into place.
@@ -435,20 +435,23 @@ and paste the body into the Cowork project's instructions in the cloud UI.
 Installed automatically on startup from `settings.json` → `enabledPlugins`.
 
 **From the official `claude-plugins-official` marketplace:**
-`frontend-design` · `claude-md-management` · `claude-code-setup` · `superpowers` ·
-`context7` · `typescript-lsp`.
+`frontend-design` · `claude-md-management` · `claude-code-setup` · `context7` ·
+`typescript-lsp`.
 
 > ✂️ Pruned in the Claude 5 era (behaviors now native to the model or the harness):
 > `code-review`, `code-simplifier`, `skill-creator`, `feature-dev`, `commit-commands`,
-> `security-guidance`, and `andrej-karpathy-skills`.
+> `security-guidance`, `andrej-karpathy-skills`, and `superpowers` (process ceremony that
+> fights auto-mode; deterministic hooks carry the discipline instead). Design skills were
+> consolidated to one per role — direction (`frontend-design`), refinement (`impeccable`),
+> interaction polish (`emil-design-eng`) — dropping `ui-ux-pro-max` and
+> `design-taste-frontend`.
 
 **Third-party marketplaces** (declared in `extraKnownMarketplaces`):
-- `ui-ux-pro-max` — [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
 - `impeccable` — [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
 - `warp` — [warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)
 
 **Vendored skills** (copied into `claude/skills/`, pinned): `pr-draft` (own), plus
-`emil-design-eng` & `design-taste-frontend` (see credits).
+`emil-design-eng` (see credits).
 
 > 🧠 **basic-memory** backs the knowledge-graph protocol in `CLAUDE.md` — installed via the
 > Brewfile (`uv "basic-memory"`) and rendered as an Obsidian vault.
@@ -543,10 +546,8 @@ Windows manifest stays in lockstep.
 
 **Vendored skills** (copied into `claude/skills/`, pinned — refresh by re-downloading `SKILL.md`):
 - `emil-design-eng` — [emilkowalski/skill](https://github.com/emilkowalski/skill)
-- `design-taste-frontend` — [bnd-1/taste-skill](https://github.com/bnd-1/taste-skill)
 
 **Plugin marketplaces** (declared in `settings.json`, installed by Claude Code on startup):
-- `ui-ux-pro-max@ui-ux-pro-max-skill` — [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
 - `impeccable@impeccable` — [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
 - `warp@claude-code-warp` — [warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)
 
