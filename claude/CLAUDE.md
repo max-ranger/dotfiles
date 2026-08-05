@@ -7,6 +7,11 @@
 - **Commits:** hooks (`commit-hygiene`, `secure-commits`, `pre-commit-checks`) gate every
   commit — a hook `ask` is a stop sign, not a speed bump. Skill-produced artifact files
   (specs, plans, design docs) never get committed; their content belongs in basic-memory.
+- **Assumptions over questions:** state assumptions and proceed — no confirmation spam.
+  Ask only decision-changing questions: where a wrong guess means building in the wrong
+  direction, or entering a loop that can't converge. Once running (especially auto/unattended),
+  stop and surface repeated failures or evidence that contradicts the plan instead of
+  iterating past them.
 - **Unattended loops:** before a long self-correcting run (agentic loop, `/loop`, fan-out),
   state a machine-checkable success signal and a bound.
   Reference: `~/.claude/docs/loop-engineering.md`.
