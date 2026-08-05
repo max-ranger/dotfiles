@@ -22,4 +22,5 @@
 - When adding a dependency that already exists in a sibling workspace/package, match its
   version exactly — don't scaffold a fresh `^latest`.
 - Semantic commit messages.
+- Never add `Co-Authored-By` lines to commits.
 <!-- Add project quirks: required env vars, flaky areas, things that bit you before. -->
