@@ -12,6 +12,7 @@
       "Packages": [
         { "PackageIdentifier": "Git.Git" },
         { "PackageIdentifier": "GitHub.cli" },
+        { "PackageIdentifier": "Amazon.AWSCLI" },
         { "PackageIdentifier": "sharkdp.bat" },
         { "PackageIdentifier": "uutils.coreutils" },
         { "PackageIdentifier": "direnv.direnv" },

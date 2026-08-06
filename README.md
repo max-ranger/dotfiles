@@ -136,6 +136,7 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 
 | Tool | What it's for |
 |---|---|
+| `awscli` | Official AWS command-line interface |
 | `bat` | `cat` with syntax highlighting + git integration |
 | `cocoapods` | Dependency manager for Cocoa / iOS projects |
 | `coreutils` | GNU file, shell & text utilities |
