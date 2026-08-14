@@ -54,7 +54,7 @@ brew "zoxide"
 brew "supabase/tap/supabase", trusted: true
 # Application uninstaller
 cask "appcleaner"
-cask "boring-notch"
+cask "boring-notch", trusted: true
 # Anthropic's official Claude AI desktop app
 cask "claude"
 # Window peeking utility app
