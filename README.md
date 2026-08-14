@@ -118,7 +118,6 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 |---|---|
 | `orbstack` / `docker` · `docker-compose` | `Docker.DockerDesktop` (bundles the CLI + compose) |
 | `postgres-app` | `PostgreSQL.PostgreSQL.18` (full server + psql) |
-| `rectangle` | `Microsoft.PowerToys` (FancyZones window snapping) |
 | `supabase` | Not on winget — per project: `pnpm add -D supabase`, or [Scoop](https://supabase.com/docs/guides/local-development/cli/getting-started?platform=windows) |
 | `fvm` / `flutter` | Not on winget — grab the [fvm release binary](https://github.com/leoafarias/fvm/releases) onto `PATH`, let fvm manage Flutter |
 | `font-hack-nerd-font` | Manual — download from [nerdfonts.com](https://www.nerdfonts.com/font-downloads), right-click → *Install* |
@@ -175,7 +174,6 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 | `obsidian` | Markdown knowledge base (also basic-memory's graph) |
 | `claude` | Anthropic's Claude desktop app |
 | `spotify` · `zoom` | Music · video calls |
-| `rectangle` | Keyboard window snapping |
 | `dockdoor` | Window peeking on Dock hover |
 | `boring-notch` | Turns the notch into a media widget 🎸 |
 | `appcleaner` | Clean app uninstaller |
