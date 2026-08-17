@@ -1,11 +1,11 @@
 ---
 name: pr-draft
-description: Use when the user wants to create a pull request, generate a PR description, write a draft PR, or asks for /pr-draft or /pr. Analyzes branch diff and commits to produce a filled PR and creates a draft PR via gh CLI.
+description: Use when the user wants to create a pull request, generate a PR description, write a draft PR, or asks for /pr-draft or /pr. Analyzes branch diff and commits to produce a filled PR and creates a draft PR via gh CLI (GitHub) or az repos (Azure DevOps).
 ---
 
 # Draft PR Creator
 
-Generate a complete PR description from the current branch's changes and create a draft PR via `gh`.
+Generate a complete PR description from the current branch's changes and create a draft PR via `gh` (GitHub) or `az repos` (Azure DevOps) — whichever the remote calls for.
 
 ## Trigger
 
@@ -32,12 +32,24 @@ git log --oneline --decorate --simplify-by-decoration HEAD | head -20
 # Full diff (determined after base branch is found)
 # Commit log (determined after base branch is found)
 
-# Check gh CLI
+# Detect remote host (GitHub vs Azure DevOps) — drives which CLI Step 4 uses
+git remote get-url origin 2>/dev/null
+
+# Check gh CLI (GitHub)
 command -v gh 2>/dev/null || where gh 2>/dev/null && echo "gh available" || echo "gh not available"
+
+# Check az CLI + azure-devops extension (Azure DevOps)
+command -v az 2>/dev/null && az extension show --name azure-devops >/dev/null 2>&1 && echo "az devops available" || echo "az devops not available"
 
 # Check if branch is pushed
 git rev-parse --abbrev-ref @{upstream} 2>/dev/null && echo "tracking" || echo "not tracking"
 ```
+
+**Remote host detection:** inspect the `origin` URL from above.
+- Contains `github.com` → **GitHub**.
+- Contains `dev.azure.com` or `visualstudio.com` → **Azure DevOps**. Parse organization/project/repository out of it — both remote formats appear in the wild:
+  - SSH: `git@ssh.dev.azure.com:v3/<org>/<project>/<repo>` (URL-decode `%20` in `<project>` back to spaces)
+  - HTTPS: `https://dev.azure.com/<org>/<project>/_git/<repo>`
 
 **Base branch detection (priority order):**
 
@@ -126,7 +138,9 @@ Read the chosen template file and use the fenced ```markdown block inside it as 
 
 ### Step 4: Create the PR
 
-**If `gh` CLI is available:**
+Use the remote host detected in Step 1.
+
+**GitHub, `gh` available:**
 
 ```bash
 # Push branch if not tracking remote
@@ -143,12 +157,42 @@ EOF
 
 Report the draft PR URL to the user.
 
-**If `gh` CLI is NOT available:**
+**Azure DevOps, `az` available with the `azure-devops` extension:**
+
+If the extension isn't installed yet, add it once: `az extension add --name azure-devops`.
+Azure Repos PRs have no separate title field for the body — the description IS the body,
+so put the title as an `# H1` on its own first line as well as in `--title`.
+
+```bash
+# Push branch if not tracking remote
+git push -u origin <branch>
+
+# <org>/<project>/<repo> from the remote URL parsed in Step 1.
+az repos pr create \
+  --organization "https://dev.azure.com/<org>" \
+  --project "<project>" \
+  --repository "<repo>" \
+  --source-branch "<branch>" \
+  --target-branch "<base-branch>" \
+  --title "<title>" \
+  --description "$(cat <<'EOF'
+# <title>
+
+<filled template body from Step 3>
+EOF
+)" \
+  --draft true
+```
+
+The command returns JSON with `pullRequestId`. Report the draft PR URL to the user as
+`https://dev.azure.com/<org>/<project>/_git/<repo>/pullrequest/<pullRequestId>`.
+
+**Neither CLI is available for this remote's host:**
 
 Save the body to a file in the current working directory. Since the body no longer contains the title, put the title on the first line as an `# H1` in the saved file (so the file is self-describing), then report:
 ```
 PR description saved to pr-<ticket-or-slug>.md
-gh CLI not found — install it to create draft PRs directly, or paste the title + description manually.
+<gh|az> CLI not found — install it to create draft PRs directly, or paste the title + description manually.
 ```
 
 ### Step 5: Report to user
