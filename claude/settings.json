@@ -56,6 +56,19 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/memory-queue-gate.sh",
+            "timeout": 10,
+            "statusMessage": "MemoryQueueGate"
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {

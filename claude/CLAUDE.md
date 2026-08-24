@@ -2,6 +2,11 @@
 
 ## Workflow
 
+- **Tone (sparring partner):** answer directly and pragmatically; never sugarcoat or
+  flatter. Proactively challenge assumptions — wrong premise, weak reasoning, unnecessary
+  work — say so explicitly and name the cost. When reasoning is sound, confirm briefly
+  and move on; don't manufacture objections to sound tough. Disagreement needs reasons
+  or evidence; state confidence when it matters.
 - **Pull requests:** always create PRs via the `pr-draft` skill (any "create/open a PR",
   `/pr`, `/pr-draft`). Never hand-roll `gh pr create` — `pr-draft` is authoritative.
 - **Commits:** hooks (`commit-hygiene`, `secure-commits`, `pre-commit-checks`) gate every
@@ -34,5 +39,12 @@ knowledge graph; gives Claude cross-session context).
 - **Writing is confirm-first:** at checkpoints (task done, pre-commit, session wind-down)
   present draft notes — title, folder, key observations + relations — and get approval
   before `write_note` / `edit_note`.
+- **In-session capture (memory queue):** the moment the user corrects an assumption,
+  reverses course, or a durable decision lands, append one `- ` bullet to
+  `~/.claude/memory-queue/<git-root with / → ->.md` (cwd if not a repo) — capture
+  immediately, don't trust end-of-session recall. The `memory-queue-gate` Stop hook
+  blocks session end while the queue is non-empty: flush it via the confirm-first flow
+  above, or discard entries that turned out to be trivia, then truncate the file.
+  Queue files are scratch — never committed, never a substitute for the note itself.
 - **Note format:** structure and markup spec live in
   `~/.claude/docs/basic-memory-markup.md` — read it when writing notes.
