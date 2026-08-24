@@ -41,7 +41,7 @@ knowledge graph; gives Claude cross-session context).
   before `write_note` / `edit_note`.
 - **In-session capture (memory queue):** the moment the user corrects an assumption,
   reverses course, or a durable decision lands, append one `- ` bullet to
-  `~/.claude/memory-queue/<git-root with / → ->.md` (cwd if not a repo) — capture
+  `~/.claude/memory-queue/<git-root with : and / → ->.md` (cwd if not a repo) — capture
   immediately, don't trust end-of-session recall. The `memory-queue-gate` Stop hook
   blocks session end while the queue is non-empty: flush it via the confirm-first flow
   above, or discard entries that turned out to be trivia, then truncate the file.

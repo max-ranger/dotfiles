@@ -3,7 +3,8 @@
 # unflushed entries. Per CLAUDE.md "In-session capture", Claude appends
 # mid-session decisions/corrections to the queue file and must flush them
 # (draft basic-memory notes, confirm-first) or discard them before stopping.
-# Queue path: ~/.claude/memory-queue/<git-root or cwd, / -> ->.md
+# Queue path: ~/.claude/memory-queue/<git-root or cwd, : and / -> ->.md
+# (':' matters on Windows, where the git root is C:/... and NTFS forbids ':' in names)
 
 INPUT=$(cat)
 
@@ -18,7 +19,7 @@ CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
 ROOT=$(cd "$CWD" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null)
 [ -z "$ROOT" ] && ROOT="$CWD"
 
-QUEUE="$HOME/.claude/memory-queue/$(printf '%s' "$ROOT" | tr '/' '-').md"
+QUEUE="$HOME/.claude/memory-queue/$(printf '%s' "$ROOT" | tr ':/' '--').md"
 [ -f "$QUEUE" ] || exit 0
 grep -q '[^[:space:]]' "$QUEUE" || exit 0
 
