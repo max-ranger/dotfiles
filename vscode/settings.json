@@ -10,6 +10,7 @@
   "workbench.editor.restoreViewState": true,
   "workbench.colorTheme": "Dark 2026",
   "workbench.secondarySideBar.defaultVisibility": "visible",
+  "workbench.browser.openLocalhostLinks": false,
 
   // ─── Editor: font & layout ───────────────────────────────────────────────
   "editor.fontFamily": "Hack Nerd Font Mono",
