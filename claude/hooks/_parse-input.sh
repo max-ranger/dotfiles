@@ -15,8 +15,13 @@ _json_extract() {
     | sed -nE "s/.*\"${key}\"[[:space:]]*:[[:space:]]*\"((\\\\.|[^\"\\\\])*)\".*/\\1/p"
 }
 
+# Order matters: collapse escaped backslashes LAST, behind a placeholder byte.
+# Doing \\ -> \ first turns JSON "C:\\Dev\\ranger" into C:\Dev\ranger, and the
+# \n / \t / \r rules that follow then eat the \r of "\ranger" — silently
+# corrupting every Windows path whose next character is n, t or r.
 _json_decode() {
-  printf '%s' "$1" | sed -E 's/\\"/"/g; s/\\\\/\\/g; s/\\n/\n/g; s/\\t/\t/g; s/\\r/\r/g'
+  printf '%s' "$1" \
+    | sed -E 's/\\\\/\x01/g; s/\\"/"/g; s/\\n/\n/g; s/\\t/\t/g; s/\\r/\r/g; s/\x01/\\/g'
 }
 
 HOOK_COMMAND=$(_json_decode "$(_json_extract command)")
