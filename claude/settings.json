@@ -42,6 +42,17 @@
             "statusMessage": "PreCommitChecks"
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/basic-memory-write-gate.sh",
+            "timeout": 10,
+            "statusMessage": "BasicMemoryGate"
+          }
+        ]
       }
     ],
     "PostToolUse": [

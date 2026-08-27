@@ -365,9 +365,13 @@ irm https://claude.ai/install.ps1 | iex              # Windows
   push notifications).
 - [`claude/hooks/`](claude/hooks) — deterministic gates (kept precisely because they don't
   depend on model behavior): **security gate**, **secure-commits**, **commit-hygiene**,
-  **pre-commit checks**, **format-on-save**, plus the **basic-memory session context**
-  injector. Notification hooks were retired in favor of Claude Code's native push/desktop
-  notifications (`agentPushNotifEnabled`, `inputNeededNotifEnabled`).
+  **pre-commit checks**, **format-on-save**, the **memory-queue gate**, plus the two
+  basic-memory hooks — the **session-context** injector (resolves the repo's project, or
+  asks whether one should be created when there is none) and the **write gate**, which turns
+  a Write/Edit into an unregistered folder under the vault root into a permission prompt so
+  notes can't land somewhere basic-memory will never index. Notification hooks were retired
+  in favor of Claude Code's native push/desktop notifications (`agentPushNotifEnabled`,
+  `inputNeededNotifEnabled`).
 - [`claude/skills/`](claude/skills) — user-level skills: `pr-draft` (own), plus the vendored
   `emil-design-eng` (see credits).
 - [`claude/prompts/prompt-templates.md`](claude/prompts/prompt-templates.md) — reusable prompt

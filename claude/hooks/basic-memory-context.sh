@@ -42,7 +42,7 @@ if [ "$VIA" = "parent" ]; then
 elif [ -n "$MATCH" ]; then
   MSG="📓 basic-memory project \`${MATCH}\`: before substantive work, load context (recent_activity + Overview + the ticket note under tickets/ if the work has a ticket). Capture durable decisions at checkpoints — draft, confirm, then write."
 else
-  MSG="📓 No basic-memory project for \`${PROJECT}\` (or its parent \`${PARENT}\`) yet: offer to create one before capturing knowledge. Capture durable decisions at checkpoints — draft, confirm, then write."
+  MSG="📓 No basic-memory project for \`${PROJECT}\` (or its parent \`${PARENT}\`). ASK the user whether one should be created — put the question to them, do not create it unprompted and do not capture knowledge into an unregistered folder. If they decline, drop the subject for the rest of the session and do not ask again."
 fi
 
 jq -nc --arg m "$MSG" \
