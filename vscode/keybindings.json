@@ -1,22 +1,27 @@
 // Place your key bindings in this file to override the defaults
+// `key` is the Windows/Linux binding; `mac` overrides it on macOS.
 [
   {
-    "key": "shift+cmd+down",
+    "key": "shift+ctrl+down",
+    "mac": "shift+cmd+down",
     "command": "cursorColumnSelectDown",
     "when": "textInputFocus",
   },
   {
-    "key": "shift+alt+cmd+down",
+    "key": "shift+alt+ctrl+down",
+    "mac": "shift+alt+cmd+down",
     "command": "-cursorColumnSelectDown",
     "when": "textInputFocus",
   },
   {
-    "key": "shift+cmd+up",
+    "key": "shift+ctrl+up",
+    "mac": "shift+cmd+up",
     "command": "cursorColumnSelectUp",
     "when": "textInputFocus",
   },
   {
-    "key": "shift+alt+cmd+up",
+    "key": "shift+alt+ctrl+up",
+    "mac": "shift+alt+cmd+up",
     "command": "-cursorColumnSelectUp",
     "when": "textInputFocus",
   },
