@@ -18,19 +18,21 @@ bm_resolve_project "$CWD"
 CONFIG="$HOME/.basic-memory/config.json"
 VAULT=""
 [ -n "$BM_PROJECT" ] && VAULT=$(jq -r --arg p "$BM_PROJECT" '.projects[$p].path' "$CONFIG" 2>/dev/null | tr -d '\r')
+# Path separator: follow the vault path as stored in config (native per OS).
+SEP='/'; case "$VAULT" in *\\*) SEP='\' ;; esac
 
-READ_HINT="Load context first: \`basic-memory tool recent-activity --project ${BM_PROJECT} --timeframe 7d\`, then read \`${VAULT}\\Overview.md\`"
+READ_HINT="Load context first: \`basic-memory tool recent-activity --project ${BM_PROJECT} --timeframe 7d\`, then read \`${VAULT}${SEP}Overview.md\`"
 WRITE_HINT="Capture: ticket notes (tickets/<ID> ...) are written DIRECTLY at checkpoints, no approval needed; hub (Overview) and decisions/ changes are drafted and confirmed first. After any direct file write run \`bm reindex --project \"${BM_NAME}\"\` (no watcher is running). Queue for hub/decision candidates only: ~/.claude/memory-queue/${BM_PROJECT}.md"
 
 case "$BM_VIA" in
   parent)
-    MSG="📓 basic-memory project \`${BM_PROJECT}\` (multi-repo; this repo is \`${BM_REPO}\`). ${READ_HINT}, \`${BM_REPO}\\Overview.md\` and the ticket note under \`${BM_REPO}\\tickets\\\` (or \`tickets\\\` at project level for cross-repo tickets). ${WRITE_HINT}"
+    MSG="📓 basic-memory project \`${BM_PROJECT}\` (multi-repo; this repo is \`${BM_REPO}\`). ${READ_HINT}, \`${BM_REPO}${SEP}Overview.md\` and the ticket note under \`${BM_REPO}${SEP}tickets${SEP}\` (or \`tickets${SEP}\` at project level for cross-repo tickets). ${WRITE_HINT}"
     ;;
   repo)
-    MSG="📓 basic-memory project \`${BM_PROJECT}\`. ${READ_HINT} and the ticket note under \`tickets\\\` if the work has a ticket. ${WRITE_HINT}"
+    MSG="📓 basic-memory project \`${BM_PROJECT}\`. ${READ_HINT} and the ticket note under \`tickets${SEP}\` if the work has a ticket. ${WRITE_HINT}"
     ;;
   cwd|cwd-parent)
-    MSG="📓 basic-memory project \`${BM_PROJECT}\` (session opened at the workspace root, not inside a repo). ${READ_HINT}; per-repo hubs are \`<repo>\\Overview.md\`, cross-repo tickets under \`tickets\\\`. ${WRITE_HINT}"
+    MSG="📓 basic-memory project \`${BM_PROJECT}\` (session opened at the workspace root, not inside a repo). ${READ_HINT}; per-repo hubs are \`<repo>${SEP}Overview.md\`, cross-repo tickets under \`tickets${SEP}\`. ${WRITE_HINT}"
     ;;
   *)
     NAME=$(basename "$CWD")

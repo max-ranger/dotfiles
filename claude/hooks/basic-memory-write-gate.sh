@@ -12,6 +12,14 @@
 #
 # Writes inside a registered project, and writes outside the vault entirely,
 # pass straight through.
+#
+# Two vault layouts exist across machines and both must work:
+#   nested   -- the vault root is itself a registered project (e.g. `main`) and the
+#               other projects live in sub-folders of it;
+#   siblings -- nothing is registered at the vault root, every project is a sibling
+#               folder under a plain directory (e.g. ~/BasicMemory/<project>).
+# A "vault root" is therefore a directory that is the parent of >= 2 registered
+# projects, or a registered project that is the parent of another one.
 
 INPUT=$(cat)
 
@@ -30,41 +38,69 @@ CONFIG="$HOME/.basic-memory/config.json"
 # Compare case-insensitively on forward slashes (Windows paths arrive either way).
 # Length is preserved by both transforms, so offsets computed on the lowercased
 # form stay valid for the display form.
-# jq is a Windows build here and emits CRLF, so every value it hands back carries a
-# trailing \r. Strip it first or nothing ever compares equal.
+# jq is a Windows build on one machine and emits CRLF, so every value it hands
+# back carries a trailing \r. Strip it first or nothing ever compares equal.
 _slashes() { printf '%s' "$1" | tr -d '\r' | tr '\\' '/' | sed 's#/*$##'; }
 _fold()    { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
+_under()   { case "$1/" in "$2"/*) return 0 ;; esac; return 1; }   # $1 is at/below dir $2
 
 FILE_DISP=$(_slashes "$FILE")
 FILE_CMP=$(_fold "$FILE_DISP")
 
-# ROOT = shortest registered project path containing the file (the vault root).
-# BEST = longest such path. BEST != ROOT means the file is inside a real project.
-ROOT=""
-BEST=""
+# Registered project paths, normalized.
+PROJECTS=()
 while IFS= read -r p; do
   [ -z "$p" ] && continue
-  n=$(_fold "$(_slashes "$p")")
-  case "$FILE_CMP/" in
-    "$n"/*)
-      if [ -z "$ROOT" ] || [ "${#n}" -lt "${#ROOT}" ]; then ROOT="$n"; fi
-      if [ "${#n}" -gt "${#BEST}" ]; then BEST="$n"; fi
-      ;;
-  esac
-done <<EOF
+  PROJECTS+=("$(_fold "$(_slashes "$p")")")
+done <<EOT
 $(jq -r '.projects[]?.path // empty' "$CONFIG" 2>/dev/null | tr -d '\r')
-EOF
+EOT
+[ "${#PROJECTS[@]}" -gt 0 ] || exit 0
 
-[ -z "$ROOT" ] && exit 0            # not in the vault at all
-[ "$BEST" != "$ROOT" ] && exit 0    # inside a registered project -> fine
+# Vault roots (see header): parent of >= 2 projects, or a project that is the
+# parent of another. dirname(<root project>) is deliberately NOT a vault root --
+# otherwise every write under C:/ or $HOME would be gated.
+VAULTS=()
+_is_vault() { local v; for v in "${VAULTS[@]}"; do [ "$v" = "$1" ] && return 0; done; return 1; }
+for p in "${PROJECTS[@]}"; do
+  d=$(dirname "$p")
+  n=0
+  for q in "${PROJECTS[@]}"; do
+    [ "$(dirname "$q")" = "$d" ] && n=$((n + 1))
+    [ "$q" = "$d" ] && n=$((n + 2))
+  done
+  [ "$n" -ge 2 ] && ! _is_vault "$d" && VAULTS+=("$d")
+done
 
-REL="${FILE_DISP:$(( ${#ROOT} + 1 ))}"
+# Deepest (BEST) and shallowest (ROOT) registered project containing the file.
+ROOT=""; BEST=""
+for p in "${PROJECTS[@]}"; do
+  _under "$FILE_CMP" "$p" || continue
+  if [ -z "$ROOT" ] || [ "${#p}" -lt "${#ROOT}" ]; then ROOT="$p"; fi
+  if [ "${#p}" -gt "${#BEST}" ]; then BEST="$p"; fi
+done
+
+if [ -n "$BEST" ]; then
+  [ "$BEST" != "$ROOT" ] && exit 0      # nested inside a real project
+  _is_vault "$BEST" || exit 0           # leaf project -> fine
+  V="$BEST"                             # root project: gate its sub-folders
+else
+  V=""                                  # no project owns it: inside a vault root?
+  for v in "${VAULTS[@]}"; do
+    _under "$FILE_CMP" "$v" || continue
+    if [ -z "$V" ] || [ "${#v}" -gt "${#V}" ]; then V="$v"; fi
+  done
+  [ -z "$V" ] && exit 0                 # not in the vault at all
+fi
+
+REL="${FILE_DISP:$(( ${#V} + 1 ))}"
 case "$REL" in
   */*) TOP="${REL%%/*}" ;;
-  *)   exit 0 ;;                    # loose file at the vault root -> belongs to the root project
+  *)   [ -n "$BEST" ] && exit 0         # loose file inside the root project -> fine
+       TOP="$REL" ;;                    # loose file at a siblings-layout root: nobody indexes it
 esac
 
-jq -nc --arg t "$TOP" --arg r "${FILE_DISP:0:${#ROOT}}" '
+jq -nc --arg t "$TOP" --arg r "${FILE_DISP:0:${#V}}" '
 {
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
