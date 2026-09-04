@@ -24,15 +24,21 @@
 ## Knowledge Memory (basic-memory)
 
 Durable, non-code project knowledge lives in **basic-memory** (rendered as an Obsidian
-knowledge graph; gives Claude cross-session context).
+knowledge graph; gives Claude cross-session context). basic-memory is **local and
+file-first — no MCP server, ever.** Notes are markdown files under the project path in
+`~/.basic-memory/config.json`; read them with the `basic-memory` / `bm` CLI or directly,
+write them directly, then run `bm reindex --project "<Project Name>"` (no watcher runs, so
+an unindexed note is invisible to search and `recent-activity`). Never propose, configure or
+wait for an MCP server; "MCP not available" is not a reason to skip capture.
 
 - **Project mapping:** one basic-memory project per big project. In a git repo the project =
   the git-root folder name, or — for a multi-repo project whose repos live under a shared
-  parent folder — that parent folder's name; the SessionStart hook resolves both and names
-  the repo hub to read. Missing project, or a non-repo/cowork session: ask
-  which project to use or whether to create one — never auto-create.
-- **Session start:** before substantive work, call `recent_activity`, read the project's
-  `Overview`, then (multi-repo project) `Overview (<repo>)` and the ticket note for the
+  parent folder — that parent folder's name; outside a repo the cwd folder name (then its
+  parent). The SessionStart hook resolves this and names the hub to read. Missing project:
+  ask whether to create one — never auto-create.
+- **Session start:** before substantive work, run
+  `basic-memory tool recent-activity --project <slug> --timeframe 7d`, read the project's
+  `Overview.md`, then (multi-repo project) `<repo>/Overview.md` and the ticket note for the
   ticket at hand. Skip for trivial/throwaway tasks.
 - **What to capture:** tech stack, significant technical / architectural / design / product /
   ops decisions, and — per ticket / work item (same notes, titled instead of keyed, where
@@ -43,16 +49,23 @@ knowledge graph; gives Claude cross-session context).
 - **Skill artifacts are scratch:** specs, plans, and ADR/design files written by skills are
   working copies — distill their durable decisions into basic-memory instead of committing
   them; writing such a file does not count as capturing.
-- **Writing is confirm-first:** at checkpoints (task done, pre-commit, session wind-down)
-  present draft notes — title, folder, key observations + relations — and get approval
-  before `write_note` / `edit_note`.
-- **In-session capture (memory queue):** the moment the user corrects an assumption,
-  reverses course, or a durable decision lands, append one `- ` bullet to
-  `~/.claude/memory-queue/<git-root with : and / → ->.md` (cwd if not a repo) — capture
-  immediately, don't trust end-of-session recall. The `memory-queue-gate` Stop hook
-  blocks session end while the queue is non-empty: flush it via the confirm-first flow
-  above — ticket note (timeline, status, handoff) first, then any hub line the session made
-  stale — or discard entries that turned out to be trivia, then truncate the file.
+- **Ticket notes are written directly, at every checkpoint** (task done, PR created,
+  pre-commit, session wind-down): create or update `tickets/<ID> ...` (timeline entry,
+  status, handoff) without asking, reindex, and say in the report what was written. A
+  ticket's own note is the default place for everything the session learned about that
+  ticket — do not park it in the queue, do not wait for session end.
+- **Hubs and decisions are confirm-first:** changes to `Overview` hubs, `decisions/`,
+  `architecture/`, and any deletion are presented as drafts — title, folder, key
+  observations + relations — and written after approval. Present them at the same
+  checkpoint as the ticket-note write, not at session end.
+- **Memory queue (hub/decision candidates only):** when the user corrects an assumption,
+  reverses course, or a cross-ticket convention/decision lands, append one `- ` bullet to
+  `~/.claude/memory-queue/<project-slug>.md` (same slug as the basic-memory project — e.g.
+  `global-data-store.md`; one file per project, not per repo) — capture immediately, don't
+  trust end-of-session recall. Ticket-scoped facts go straight into the ticket note instead.
+  The `memory-queue-gate` Stop hook blocks session end while the queue is non-empty and has
+  no bypass: flush it (draft → confirm → write → reindex → truncate) or discard trivia.
+  Only when the user explicitly says to defer, append `- DEFER: <reason>` and stop.
   Queue files are scratch — never committed, never a substitute for the note itself.
 - **Note format:** layout, which-note-gets-what, titles and markup live in
   `~/.claude/docs/basic-memory-markup.md` — read it when writing notes.

@@ -1,8 +1,10 @@
 # basic-memory — note structure & markup
 
-Reference for writing basic-memory notes — read before `write_note` / `edit_note` (or before
-editing the markdown directly). The markup is what drives the Obsidian knowledge graph; the
-structure is what keeps "what is true now" separable from "what we did when".
+Reference for writing basic-memory notes — read before writing or editing a note. basic-memory
+is local and file-first (no MCP server): notes are the markdown files under the project path,
+written directly and followed by `bm reindex --project "<Project Name>"`. The markup is what
+drives the Obsidian knowledge graph; the structure is what keeps "what is true now" separable
+from "what we did when".
 
 ## Structure (per project)
 
@@ -99,8 +101,14 @@ One paragraph: what and why; link to the master note if cross-repo.
 
 ## Session discipline
 
-- Start: project hub → repo hub → ticket note for the ticket at hand (`recent_activity` first).
-  Plans and decision notes are reference, not instructions.
-- End / checkpoint: append the ticket timeline, refresh its status and handoff, then fix every
-  hub line the session made stale — repo hub first, project hub if the ticket index or state
-  table changed. Confirm-first still applies to every write.
+- Start: `basic-memory tool recent-activity --project <slug> --timeframe 7d`, then project hub →
+  repo hub → ticket note for the ticket at hand. Plans and decision notes are reference, not
+  instructions.
+- Checkpoint (task done, PR created, pre-commit, wind-down): **write the ticket note directly** —
+  append the timeline, refresh status and handoff — no approval needed. Then draft every hub
+  line the session made stale (repo hub first, project hub if the ticket index or state table
+  changed) plus any new `decisions/` note, get approval, write. Finish with
+  `bm reindex --project "<Project Name>"`.
+- Confirm-first applies to hubs, decisions, architecture and deletions — not to ticket notes.
+  A ticket flushed at its own checkpoint touches 2–4 files; a backlog of several tickets
+  flushed at once touches a dozen. Flush per checkpoint, not per session.
