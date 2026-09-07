@@ -63,9 +63,11 @@ wait for an MCP server; "MCP not available" is not a reason to skip capture.
   `~/.claude/memory-queue/<project-slug>.md` (same slug as the basic-memory project — e.g.
   `global-data-store.md`; one file per project, not per repo) — capture immediately, don't
   trust end-of-session recall. Ticket-scoped facts go straight into the ticket note instead.
-  The `memory-queue-gate` Stop hook blocks session end while the queue is non-empty and has
-  no bypass: flush it (draft → confirm → write → reindex → truncate) or discard trivia.
-  Only when the user explicitly says to defer, append `- DEFER: <reason>` and stop.
+  The `memory-queue-gate` Stop hook blocks session end while the queue is non-empty: flush it
+  (draft → confirm → write → reindex → truncate) or discard trivia. Two markers let a stop
+  through: `- PENDING: <draft shown>` — written only together with the draft presented in
+  chat, so the user can answer; resolve it the moment the answer arrives — and
+  `- DEFER: <reason>`, written only when the user explicitly says to defer.
   Queue files are scratch — never committed, never a substitute for the note itself.
 - **Note format:** layout, which-note-gets-what, titles and markup live in
   `~/.claude/docs/basic-memory-markup.md` — read it when writing notes.
