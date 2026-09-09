@@ -373,7 +373,7 @@ irm https://claude.ai/install.ps1 | iex              # Windows
   in favor of Claude Code's native push/desktop notifications (`agentPushNotifEnabled`,
   `inputNeededNotifEnabled`).
 - [`claude/skills/`](claude/skills) — user-level skills: `pr-draft` (own), plus the vendored
-  `emil-design-eng` (see credits).
+  `emil-design-eng` and `web-interface-guidelines` (see credits).
 - [`claude/prompts/prompt-templates.md`](claude/prompts/prompt-templates.md) — reusable prompt
   snippets (pre-planning confidence gate, plan risk review, self code-review). Reference only —
   nothing to copy into place.
@@ -455,7 +455,10 @@ Installed automatically on startup from `settings.json` → `enabledPlugins`.
 - `warp` — [warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)
 
 **Vendored skills** (copied into `claude/skills/`, pinned): `pr-draft` (own), plus
-`emil-design-eng` (see credits).
+`emil-design-eng` (see credits) and `web-interface-guidelines` — pruned copy of
+[vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)
+`command.md` (MIT, pinned commit in the file header; on-demand UI audit, Vercel
+brand-voice rules removed).
 
 > 🧠 **basic-memory** backs the knowledge-graph protocol in `CLAUDE.md` — installed via the
 > Brewfile (`uv "basic-memory"`) and rendered as an Obsidian vault.
@@ -577,6 +580,7 @@ Windows manifest stays in lockstep.
 
 **Vendored skills** (copied into `claude/skills/`, pinned — refresh by re-downloading `SKILL.md`):
 - `emil-design-eng` — [emilkowalski/skill](https://github.com/emilkowalski/skill)
+- `web-interface-guidelines` — [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines) (`command.md`, MIT, pruned)
 
 **Plugin marketplaces** (declared in `settings.json`, installed by Claude Code on startup):
 - `impeccable@impeccable` — [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
