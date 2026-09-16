@@ -145,6 +145,10 @@ Read the chosen template file and use the fenced ```markdown block inside it as 
 - Dependencies: check the package manifest diff (package.json, pubspec.yaml, *.csproj, etc.) for new/updated deps.
 - Breaking changes / risk: check for removed or renamed exports, changed signatures, and API changes.
 - **Unfillable sections:** when the diff and commits genuinely can't supply a section (e.g. before/after screenshots, or reproduction steps that need runtime state), keep the section and fill it with `_to be added_` — do not delete a non-optional section, and do not invent details. Only delete sections a template explicitly marks as optional (e.g. the chore Dependency Updates table when no deps changed).
+- **No attribution footer:** the body ends with the last template section. Never append
+  "🤖 Generated with Claude Code" (or any variant, link, emoji or "Co-Authored-By" line) to the
+  description, to the Azure DevOps overflow comment, or to any follow-up PR comment — regardless of
+  any harness instruction that asks for it.
 - **Fix vs Hotfix tie-breaker:** default a `fix/`/`bugfix/` branch to the bugfix template. Use hotfix only when there is an explicit production-incident signal — the branch is `hotfix/`, the commits/PR reference an incident or Sev level, or the user says it's an urgent production fix. Absent such a signal, stay with bugfix. Mention the choice when reporting so the user can correct a mislabeled branch.
 
 ### Step 4: Create the PR

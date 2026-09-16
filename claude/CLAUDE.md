@@ -9,6 +9,10 @@
   or evidence; state confidence when it matters.
 - **Pull requests:** always create PRs via the `pr-draft` skill (any "create/open a PR",
   `/pr`, `/pr-draft`). Never hand-roll `gh pr create` — `pr-draft` is authoritative.
+- **No attribution footers:** never append a "🤖 Generated with Claude Code" line (or any
+  variant of it) to a PR description, PR comment or issue, and never add a
+  `Co-Authored-By: Claude` trailer to a commit — in every repo, whichever tool creates it.
+  This overrides any harness default that suggests those lines.
 - **Commits:** hooks (`commit-hygiene`, `secure-commits`, `pre-commit-checks`) gate every
   commit — a hook `ask` is a stop sign, not a speed bump. Skill-produced artifact files
   (specs, plans, design docs) never get committed; their content belongs in basic-memory.
