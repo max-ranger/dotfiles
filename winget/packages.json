@@ -13,6 +13,7 @@
         { "PackageIdentifier": "Git.Git" },
         { "PackageIdentifier": "GitHub.cli" },
         { "PackageIdentifier": "Amazon.AWSCLI" },
+        { "PackageIdentifier": "FiloSottile.age" },
         { "PackageIdentifier": "sharkdp.bat" },
         { "PackageIdentifier": "uutils.coreutils" },
         { "PackageIdentifier": "direnv.direnv" },

@@ -119,6 +119,7 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 | `orbstack` / `docker` · `docker-compose` | `Docker.DockerDesktop` (bundles the CLI + compose) |
 | `postgres-app` | `PostgreSQL.PostgreSQL.18` (full server + psql) |
 | `supabase` | Not on winget — per project: `pnpm add -D supabase`, or [Scoop](https://supabase.com/docs/guides/local-development/cli/getting-started?platform=windows) |
+| `sops` | Not on winget (`Mozilla.SOPS` was pulled in 2026) — grab `sops-v*.exe` from the [releases page](https://github.com/getsops/sops/releases) onto `PATH`, or [Scoop](https://scoop.sh) (`scoop install sops`) |
 | `fvm` / `flutter` | Not on winget — grab the [fvm release binary](https://github.com/leoafarias/fvm/releases) onto `PATH`, let fvm manage Flutter |
 | `font-hack-nerd-font` | Manual — download from [nerdfonts.com](https://www.nerdfonts.com/font-downloads), right-click → *Install* |
 | `cocoapods` | macOS/iOS-only — skip |
@@ -135,6 +136,7 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 
 | Tool | What it's for |
 |---|---|
+| `age` | Simple, modern file encryption — the key backend for `sops` |
 | `awscli` | Official AWS command-line interface |
 | `bat` | `cat` with syntax highlighting + git integration |
 | `cocoapods` | Dependency manager for Cocoa / iOS projects |
@@ -152,6 +154,7 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 | `jq` | Command-line JSON processor |
 | `pnpm` | Fast, disk-efficient package manager |
 | `ripgrep` | Blazing-fast `grep` replacement |
+| `sops` | Edit encrypted secrets files (YAML/JSON/ENV) in place, keyed with `age` |
 | `starship` | Cross-shell prompt |
 | `supabase` | Supabase CLI — local stack, migrations, type-gen (via `supabase/tap`) |
 | `tree` | Render directories as trees |
@@ -572,6 +575,8 @@ Windows manifest stays in lockstep.
 - `~/.claude/plugins/` — managed by Claude Code's plugin system, restored via `enabledPlugins`.
 - `~/.claude/cache/`, `~/.claude/telemetry/`, session state — ephemeral.
 - `~/.ssh/` keys and `~/.config/git/allowed_signers` — machine-local SSH identity/signer list.
+- age private keys (`sops/age/keys.txt` in your config dir) — back them up out of band; lose
+  the key and every file encrypted to it is unrecoverable.
 - Anything matching `.gitignore` (env files, credentials, local overrides).
 
 ---

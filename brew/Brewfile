@@ -1,5 +1,7 @@
 tap "supabase/tap"
 tap "theboredteam/boring-notch", "https://github.com/TheBoredTeam/homebrew-boring-notch"
+# Simple, modern, secure file encryption
+brew "age"
 # Official Amazon AWS command-line interface
 brew "awscli"
 # Clone of cat(1) with syntax highlighting and Git integration
@@ -38,6 +40,8 @@ brew "jq"
 brew "pnpm"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
+# Editor of encrypted files
+brew "sops"
 # Cross-shell prompt for astronauts
 brew "starship"
 # Display directories as trees (with optional color/HTML output)
