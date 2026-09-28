@@ -124,8 +124,10 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 | `font-hack-nerd-font` | Manual — download from [nerdfonts.com](https://www.nerdfonts.com/font-downloads), right-click → *Install* |
 | `cocoapods` | macOS/iOS-only — skip |
 | `htop` · `tree` | Skip — Task Manager / built-in `tree` |
-| `whisper-cpp` · `appcleaner` · `dockdoor` · `boring-notch` | No equivalent — skip |
+| `whisper.cpp` · `appcleaner` · `dockdoor` · `boring-notch` | No equivalent — skip |
+| `git-filter-repo` | Not on winget — `uv tool install git-filter-repo` (git picks it up from `PATH`) |
 | `uv "basic-memory"` | Same as macOS: `uv tool install basic-memory` (uv is in the manifest) |
+| `npm "@playwright/cli"` | Same as macOS: `npm i -g @playwright/cli` (after Node via fnm) |
 | `npm "corepack"` | Ships with Node — `fnm install --lts`, then `corepack enable` |
 
 > 🔄 When the Brewfile changes, update [`winget/packages.json`](winget/packages.json) to match
@@ -149,11 +151,13 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 | `fzf` | Command-line fuzzy finder |
 | `gh` | GitHub CLI |
 | `git` | Version control (the whole point 😉) |
+| `git-filter-repo` | Rewrite git history — purge files/secrets, split repos (`git filter-repo`) |
 | `gnupg` | OpenPGP / GPG |
 | `htop` | Interactive process viewer |
 | `jq` | Command-line JSON processor |
 | `pnpm` | Fast, disk-efficient package manager |
 | `ripgrep` | Blazing-fast `grep` replacement |
+| `shellcheck` | Lint for (ba)sh scripts — e.g. the Claude hooks in this repo |
 | `sops` | Edit encrypted secrets files (YAML/JSON/ENV) in place, keyed with `age` |
 | `starship` | Cross-shell prompt |
 | `supabase` | Supabase CLI — local stack, migrations, type-gen (via `supabase/tap`) |
@@ -182,8 +186,9 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 | `appcleaner` | Clean app uninstaller |
 | `font-hack-nerd-font` | Hack Nerd Font (terminal + editor font) |
 
-> ➕ The Brewfile also installs two non-brew bits via `brew bundle`: **`basic-memory`** (through
-> `uv` — the knowledge-graph backend Claude uses) and **`corepack`** (through `npm`).
+> ➕ The Brewfile also installs three non-brew bits via `brew bundle`: **`basic-memory`** (through
+> `uv` — the knowledge-graph backend Claude uses), plus **`@playwright/cli`** (`playwright-cli`,
+> browser automation for coding agents) and **`corepack`** (both through `npm`).
 
 ### 🖱️ Outside any package manager
 

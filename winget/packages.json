@@ -25,6 +25,7 @@
         { "PackageIdentifier": "jqlang.jq" },
         { "PackageIdentifier": "pnpm.pnpm" },
         { "PackageIdentifier": "BurntSushi.ripgrep.MSVC" },
+        { "PackageIdentifier": "koalaman.shellcheck" },
         { "PackageIdentifier": "Starship.Starship" },
         { "PackageIdentifier": "astral-sh.uv" },
         { "PackageIdentifier": "JernejSimoncic.Wget" },

@@ -30,6 +30,8 @@ brew "fzf"
 brew "gh"
 # Distributed revision control system
 brew "git"
+# Quickly rewrite git repository history
+brew "git-filter-repo"
 # GNU Privacy Guard (OpenPGP)
 brew "gnupg"
 # Improved top (interactive process viewer)
@@ -40,6 +42,8 @@ brew "jq"
 brew "pnpm"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
 # Editor of encrypted files
 brew "sops"
 # Cross-shell prompt for astronauts
@@ -51,7 +55,7 @@ brew "uv"
 # Internet file retriever
 brew "wget"
 # Port of OpenAI's Whisper model in C/C++
-brew "whisper-cpp"
+brew "whisper.cpp"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
 # Supabase CLI
@@ -112,4 +116,5 @@ vscode "wayou.vscode-todo-highlight"
 vscode "xabikos.javascriptsnippets"
 vscode "yoavbls.pretty-ts-errors"
 uv "basic-memory"
+npm "@playwright/cli"
 npm "corepack"
