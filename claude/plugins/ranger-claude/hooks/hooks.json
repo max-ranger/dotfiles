@@ -1,0 +1,59 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/project-context.sh", "timeout": 5 }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/security-gate.sh", "timeout": 10, "statusMessage": "SecurityGate" },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/secure-commits.sh", "timeout": 15, "statusMessage": "SecureCommits" },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/commit-hygiene.sh", "timeout": 10, "statusMessage": "CommitHygiene" },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/review-gate.sh", "timeout": 10, "statusMessage": "ReviewGate" },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/pre-commit-checks.sh", "timeout": 180, "statusMessage": "PreCommitChecks" }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/design-pretrigger.sh", "timeout": 5, "statusMessage": "DesignCheck" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/format-on-save.sh", "timeout": 30, "statusMessage": "Auto-Format", "async": true },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/track-edits.sh", "timeout": 5 }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/track-skills.sh", "timeout": 5 }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/track-tests.sh", "timeout": 5 }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/verify-gate.sh", "timeout": 10, "statusMessage": "VerifyGate" }
+        ]
+      }
+    ]
+  }
+}

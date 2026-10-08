@@ -128,13 +128,13 @@ Both hosts:
 
 | PR type (from Step 2) | Template file |
 |---|---|
-| Feature | `templates/feature.md` |
-| Fix | `templates/bugfix.md` |
-| Hotfix | `templates/hotfix.md` |
-| Refactor | `templates/refactor.md` |
-| Chore | `templates/chore.md` |
-| Docs | `templates/feature.md` (trim to Description + Highlights) |
-| Change (fallback) | `templates/feature.md` |
+| Feature | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/feature.md` |
+| Fix | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/bugfix.md` |
+| Hotfix | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/hotfix.md` |
+| Refactor | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/refactor.md` |
+| Chore | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/chore.md` |
+| Docs | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/feature.md` (trim to Description + Highlights) |
+| Change (fallback) | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/feature.md` |
 
 Read the chosen template file and use the fenced ```markdown block inside it as the body structure. Replace every `<…>` placeholder with real content derived from the actual changes; delete any section a template marks as optional when it doesn't apply.
 

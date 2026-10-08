@@ -1,88 +1,7 @@
 {
-  "model": "claude-fable-5[1m]",
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/basic-memory-context.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/security-gate.sh",
-            "timeout": 10,
-            "statusMessage": "SecurityGate"
-          },
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/secure-commits.sh",
-            "timeout": 15,
-            "statusMessage": "SecureCommits"
-          },
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/commit-hygiene.sh",
-            "timeout": 10,
-            "statusMessage": "CommitHygiene"
-          },
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/pre-commit-checks.sh",
-            "timeout": 180,
-            "statusMessage": "PreCommitChecks"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/basic-memory-write-gate.sh",
-            "timeout": 10,
-            "statusMessage": "BasicMemoryGate"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/format-on-save.sh",
-            "timeout": 30,
-            "statusMessage": "Auto-Format",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/memory-queue-gate.sh",
-            "timeout": 10,
-            "statusMessage": "MemoryQueueGate"
-          }
-        ]
-      }
-    ]
-  },
+  "model": "fable[1m]",
+  "outputStyle": "Concise",
+  "effortLevel": "xhigh",
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
@@ -90,7 +9,8 @@
     "context7@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "impeccable@impeccable": true,
-    "warp@claude-code-warp": true
+    "warp@claude-code-warp": true,
+    "ranger-claude@ranger": true
   },
   "extraKnownMarketplaces": {
     "impeccable": {
@@ -104,11 +24,17 @@
         "source": "github",
         "repo": "warpdotdev/claude-code-warp"
       }
+    },
+    "ranger": {
+      "source": {
+        "source": "github",
+        "repo": "max-ranger/dotfiles"
+      }
     }
   },
-  "effortLevel": "xhigh",
   "autoUpdatesChannel": "latest",
   "theme": "auto",
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "skipWorkflowUsageWarning": true
 }

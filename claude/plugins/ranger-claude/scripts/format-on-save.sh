@@ -2,7 +2,7 @@
 # Auto-formats files after Claude edits them (PostToolUse Edit|Write).
 # Reports when the project is missing prettier instead of failing silently.
 
-source ~/.claude/hooks/_parse-input.sh
+source "$(dirname "$0")/_parse-input.sh"
 [ -z "$HOOK_FILE_PATH" ] || [ ! -f "$HOOK_FILE_PATH" ] && exit 0
 
 EXTENSION="${HOOK_FILE_PATH##*.}"

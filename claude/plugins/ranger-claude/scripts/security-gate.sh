@@ -1,7 +1,7 @@
 #!/bin/bash
 # Blocks dangerous shell commands (PreToolUse Bash).
 
-source ~/.claude/hooks/_parse-input.sh
+source "$(dirname "$0")/_parse-input.sh"
 [ -z "$HOOK_COMMAND" ] && exit 0
 
 emit() {

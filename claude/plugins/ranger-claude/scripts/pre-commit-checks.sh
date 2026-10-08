@@ -3,7 +3,7 @@
 # Tools must already be installed in the project — missing tools are reported
 # but never block. Failures block the commit so they get fixed first.
 
-source ~/.claude/hooks/_parse-input.sh
+source "$(dirname "$0")/_parse-input.sh"
 [ -z "$HOOK_COMMAND" ] && exit 0
 
 if ! echo "$HOOK_COMMAND" | grep -qE '(^|[;&|()]+[[:space:]]*)git[[:space:]]+commit(\b|$)'; then

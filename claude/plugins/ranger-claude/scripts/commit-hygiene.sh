@@ -3,7 +3,7 @@
 # artifacts (PreToolUse Bash). Ask-only (exit 0 + permissionDecision:ask) so a
 # false positive costs one confirmation, never a hard block.
 
-source ~/.claude/hooks/_parse-input.sh
+source "$(dirname "$0")/_parse-input.sh"
 [ -z "$HOOK_COMMAND" ] && exit 0
 
 # Only trigger on git commit
