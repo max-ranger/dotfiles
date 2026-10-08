@@ -1,0 +1,11 @@
+{
+  "plansDirectory": "./docs/plans",
+  "enabledPlugins": {
+    "ranger-claude@ranger": true
+  },
+  "extraKnownMarketplaces": {
+    "ranger": {
+      "source": { "source": "github", "repo": "max-ranger/dotfiles" }
+    }
+  }
+}
