@@ -2,40 +2,16 @@ tap "supabase/tap"
 tap "theboredteam/boring-notch", "https://github.com/TheBoredTeam/homebrew-boring-notch"
 # Simple, modern, secure file encryption
 brew "age"
-# Official Amazon AWS command-line interface
-brew "awscli"
-# Clone of cat(1) with syntax highlighting and Git integration
-brew "bat"
 # Dependency manager for Cocoa projects
 brew "cocoapods"
-# GNU File, Shell, and Text utilities
-brew "coreutils"
-# Secure runtime for JavaScript and TypeScript
-brew "deno"
-# Load/unload environment variables based on $PWD
-brew "direnv"
-# Pack, ship and run any application as a lightweight container
-brew "docker"
-# Isolated development environments using Docker
-brew "docker-compose"
-# Modern, maintained replacement for ls
-brew "eza"
 # Fast and simple Node.js version manager
 brew "fnm"
-# Manage Flutter SDK versions per project
-brew "fvm"
-# Command-line fuzzy finder written in Go
-brew "fzf"
 # GitHub command-line tool
 brew "gh"
 # Distributed revision control system
 brew "git"
 # Quickly rewrite git repository history
 brew "git-filter-repo"
-# GNU Privacy Guard (OpenPGP)
-brew "gnupg"
-# Improved top (interactive process viewer)
-brew "htop"
 # Lightweight and flexible command-line JSON processor
 brew "jq"
 # Fast, disk space efficient package manager
@@ -48,16 +24,10 @@ brew "shellcheck"
 brew "sops"
 # Cross-shell prompt for astronauts
 brew "starship"
-# Display directories as trees (with optional color/HTML output)
-brew "tree"
 # Extremely fast Python package installer and resolver, written in Rust
 brew "uv"
-# Internet file retriever
-brew "wget"
 # Port of OpenAI's Whisper model in C/C++
 brew "whisper.cpp"
-# Shell extension to navigate your filesystem faster
-brew "zoxide"
 # Supabase CLI
 brew "supabase/tap/supabase", trusted: true
 # Application uninstaller
@@ -115,6 +85,4 @@ vscode "unifiedjs.vscode-mdx"
 vscode "wayou.vscode-todo-highlight"
 vscode "xabikos.javascriptsnippets"
 vscode "yoavbls.pretty-ts-errors"
-uv "basic-memory"
 npm "@playwright/cli"
-npm "corepack"
