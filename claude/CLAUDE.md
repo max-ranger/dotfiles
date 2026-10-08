@@ -27,4 +27,4 @@ layout, per-stack conventions) and load on their own.
 
 Project knowledge lives in the repo (`docs/`), cross-repo and non-code knowledge in the
 `handbook` repo. No external memory tool, no notes outside git. Layout and what gets a
-file: `rules/docs.md`. Legacy notes under `~/BasicMemory/` are read-only until migrated.
+file: `rules/docs.md`. Workspace: `~/Code`, flat by project; `ranger-ecosystem/` is the only group.

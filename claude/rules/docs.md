@@ -17,6 +17,10 @@ Scale by change size:
 - **Feature-sized change** (more than ~half a day or touches a boundary): `/intent` → `/spec` → plan mode → build → verify → `/pr`. The spec is approved before code; if the implementation departs from the plan, the plan is updated in the same commit.
 - **A decision that would surprise a future reader** (technology, boundary, trade-off): `/adr`.
 
+Topical docs sit next to these when a repo needs them: `tech-stack.md`, `product-brief.md`, `design/`, `architecture/<component>.md`, `runbooks/`.
+
+Data that must not enter git (tester data, customer documents, database dumps) lives in `~/Code/assets/test-data/<project>/` or `~/Code/backups/`, with a README that says why. A repo's own privacy rule beats this layout: a note that would break it stays outside git.
+
 What never becomes a file: tickets, timelines, handoffs, session logs. `git log`, PRs and issues are that record. Hubs describe what is true now; history lives in git.
 
 Cowork writes only under `docs/` (intent, spec, decisions); Claude Code implements. The handoff between them is the spec file, not a kickoff prompt.

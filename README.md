@@ -23,8 +23,9 @@ Windows 10/11 — Homebrew doesn't run on Windows, so winget is its stand-in the
 5. [🤖 Claude Code — plugin, rules & repo template](#-claude-code--plugin-rules--repo-template)
 6. [🧩 VS Code — settings, keybindings & extensions](#-vs-code--settings-keybindings--extensions)
 7. [🐚 PowerShell — profile (Windows)](#-powershell--profile-windows)
-8. [🔄 Maintaining this repo](#-maintaining-this-repo)
-9. [🙏 Credits — vendored third-party content](#-credits--vendored-third-party-content)
+8. [🗂️ Workspace layout — `~/Code`](#️-workspace-layout--code)
+9. [🔄 Maintaining this repo](#-maintaining-this-repo)
+10. [🙏 Credits — vendored third-party content](#-credits--vendored-third-party-content)
 
 ---
 
@@ -42,9 +43,10 @@ per-tool copy steps for you. 🤖
 eval "$(/opt/homebrew/bin/brew shellenv)"        # add brew to PATH for this shell
 
 # 2. Clone this repo (no SSH key yet? use the HTTPS line instead)
-git clone git@github.com-ranger:max-ranger/dotfiles.git ~/dotfiles
-# git clone https://github.com/max-ranger/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+mkdir -p ~/Code/ranger-ecosystem
+git clone git@github.com:max-ranger/dotfiles.git ~/Code/ranger-ecosystem/dotfiles
+# git clone https://github.com/max-ranger/dotfiles.git ~/Code/ranger-ecosystem/dotfiles
+cd ~/Code/ranger-ecosystem/dotfiles
 
 # 3. Install everything in one shot — CLIs, apps, fonts, AND VS Code extensions
 brew bundle --file=brew/Brewfile
@@ -315,7 +317,7 @@ and covers: secrets & `.env*`, keys/certs, `appsettings*.json`, `node_modules` &
 files. Lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`) stay **committed**.
 
 ```bash
-cp ~/dotfiles/git/gitignore ./.gitignore          # macOS / Linux
+cp ~/Code/ranger-ecosystem/dotfiles/git/gitignore ./.gitignore          # macOS / Linux
 ```
 ```powershell
 Copy-Item C:\Dev\ranger\dotfiles\git\gitignore .\.gitignore   # Windows
@@ -381,7 +383,7 @@ plugin, so Claude Code installs it on startup; to force it:
 claude plugin marketplace add max-ranger/dotfiles     # GitHub (new machines, cloud)
 claude plugin install ranger-claude@ranger
 # dev machine: point the marketplace at the checkout instead (no push needed to test)
-claude plugin marketplace add ~/Dev/ranger/ranger-ecosystem/dotfiles
+claude plugin marketplace add ~/Code/ranger-ecosystem/dotfiles
 # after editing the plugin: bump "version" in .claude-plugin/plugin.json, then
 claude plugin update ranger-claude@ranger
 ```
@@ -431,7 +433,7 @@ Decisions a future reader would question → `/adr`. Full rule: `claude/rules/do
 
 ```bash
 # macOS / Linux — inside the new repo
-cp -R ~/dotfiles/claude/repo-template/. .
+cp -R ~/Code/ranger-ecosystem/dotfiles/claude/repo-template/. .
 ```
 ```powershell
 # Windows
@@ -540,6 +542,31 @@ $docs = [Environment]::GetFolderPath('MyDocuments')
 ```
 
 > 🍎 macOS equivalent: `~/.zshrc` — deliberately not tracked here (yet).
+
+---
+
+## 🗂️ Workspace layout — `~/Code`
+
+One folder, flat by project. A repo sits directly under `~/Code`; the only grouping folder is
+`ranger-ecosystem/`, whose name is load-bearing (product repos reach their siblings through
+`../ranger-ecosystem/<repo>`). Decision: [`docs/decisions/0015`](docs/decisions/0015-flat-code-workspace.md).
+
+```text
+~/Code/
+  handbook/             cross-repo decisions, shared-stack as-built, non-code projects (private repo)
+  <product>/            one folder per product repo
+  ranger-ecosystem/     dotfiles · ranger-infra · ranger-vue · ranger-dotnet · ranger-app-template · daily-triage
+  sandbox/              throwaways
+  archive/              inactive checkouts
+  assets/               brand assets and test data that must stay outside git (each with a README)
+  backups/              database dumps and pre-rewrite mirrors, never committed
+```
+
+Knowledge follows the same shape: *describes one repo → that repo's `docs/`; spans repos or has no
+repo → `handbook/docs/`.* No notes outside git.
+
+> 🪟 The Windows machine still uses `C:\Dev\…`; the Windows commands in this README keep that path
+> until it is moved the same way.
 
 ---
 
