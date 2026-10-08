@@ -1,13 +1,12 @@
 #!/bin/bash
 # SessionStart: point the session at the repo's own docs (the solo-dev SDLC layout)
-# and, transitionally, at legacy basic-memory notes that still need migrating.
+# and at the handbook repo for cross-repo knowledge.
 INPUT=$(cat)
 source "$(dirname "$0")/_markers.sh"
 mk_init "$INPUT"
 
 ROOT=$(git -C "$MK_CWD" rev-parse --show-toplevel 2>/dev/null)
 [ -z "$ROOT" ] && ROOT="$MK_CWD"
-NAME=$(basename "$ROOT")
 MSG=""
 
 if [ -f "$ROOT/docs/overview.md" ]; then
@@ -17,13 +16,7 @@ else
 fi
 
 HANDBOOK="$HOME/Code/handbook"
-[ -f "$HANDBOOK/docs/overview.md" ] && MSG="$MSG Cross-repo and non-code knowledge: $HANDBOOK/docs/overview.md (handbook repo)."
+[ -f "$HANDBOOK/docs/overview.md" ] && [ "$ROOT" != "$HANDBOOK" ] && MSG="$MSG Cross-repo and non-code knowledge: $HANDBOOK/docs/overview.md (handbook repo)."
 
-for cand in "$NAME" "$(basename "$(dirname "$ROOT")")"; do
-  if [ -d "$HOME/BasicMemory/$cand" ]; then
-    MSG="$MSG ⚠️ Legacy basic-memory notes at ~/BasicMemory/$cand — basic-memory is retired. Read them when relevant, migrate what matters into docs/ when you touch the topic, never write new notes there."
-    break
-  fi
-done
 
 jq -nc --arg m "$MSG" '{continue:true,suppressOutput:true,hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:$m}}'
