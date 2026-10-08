@@ -20,11 +20,11 @@ Windows 10/11 — Homebrew doesn't run on Windows, so winget is its stand-in the
 2. [🍺 Homebrew — apps, CLIs & fonts](#-homebrew--apps-clis--fonts)
 3. [📜 Scripts — .NET SDK (outside brew)](#-scripts--net-sdk-outside-brew)
 4. [🌿 Git — config, SSH keys & signed commits](#-git--config-ssh-keys--signed-commits)
-5. [🤖 Claude Code — config, hooks, plugins & skills](#-claude-code--config-hooks-plugins--skills)
+5. [🤖 Claude Code — plugin, rules & repo template](#-claude-code--plugin-rules--repo-template)
 6. [🧩 VS Code — settings, keybindings & extensions](#-vs-code--settings-keybindings--extensions)
 7. [🐚 PowerShell — profile (Windows)](#-powershell--profile-windows)
 8. [🔄 Maintaining this repo](#-maintaining-this-repo)
-9. [🙏 Credits — third-party skills & plugins](#-credits--third-party-skills--plugins)
+9. [🙏 Credits — vendored third-party content](#-credits--vendored-third-party-content)
 
 ---
 
@@ -56,8 +56,9 @@ claude
 
 Then, inside `claude`, just ask:
 
-> **"Set up this machine from these dotfiles — copy the Claude, VS Code and Git configs into
-> place per the README, and run the .NET install script."**
+> **"Set up this machine from these dotfiles — copy the Claude config and rules, install the
+> ranger-claude plugin, copy the VS Code and Git configs per the README, and run the .NET
+> install script."**
 
 Claude reads this README and runs the copy/install steps below for you. ✨
 
@@ -116,19 +117,16 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 
 | Brewfile entry | On Windows |
 |---|---|
-| `orbstack` / `docker` · `docker-compose` | `Docker.DockerDesktop` (bundles the CLI + compose) |
 | `postgres-app` | `PostgreSQL.PostgreSQL.18` (full server + psql) |
 | `supabase` | Not on winget — per project: `pnpm add -D supabase`, or [Scoop](https://supabase.com/docs/guides/local-development/cli/getting-started?platform=windows) |
 | `sops` | Not on winget (`Mozilla.SOPS` was pulled in 2026) — grab `sops-v*.exe` from the [releases page](https://github.com/getsops/sops/releases) onto `PATH`, or [Scoop](https://scoop.sh) (`scoop install sops`) |
-| `fvm` / `flutter` | Not on winget — grab the [fvm release binary](https://github.com/leoafarias/fvm/releases) onto `PATH`, let fvm manage Flutter |
 | `font-hack-nerd-font` | Manual — download from [nerdfonts.com](https://www.nerdfonts.com/font-downloads), right-click → *Install* |
 | `cocoapods` | macOS/iOS-only — skip |
-| `htop` · `tree` | Skip — Task Manager / built-in `tree` |
+| `orbstack` | `Docker.DockerDesktop` (OrbStack provides `docker` + `compose` on macOS) |
+| `flutter` | Not on winget — [flutter.dev](https://docs.flutter.dev/get-started/install/windows) installer |
 | `whisper.cpp` · `appcleaner` · `dockdoor` · `boring-notch` | No equivalent — skip |
 | `git-filter-repo` | Not on winget — `uv tool install git-filter-repo` (git picks it up from `PATH`) |
-| `uv "basic-memory"` | Same as macOS: `uv tool install basic-memory` (uv is in the manifest) |
 | `npm "@playwright/cli"` | Same as macOS: `npm i -g @playwright/cli` (after Node via fnm) |
-| `npm "corepack"` | Ships with Node — `fnm install --lts`, then `corepack enable` |
 
 > 🔄 When the Brewfile changes, update [`winget/packages.json`](winget/packages.json) to match
 > (`winget search <name>` finds the ID). No Chocolatey — winget + the fallbacks above cover
@@ -136,35 +134,20 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 
 ### 🛠️ CLI tools (formulae)
 
+Only tools that are wired into the shell, required by a repo, or used by a hook. Pruned
+2026-10-08 (see `docs/decisions/0004`); re-add anything with one line when it earns its place.
+
 | Tool | What it's for |
 |---|---|
-| `age` | Simple, modern file encryption — the key backend for `sops` |
-| `awscli` | Official AWS command-line interface |
-| `bat` | `cat` with syntax highlighting + git integration |
-| `cocoapods` | Dependency manager for Cocoa / iOS projects |
-| `coreutils` | GNU file, shell & text utilities |
-| `direnv` | Auto-load/unload env vars per directory (`$PWD`) |
-| `docker` · `docker-compose` | Container CLI + multi-container orchestration |
-| `eza` | Modern, maintained `ls` replacement |
-| `fnm` | Fast Node.js version manager |
-| `fvm` | Flutter SDK version manager (per project) |
-| `fzf` | Command-line fuzzy finder |
-| `gh` | GitHub CLI |
-| `git` | Version control (the whole point 😉) |
-| `git-filter-repo` | Rewrite git history — purge files/secrets, split repos (`git filter-repo`) |
-| `gnupg` | OpenPGP / GPG |
-| `htop` | Interactive process viewer |
-| `jq` | Command-line JSON processor |
-| `pnpm` | Fast, disk-efficient package manager |
-| `ripgrep` | Blazing-fast `grep` replacement |
-| `shellcheck` | Lint for (ba)sh scripts — e.g. the Claude hooks in this repo |
-| `sops` | Edit encrypted secrets files (YAML/JSON/ENV) in place, keyed with `age` |
-| `starship` | Cross-shell prompt |
+| `age` · `sops` | File encryption + in-place editing of encrypted secrets (keyed with `age`) |
+| `cocoapods` | iOS dependency manager (Pegasus builds) |
+| `fnm` · `pnpm` | Node version manager (`--use-on-cd`) + package manager |
+| `gh` · `git` · `git-filter-repo` | GitHub CLI, version control, history rewrite (break-glass) |
+| `jq` · `ripgrep` · `shellcheck` | JSON, search, and shell lint — the hooks depend on them |
+| `starship` | The prompt |
 | `supabase` | Supabase CLI — local stack, migrations, type-gen (via `supabase/tap`) |
-| `tree` | Render directories as trees |
-| `uv` | Extremely fast Python package installer (Rust) |
-| `wget` | Internet file retriever |
-| `zoxide` | Smarter `cd` that learns your habits |
+| `uv` | Python tool runner (fast `pipx`) |
+| `whisper.cpp` | Local speech-to-text (`ggml-small` model in `~/.cache/whisper`) |
 
 ### 📦 Apps (casks)
 
@@ -178,7 +161,7 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 | `jetbrains-toolbox` | Manages Rider / WebStorm / etc. |
 | `flutter` | Flutter SDK |
 | `google-chrome` | Web browser |
-| `obsidian` | Markdown knowledge base (also basic-memory's graph) |
+| `obsidian` | Markdown knowledge base — opens any repo's `docs/` as a vault |
 | `claude` | Anthropic's Claude desktop app |
 | `spotify` · `zoom` | Music · video calls |
 | `dockdoor` | Window peeking on Dock hover |
@@ -186,9 +169,8 @@ Select-String -Path brew\Brewfile -Pattern '^vscode "(.+)"' |
 | `appcleaner` | Clean app uninstaller |
 | `font-hack-nerd-font` | Hack Nerd Font (terminal + editor font) |
 
-> ➕ The Brewfile also installs three non-brew bits via `brew bundle`: **`basic-memory`** (through
-> `uv` — the knowledge-graph backend Claude uses), plus **`@playwright/cli`** (`playwright-cli`,
-> browser automation for coding agents) and **`corepack`** (both through `npm`).
+> ➕ The Brewfile also installs **`@playwright/cli`** through `npm` (`playwright-cli`, browser
+> automation for coding agents).
 
 ### 🖱️ Outside any package manager
 
@@ -341,135 +323,143 @@ Copy-Item C:\Dev\ranger\dotfiles\git\gitignore .\.gitignore   # Windows
 
 ---
 
-## 🤖 Claude Code — config, hooks, plugins & skills
+## 🤖 Claude Code — plugin, rules & repo template
 
-**What it is:** [Claude Code](https://claude.com/claude-code) is Anthropic's agentic coding tool
-that runs in your terminal (and IDE). This section is the **global** setup that applies across
-every project: instructions, automation hooks, enabled plugins, and personal skills.
+**What it is:** [Claude Code](https://claude.com/claude-code) is Anthropic's agentic coding tool.
+This section is the global setup: a lean `CLAUDE.md`, always-on and path-scoped **rules**, and
+the **`ranger-claude` plugin** that carries every hook, skill and agent — installed from this
+repo's own marketplace, so a new machine, a cloud session and Cowork all get the same gates.
 
-**Install:**
+**Install Claude Code:**
 
 ```bash
 curl -fsSL https://claude.ai/install.sh | bash       # macOS / Linux
-# or: npm install -g @anthropic-ai/claude-code
 ```
 ```powershell
 irm https://claude.ai/install.ps1 | iex              # Windows
 ```
 
-> The `claude` **desktop app** is separate and installs via Homebrew (`cask "claude"`); the
-> `anthropic.claude-code` **VS Code extension** installs via the Brewfile.
-
 ### ⚙️ Config files
 
-- [`claude/CLAUDE.md`](claude/CLAUDE.md) — global user instructions, kept deliberately lean
-  for modern (Claude 5-class) models: workflow routing (PRs via `pr-draft`, hook gates,
-  loop bounds) + the **basic-memory** protocol. Detail that's only needed on demand lives in
-  `claude/docs/` and is referenced by pointer.
-- [`claude/docs/`](claude/docs) — on-demand references: `basic-memory-markup.md` (note
-  structure & graph markup) and `loop-engineering.md` (closed-loop working guide).
-- [`claude/settings.json`](claude/settings.json) — hooks wiring, `enabledPlugins` +
-  `extraKnownMarketplaces` (installed on Claude Code startup), and flags (`effortLevel`, `theme`,
-  push notifications).
-- [`claude/hooks/`](claude/hooks) — deterministic gates (kept precisely because they don't
-  depend on model behavior): **security gate**, **secure-commits**, **commit-hygiene**,
-  **pre-commit checks**, **format-on-save**, the **memory-queue gate**, plus the two
-  basic-memory hooks — the **session-context** injector (resolves the repo's project, or
-  asks whether one should be created when there is none) and the **write gate**, which turns
-  a Write/Edit into an unregistered folder under the vault root into a permission prompt so
-  notes can't land somewhere basic-memory will never index. Notification hooks were retired
-  in favor of Claude Code's native push/desktop notifications (`agentPushNotifEnabled`,
-  `inputNeededNotifEnabled`).
-- [`claude/skills/`](claude/skills) — user-level skills: `pr-draft` (own), plus the vendored
-  `emil-design-eng` and `web-interface-guidelines` (see credits).
-- [`claude/prompts/prompt-templates.md`](claude/prompts/prompt-templates.md) — reusable prompt
-  snippets (pre-planning confidence gate, plan risk review, self code-review). Reference only —
-  nothing to copy into place.
+- [`claude/CLAUDE.md`](claude/CLAUDE.md) — global instructions: tone, workflow, the gate
+  summary, where knowledge lives. ~30 lines; everything detailed is a rule.
+- [`claude/rules/`](claude/rules) — `~/.claude/rules/`. Always-on: `output.md` (verdict first,
+  short, scannable), `simplicity.md` (the ladder), `git.md`, `docs.md` (the in-repo docs layout
+  and SDLC chain). Path-scoped (load only when matching files are touched): `csharp.md`,
+  `dart.md`, `typescript.md`, `vue.md`, `web-interface.md`.
+- [`claude/settings.json`](claude/settings.json) — model, output style, `enabledPlugins`,
+  `extraKnownMarketplaces` (incl. this repo as marketplace `ranger`), flags. No hooks: they
+  live in the plugin.
+- [`claude/docs/loop-engineering.md`](claude/docs/loop-engineering.md) — on-demand reference
+  for unattended loops. [`claude/prompts/`](claude/prompts) — paste-in prompt snippets.
 
 ```bash
-# macOS / Linux  (the /. form stays correct on re-runs — no nested dirs)
-mkdir -p ~/.claude/hooks ~/.claude/docs ~/.claude/skills
+# macOS / Linux
+mkdir -p ~/.claude/rules ~/.claude/docs
 cp    claude/CLAUDE.md      ~/.claude/CLAUDE.md
 cp    claude/settings.json  ~/.claude/settings.json
-cp -R claude/hooks/.        ~/.claude/hooks/
+cp -R claude/rules/.        ~/.claude/rules/
 cp -R claude/docs/.         ~/.claude/docs/
-cp -R claude/skills/.       ~/.claude/skills/
+```
+```powershell
+# Windows
+"rules", "docs" | ForEach-Object { New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\$_" | Out-Null }
+Copy-Item claude\CLAUDE.md     "$env:USERPROFILE\.claude\CLAUDE.md"
+Copy-Item claude\settings.json "$env:USERPROFILE\.claude\settings.json"
+Copy-Item -Recurse -Force claude\rules\* "$env:USERPROFILE\.claude\rules\"
+Copy-Item -Recurse -Force claude\docs\*  "$env:USERPROFILE\.claude\docs\"
 ```
 
-```powershell
-# Windows  (\* + -Force stays correct on re-runs — no nested dirs)
-"hooks", "docs", "skills" | ForEach-Object {
-  New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\$_" | Out-Null }
-Copy-Item        claude\CLAUDE.md      "$env:USERPROFILE\.claude\CLAUDE.md"
-Copy-Item        claude\settings.json  "$env:USERPROFILE\.claude\settings.json"
-Copy-Item -Recurse -Force claude\hooks\*  "$env:USERPROFILE\.claude\hooks\"
-Copy-Item -Recurse -Force claude\docs\*   "$env:USERPROFILE\.claude\docs\"
-Copy-Item -Recurse -Force claude\skills\* "$env:USERPROFILE\.claude\skills\"
+### 🔌 The `ranger-claude` plugin
+
+[`claude/plugins/ranger-claude/`](claude/plugins/ranger-claude) — one plugin, published by
+[`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) at the repo root
+(marketplace name `ranger`). `settings.json` already declares the marketplace and enables the
+plugin, so Claude Code installs it on startup; to force it:
+
+```bash
+claude plugin marketplace add max-ranger/dotfiles     # GitHub (new machines, cloud)
+claude plugin install ranger-claude@ranger
+# dev machine: point the marketplace at the checkout instead (no push needed to test)
+claude plugin marketplace add ~/Dev/ranger/ranger-ecosystem/dotfiles
+# after editing the plugin: bump "version" in .claude-plugin/plugin.json, then
+claude plugin update ranger-claude@ranger
 ```
+
+**Hooks** (`hooks/hooks.json` → `scripts/*.sh`, bash + jq, tested with synthetic input):
+
+| Gate | Event | What it does |
+|---|---|---|
+| `security-gate` | PreToolUse Bash | deny/ask on force-push, `rm -rf ~`, DROP TABLE, publish, pipe-to-shell… |
+| `secure-commits` | PreToolUse `git commit` | deny `.env`/key files; ask on secret-looking diffs |
+| `commit-hygiene` | PreToolUse `git commit` | ask when junk (`.DS_Store`, logs, scratch) is staged |
+| `review-gate` | PreToolUse `git commit` | **deny until `/code-review` ran since the last commit** (docs-only commits exempt; `RANGER_SKIP_REVIEW=1` bypass) |
+| `pre-commit-checks` | PreToolUse `git commit` | eslint + tests (JS), `flutter analyze` + tests (Dart); failures block |
+| `design-pretrigger` | PreToolUse Edit/Write | once per session: first UI-file edit is denied with "decide whether `emil-design-eng` / `impeccable` runs first" |
+| `format-on-save` | PostToolUse Edit/Write | prettier / rustfmt / gofmt / dart format |
+| `track-edits` · `track-skills` · `track-tests` | PostToolUse | markers under `.git/ranger/` for the gates |
+| `verify-gate` | Stop | **block (max 2×) when code was edited and no test ran after the last edit** |
+| `project-context` | SessionStart | points at `docs/overview.md`, the handbook, legacy notes |
+
+All PreToolUse decisions are JSON on stdout with `exit 0` — `exit 2` would discard the JSON
+and turn every ask into a silent block.
+
+**Skills** (`skills/`): `intent` (`/intent` → `docs/specs/<feature>/intent.md`), `spec`
+(`/spec` → `spec.md`, stops for approval), `adr` (`/adr` → `docs/decisions/NNNN-slug.md`),
+`pr-draft` (`/pr`, own), `emil-design-eng` (vendored, see credits).
+**Agent** (`agents/verifier.md`): fresh-context verifier — proves the spec's acceptance
+section with real command output, never edits.
+**References** (`references/`): vendored, pinned material the skills cite (see credits).
+
+### 📐 How a change flows
+
+Fix or chore: just do it — commit (review gate) → stop (verify gate) → `/pr`.
+Feature-sized: `/intent` → `/spec` (approve) → **plan mode** (writes to `docs/plans/`, accepted
+plan copied to `specs/<feature>/plan.md`) → build → verifier agent → `/code-review` → `/pr`.
+Decisions a future reader would question → `/adr`. Full rule: `claude/rules/docs.md`.
 
 ### 🧠 Per-project template
 
-[`claude/repo-template/CLAUDE.md`](claude/repo-template/CLAUDE.md) seeds a new project's
-`.claude/CLAUDE.md` (auto-loads like a root `CLAUDE.md` and **composes** with the global one —
-don't restate global rules in a project file). It's a **thin scaffold** — project description,
-commands, architecture, gotchas — plus per-stack convention snippets in
-[`claude/repo-template/stacks/`](claude/repo-template/stacks) (`typescript` · `vue` ·
-`csharp-dotnet` · `flutter-dart`). Copy the base, append **only the stacks the repo uses**,
-then fill the placeholders — generic best practices stay out; modern models don't need them,
-and every appended section costs context in every session.
+[`claude/repo-template/`](claude/repo-template) seeds a new repo:
+
+- `CLAUDE.md` → `.claude/CLAUDE.md` — project, commands, gotchas. No stack conventions (those
+  are global path rules), no architecture prose (that's `docs/architecture.md`).
+- `.claude/settings.json` — `plansDirectory: ./docs/plans`, enables `ranger-claude@ranger`
+  from the GitHub marketplace so cloud sessions get the gates too.
+- `docs/` — `overview.md` (hub), `architecture.md`, `review.md` (review policy), `decisions/0001`,
+  `specs/_template/{intent,spec,plan}.md`, `plans/`.
 
 ```bash
-# macOS / Linux — base + e.g. a Vue+TS project:
-mkdir -p .claude
-cp  ~/dotfiles/claude/repo-template/CLAUDE.md          ./.claude/CLAUDE.md
-cat ~/dotfiles/claude/repo-template/stacks/typescript.md \
-    ~/dotfiles/claude/repo-template/stacks/vue.md      >> ./.claude/CLAUDE.md
+# macOS / Linux — inside the new repo
+cp -R ~/dotfiles/claude/repo-template/. .
 ```
 ```powershell
-# Windows — base + e.g. a .NET project:
-New-Item -ItemType Directory -Force .claude | Out-Null
-Copy-Item C:\Dev\ranger\dotfiles\claude\repo-template\CLAUDE.md .\.claude\CLAUDE.md
-Get-Content C:\Dev\ranger\dotfiles\claude\repo-template\stacks\csharp-dotnet.md |
-  Add-Content .\.claude\CLAUDE.md
+# Windows
+Copy-Item -Recurse -Force C:\Dev\ranger\dotfiles\claude\repo-template\* .
 ```
+
+Knowledge rule: *describes one repo → that repo's `docs/`; spans repos or has no repo → the
+`handbook` repo.* No external memory tool.
 
 ### ☁️ Cowork project-instructions template
 
 [`claude/cowork-template/project-instructions.md`](claude/cowork-template/project-instructions.md)
-is the generic template for **Claude Cowork Project** custom instructions — sparring-partner
-role, the "Cowork never writes code" boundary (implementation stays with Claude Code in the
-repo), and the basic-memory capture protocol. Nothing to copy into place on the machine:
-fill in the placeholders (`<PROJECT>`, `<DESCRIPTION>`, `<REPO_PATH>`, `<SCOPE>`, `<OPS>`)
-and paste the body into the Cowork project's instructions in the cloud UI.
+— for a Cowork project whose folder is the repo: sparring-partner role, "Cowork never writes
+code", and what it writes under `docs/` (intent, spec, ADRs, hub). The handoff to Claude Code
+is the spec file.
 
-### 🔌 Plugins & skills in use
+### 🧩 Third-party plugins still in use
 
-Installed automatically on startup from `settings.json` → `enabledPlugins`.
+From `claude-plugins-official`: `frontend-design`, `claude-md-management`,
+`claude-code-setup`, `context7`, `typescript-lsp`. Marketplaces: `impeccable`
+([pbakaus/impeccable](https://github.com/pbakaus/impeccable)), `warp`
+([warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)). Kept because
+they are tools (LSP, live docs, large maintained design systems), not instructions.
 
-**From the official `claude-plugins-official` marketplace:**
-`frontend-design` · `claude-md-management` · `claude-code-setup` · `context7` ·
-`typescript-lsp`.
-
-> ✂️ Pruned in the Claude 5 era (behaviors now native to the model or the harness):
-> `code-review`, `code-simplifier`, `skill-creator`, `feature-dev`, `commit-commands`,
-> `security-guidance`, `andrej-karpathy-skills`, and `superpowers` (process ceremony that
-> fights auto-mode; deterministic hooks carry the discipline instead). Design skills were
-> consolidated to one per role — direction (`frontend-design`), refinement (`impeccable`),
-> interaction polish (`emil-design-eng`) — dropping `ui-ux-pro-max` and
-> `design-taste-frontend`.
-
-**Third-party marketplaces** (declared in `extraKnownMarketplaces`):
-- `impeccable` — [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
-- `warp` — [warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)
-
-**Vendored skills** (copied into `claude/skills/`, pinned): `pr-draft` (own), plus
-`emil-design-eng` (see credits) and `web-interface-guidelines` — pruned copy of
-[vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)
-`command.md` (MIT, pinned commit in the file header; on-demand UI audit, Vercel
-brand-voice rules removed).
-
-> 🧠 **basic-memory** backs the knowledge-graph protocol in `CLAUDE.md` — installed via the
-> Brewfile (`uv "basic-memory"`) and rendered as an Obsidian vault.
+> ✂️ Reviewed and not adopted (2026-10-08, `docs/decisions/0003`): ponytail (its ladder became
+> `rules/simplicity.md`), graphify, addyosmani/agent-skills and superpowers (five references
+> vendored instead), i-have-adhd (its rules became `rules/output.md`). Earlier prunes: see
+> `docs/decisions/`.
 
 ---
 
@@ -562,6 +552,11 @@ When you improve a hook, skill, setting, or template:
 2. 🔁 Copy it the other way so both match — re-run the relevant command above, or copy the edited
    live file back into the repo.
 3. 💾 Commit and push from this repo.
+4. 🔌 Plugin changes (hooks, skills, agent): bump `version` in the plugin manifest and run
+   `claude plugin update ranger-claude@ranger` — the plugin is a cached copy, even from the
+   local checkout. Other machines run the same command after `git pull`.
+   Test a hook before committing: pipe a synthetic JSON input into the script
+   (`printf '{"tool_input":{"command":"git commit -m x"},"cwd":"."}' | bash scripts/review-gate.sh`).
 
 Refresh the Brewfile (and tracked VS Code extensions) from the current Mac:
 
@@ -578,6 +573,7 @@ Windows manifest stays in lockstep.
 
 - `~/.claude/projects/` — per-project memory and history, machine-local.
 - `~/.claude/plugins/` — managed by Claude Code's plugin system, restored via `enabledPlugins`.
+- `.git/ranger/` in every repo — gate markers (reviewed HEAD, last edit, last test run), per worktree.
 - `~/.claude/cache/`, `~/.claude/telemetry/`, session state — ephemeral.
 - `~/.ssh/` keys and `~/.config/git/allowed_signers` — machine-local SSH identity/signer list.
 - age private keys (`sops/age/keys.txt` in your config dir) — back them up out of band; lose
@@ -586,14 +582,16 @@ Windows manifest stays in lockstep.
 
 ---
 
-## 🙏 Credits — third-party skills & plugins
+## 🙏 Credits — vendored third-party content
 
-**Vendored skills** (copied into `claude/skills/`, pinned — refresh by re-downloading `SKILL.md`):
-- `emil-design-eng` — [emilkowalski/skill](https://github.com/emilkowalski/skill)
-- `web-interface-guidelines` — [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines) (`command.md`, MIT, pruned)
+Pinned copies inside the plugin; re-sync deliberately against a re-reviewed commit, never
+auto-fetch.
 
-**Plugin marketplaces** (declared in `settings.json`, installed by Claude Code on startup):
-- `impeccable@impeccable` — [pbakaus/impeccable](https://github.com/pbakaus/impeccable)
-- `warp@claude-code-warp` — [warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)
-
-Other enabled plugins come from the official `claude-plugins-official` marketplace.
+- `skills/emil-design-eng` — [emilkowalski/skill](https://github.com/emilkowalski/skill)
+- `claude/rules/web-interface.md` — [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)
+  (`command.md`, MIT, pinned `e3d624b`, brand-voice rules pruned)
+- `references/` — [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)
+  (MIT, pinned `1401c8b`): definition of done, spec and plan skeletons, interview method,
+  fresh-context review
+- `rules/simplicity.md` — ladder idea from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT), rewritten
+- `rules/output.md` — ideas from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT), rewritten

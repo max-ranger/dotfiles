@@ -10,38 +10,72 @@
         "Type": "Microsoft.PreIndexed.Package"
       },
       "Packages": [
-        { "PackageIdentifier": "Git.Git" },
-        { "PackageIdentifier": "GitHub.cli" },
-        { "PackageIdentifier": "Amazon.AWSCLI" },
-        { "PackageIdentifier": "FiloSottile.age" },
-        { "PackageIdentifier": "sharkdp.bat" },
-        { "PackageIdentifier": "uutils.coreutils" },
-        { "PackageIdentifier": "direnv.direnv" },
-        { "PackageIdentifier": "DenoLand.Deno" },
-        { "PackageIdentifier": "eza-community.eza" },
-        { "PackageIdentifier": "Schniz.fnm" },
-        { "PackageIdentifier": "junegunn.fzf" },
-        { "PackageIdentifier": "GnuPG.GnuPG" },
-        { "PackageIdentifier": "jqlang.jq" },
-        { "PackageIdentifier": "pnpm.pnpm" },
-        { "PackageIdentifier": "BurntSushi.ripgrep.MSVC" },
-        { "PackageIdentifier": "koalaman.shellcheck" },
-        { "PackageIdentifier": "Starship.Starship" },
-        { "PackageIdentifier": "astral-sh.uv" },
-        { "PackageIdentifier": "JernejSimoncic.Wget" },
-        { "PackageIdentifier": "ajeetdsouza.zoxide" },
-        { "PackageIdentifier": "Microsoft.VisualStudioCode" },
-        { "PackageIdentifier": "Warp.Warp" },
-        { "PackageIdentifier": "Docker.DockerDesktop" },
-        { "PackageIdentifier": "PostgreSQL.PostgreSQL.18" },
-        { "PackageIdentifier": "Fork.Fork" },
-        { "PackageIdentifier": "JetBrains.Toolbox" },
-        { "PackageIdentifier": "Google.Chrome" },
-        { "PackageIdentifier": "Obsidian.Obsidian" },
-        { "PackageIdentifier": "Anthropic.Claude" },
-        { "PackageIdentifier": "Spotify.Spotify" },
-        { "PackageIdentifier": "Zoom.Zoom" },
-        { "PackageIdentifier": "Symless.Synergy" }
+        {
+          "PackageIdentifier": "Git.Git"
+        },
+        {
+          "PackageIdentifier": "GitHub.cli"
+        },
+        {
+          "PackageIdentifier": "FiloSottile.age"
+        },
+        {
+          "PackageIdentifier": "Schniz.fnm"
+        },
+        {
+          "PackageIdentifier": "jqlang.jq"
+        },
+        {
+          "PackageIdentifier": "pnpm.pnpm"
+        },
+        {
+          "PackageIdentifier": "BurntSushi.ripgrep.MSVC"
+        },
+        {
+          "PackageIdentifier": "koalaman.shellcheck"
+        },
+        {
+          "PackageIdentifier": "Starship.Starship"
+        },
+        {
+          "PackageIdentifier": "astral-sh.uv"
+        },
+        {
+          "PackageIdentifier": "Microsoft.VisualStudioCode"
+        },
+        {
+          "PackageIdentifier": "Warp.Warp"
+        },
+        {
+          "PackageIdentifier": "Docker.DockerDesktop"
+        },
+        {
+          "PackageIdentifier": "PostgreSQL.PostgreSQL.18"
+        },
+        {
+          "PackageIdentifier": "Fork.Fork"
+        },
+        {
+          "PackageIdentifier": "JetBrains.Toolbox"
+        },
+        {
+          "PackageIdentifier": "Google.Chrome"
+        },
+        {
+          "PackageIdentifier": "Obsidian.Obsidian"
+        },
+        {
+          "PackageIdentifier": "Anthropic.Claude"
+        },
+        {
+          "PackageIdentifier": "Spotify.Spotify"
+        },
+        {
+          "PackageIdentifier": "Zoom.Zoom"
+        },
+        {
+          "PackageIdentifier": "Symless.Synergy"
+        }
       ]
     }
   ]

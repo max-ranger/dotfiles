@@ -1,0 +1,15 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ranger",
+  "description": "Max Ranger's personal Claude Code tooling: deterministic gates, SDLC skills, verifier agent.",
+  "owner": { "name": "Maximilian Ranger", "url": "https://github.com/max-ranger" },
+  "plugins": [
+    {
+      "name": "ranger-claude",
+      "source": "./claude/plugins/ranger-claude",
+      "description": "Hooks (security, commit, review and verify gates, design pre-trigger, project context), SDLC skills (intent, spec, adr, pr-draft), design skill, verifier agent.",
+      "category": "workflow",
+      "tags": ["hooks", "sdlc", "gates", "solo-dev"]
+    }
+  ]
+}
