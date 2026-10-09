@@ -8,16 +8,6 @@ if (Get-Command fnm -ErrorAction SilentlyContinue) {
   fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression
 }
 
-# direnv — per-directory env vars; its pwsh hook requires PowerShell 7+
-if ($PSVersionTable.PSVersion.Major -ge 7 -and (Get-Command direnv -ErrorAction SilentlyContinue)) {
-  direnv hook pwsh | Out-String | Invoke-Expression
-}
-
-# zoxide — smarter cd (z / zi)
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-  zoxide init powershell | Out-String | Invoke-Expression
-}
-
 # starship — cross-shell prompt (keep last so it owns the prompt function)
 if (Get-Command starship -ErrorAction SilentlyContinue) {
   starship init powershell | Out-String | Invoke-Expression

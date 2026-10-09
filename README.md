@@ -69,8 +69,8 @@ Claude reads this README and runs the copy/install steps below for you. ✨
 ```powershell
 # 1. winget ships with Windows 10/11 (App Installer). Get git, then clone:
 winget install Git.Git
-git clone https://github.com/max-ranger/dotfiles.git C:\Dev\ranger\dotfiles
-cd C:\Dev\ranger\dotfiles
+git clone https://github.com/max-ranger/dotfiles.git C:\Code\ranger-ecosystem\dotfiles
+cd C:\Code\ranger-ecosystem\dotfiles
 
 # 2. No Homebrew on Windows — winget/packages.json is the Brewfile's stand-in:
 winget import --import-file winget\packages.json
@@ -320,7 +320,7 @@ files. Lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`) stay **com
 cp ~/Code/ranger-ecosystem/dotfiles/git/gitignore ./.gitignore          # macOS / Linux
 ```
 ```powershell
-Copy-Item C:\Dev\ranger\dotfiles\git\gitignore .\.gitignore   # Windows
+Copy-Item C:\Code\ranger-ecosystem\dotfiles\git\gitignore .\.gitignore   # Windows
 ```
 
 ---
@@ -437,7 +437,7 @@ cp -R ~/Code/ranger-ecosystem/dotfiles/claude/repo-template/. .
 ```
 ```powershell
 # Windows
-Copy-Item -Recurse -Force C:\Dev\ranger\dotfiles\claude\repo-template\* .
+Copy-Item -Recurse -Force C:\Code\ranger-ecosystem\dotfiles\claude\repo-template\* .
 ```
 
 Knowledge rule: *describes one repo → that repo's `docs/`; spans repos or has no repo → the
@@ -521,13 +521,11 @@ faster multi-cursor editing.
 ## 🐚 PowerShell — profile (Windows)
 
 **What it is:** the Windows counterpart of `~/.zshrc` — without it, the shell-integrated CLIs
-from the manifest (fnm, starship, zoxide, direnv) install fine but never activate in a session.
+from the manifest (fnm, starship) install fine but never activate in a session.
 [`powershell/Microsoft.PowerShell_profile.ps1`](powershell/Microsoft.PowerShell_profile.ps1)
 wires them up, with every hook guarded so a missing tool degrades silently.
 
 - **fnm** — `--use-on-cd`: auto-switches Node on entering a repo with `.nvmrc` / `.node-version`
-- **direnv** — per-directory env vars (its `pwsh` hook needs PowerShell 7+, guarded)
-- **zoxide** — `z` / `zi` smarter-cd commands
 - **starship** — the prompt (kept last so it owns the `prompt` function)
 
 Copy it to **both** profile locations so Windows PowerShell 5.1 and PowerShell 7 match
@@ -565,8 +563,9 @@ One folder, flat by project. A repo sits directly under `~/Code`; the only group
 Knowledge follows the same shape: *describes one repo → that repo's `docs/`; spans repos or has no
 repo → `handbook/docs/`.* No notes outside git.
 
-> 🪟 The Windows machine still uses `C:\Dev\…`; the Windows commands in this README keep that path
-> until it is moved the same way.
+> 🪟 Windows uses the same layout under `C:\Code`. [`scripts/migrate-windows.ps1`](scripts/migrate-windows.ps1)
+> performs the move from `C:\Dev` (dry run by default, `-Apply` to execute), renames Claude Code's
+> per-project state, retires basic-memory and installs the plugin — the same steps the Mac went through.
 
 ---
 
