@@ -100,3 +100,11 @@ When multiple agents or sessions are available:
 - **Must be sequential:** Database migrations, shared state changes, dependency chains
 - **Needs coordination:** Features that share an API contract (define the contract first, then parallelize)
 
+## Ranger additions
+
+From obra/superpowers `skills/writing-plans` and mattpocock/skills `to-tickets` (both MIT), distilled:
+
+- **Interfaces per task.** `Consumes:` what this task uses from earlier tasks, exact signatures. `Produces:` what later tasks rely on, exact names and types. An implementer sees only their own task; this block is how neighbouring tasks agree on names.
+- **Vertical slices.** Every task ends in something demoable through a real seam (an endpoint answers, a screen renders, a CLI prints), not a layer. The exception is a wide refactor: one mechanical change whose blast radius fans across the codebase; sequence it expand → migrate → contract so each step ships green.
+- **Review Focus.** The five input classes or failure modes the spec implies that no task's tests exercise, each with why it would bite a person. The verifier starts there.
+- **Self-review before handing over.** Spec coverage: every requirement points at a task. Type consistency: names and signatures used in later tasks match what earlier tasks define. Proportion: a plan several times longer than its spec is a transcript of the program, not a plan; replace code blocks with the one sentence that decides something.

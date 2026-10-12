@@ -8,8 +8,9 @@ layout, per-stack conventions) and load on their own.
 ## Workflow
 
 - **Assumptions over questions:** state assumptions and proceed. Ask only decision-changing
-  questions (a wrong guess builds in the wrong direction, or a loop can't converge). Once
-  running unattended, stop and surface repeated failures or evidence against the plan.
+  questions (a wrong guess builds in the wrong direction, or a loop can't converge). Every
+  assumption is a ruling: `decision — why — cost if wrong`, listed together at the end of the
+  run. Once running unattended, stop and surface repeated failures or evidence against the plan.
 - **Gates are hooks, not promises.** The `ranger-claude` plugin enforces: security gate,
   secret scan, commit hygiene, review gate (`/code-review` before any code commit), verify
   gate (tests after the last code edit before stopping), design check (first UI edit per

@@ -1,6 +1,6 @@
 ---
 name: intent
-description: Start a feature-sized change by capturing intent. Interviews the user one question at a time (hypothesis + confidence, guess attached) and writes docs/specs/<feature>/intent.md with Problem, Proposed outcome, Affected users & systems, Constraints, Open questions. Use for "/intent", "new feature", "let's plan X", "I want to build", or before any change bigger than half a day.
+description: Use when a change bigger than half a day is about to start and nobody has written down why — "/intent", "new feature", "let's plan X", "I want to build", a vague ask that would otherwise go straight to code.
 ---
 
 # Intent
@@ -12,7 +12,7 @@ Capture *why* before *what*. Output is `docs/specs/<feature>/intent.md`; nothing
 1. Read `docs/overview.md` and `docs/architecture.md` if they exist. Skip the interview for anything you can answer from the repo.
 2. Hypothesize the intent with a confidence number ("I think you want X, ~70%").
 3. Ask **one** question at a time, each with your best guess attached, so a "yes" is enough. Stop asking at ~95% confidence or when the user says "go". Method: `${CLAUDE_PLUGIN_ROOT}/references/interview-method.md`.
-4. Listen for "want vs. should want": name the difference once, let the user decide.
+4. Listen for "want vs. should want": name the difference once, let the user decide. Ask once what would make this a failure even if it technically works, and what would make the user wince if it were built wrong; those become constraints.
 5. Write the file, restate the intent in the user's own words, and **stop the turn** so they can accept it. Status stays `draft` until they say so.
 
 ## File

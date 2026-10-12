@@ -103,3 +103,17 @@ If yes, you have shared understanding. Stop interviewing and produce the restate
 This is a checkable test, not a vibe. It also has a floor: if you've gone several rounds and still can't predict, that's information about the ask, not a reason to keep grinding. Stop and tell the user: "I've asked X questions and I still can't predict your reactions. Something foundational is missing. Want to step back?"
 
 ## Output
+
+## Ranger additions
+
+- Facts are the interviewer's job, never the user's: anything that can be looked up in the repo, the docs, the handbook or the web is looked up; the user is asked only for decisions.
+- Two questions that find the expensive mistakes: "what would make this a failure even if it technically works?" (the anti-goals) and "what would make you wince if I got it wrong?"
+- Batched challenge rounds (the `grill` skill: whole frontier per round, numbered, recommendation attached) are for attacking a plan; the one-question interview above is for understanding an ask. Do not mix them in one turn.
+
+## Builder check
+
+After a spec or design exists, a fresh general-purpose subagent gets this prompt, domain and path filled in:
+
+> You are a talented <domain>. You've been handed a design document and asked to plan building what it describes; you cannot talk to its author. Read <path>. Report only the questions you'd still need answered before you could plan this well: places where you'd have to guess and a wrong guess would matter. For each, the question and why the answer changes the plan, ranked by importance. Skip what the document leaves to the builder, what you could decide yourself, and wording nitpicks. If nothing important is left, say "nothing important left".
+
+(adapted from obra/superpowers `skills/brainstorming/builder-check-prompt.md`, MIT)

@@ -34,6 +34,13 @@ Use for new functionality (`feature/`, `feat/`) and as the generic fallback for 
 
 ---
 
+### 🚪 Merge Danger
+
+**Door:** <one-way or two-way — can this be rolled back by reverting the PR, or does it migrate data, delete, or change a public contract?>
+**Blast radius:** <what else moves if this is wrong: consumers, layout, mobile, other repos>
+
+---
+
 ### 💥 Breaking Changes & Alerts
 
 <breaking changes: removed/renamed exports, changed interfaces, API changes — or "None">

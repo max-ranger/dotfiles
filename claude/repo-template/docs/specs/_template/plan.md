@@ -10,11 +10,16 @@ Spec: ./spec.md
 - `path` — what and why
 
 ## Order
-1. <step, one bounded action, verifiable>
+1. <step, one bounded action, demoable through a real seam>
+   - Consumes: <what it uses from earlier steps, exact signatures>
+   - Produces: <what later steps rely on, exact names and types>
 2. …
 
 ## Tests
 - <which tests prove which R>
+
+## Review focus
+- <input class or failure mode the spec implies that no test exercises, and why it would bite a user>
 
 ## Risks
 - <risk> — mitigation

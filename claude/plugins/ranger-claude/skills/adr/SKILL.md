@@ -7,6 +7,8 @@ description: Record an architecture or product decision as docs/decisions/NNNN-s
 
 One decision, one file, immutable once accepted. A changed mind gets a new ADR that supersedes the old one.
 
+Offer an ADR when all three hold: the choice is hard to reverse, a future reader would wonder why, and there was a real alternative. Easy to reverse gets reversed; not surprising needs no explanation; no alternative is "we did the obvious thing".
+
 ## Process
 
 1. Find the next number: highest `NNNN` in `docs/decisions/` + 1 (start at `0001`). Slug from the title, no date in the filename.
@@ -32,6 +34,7 @@ Status: proposed | accepted | superseded by NNNN
 - <what becomes easier>
 - <what becomes harder or is given up>
 - <follow-ups this creates>
+- Door: <one-way | two-way>; cost if wrong: <what it takes to undo>
 
 ## Alternatives considered
 - <option> — why not
