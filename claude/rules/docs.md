@@ -8,7 +8,7 @@ docs/
   architecture.md        the non-obvious structure (entry points, boundaries, data flow)
   decisions/NNNN-slug.md ADRs, numbered, immutable once accepted (supersede, don't edit)
   specs/<feature>/       intent.md → spec.md → plan.md   (slug names, no dates)
-  plans/                 plan-mode output (`plansDirectory`); the accepted plan is copied to specs/<feature>/plan.md
+  plans/                 plan-mode drafts (`plansDirectory`), gitignored scratch; the accepted plan is copied to specs/<feature>/plan.md
   review.md              the review policy /code-review and the verifier follow
 ```
 

@@ -427,8 +427,9 @@ Decisions a future reader would question → `/adr`. Full rule: `claude/rules/do
 
 - `CLAUDE.md` → `.claude/CLAUDE.md` — project, commands, gotchas. No stack conventions (those
   are global path rules), no architecture prose (that's `docs/architecture.md`).
-- `.claude/settings.json` — `plansDirectory: ./docs/plans`, enables `ranger-claude@ranger`
-  from the GitHub marketplace so cloud sessions get the gates too.
+- `.claude/settings.json` — committed: `plansDirectory: ./docs/plans` (drafts, gitignored), enables
+  `ranger-claude@ranger` from the GitHub marketplace so cloud sessions get the gates too. The
+  repo's `.gitignore` keeps the rest of `.claude/` personal (`.claude/*` + `!.claude/settings.json`).
 - `docs/` — `overview.md` (hub), `architecture.md`, `review.md` (review policy), `decisions/0001`,
   `specs/_template/{intent,spec,plan}.md`, `plans/`.
 
