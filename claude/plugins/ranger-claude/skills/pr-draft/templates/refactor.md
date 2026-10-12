@@ -23,6 +23,7 @@ Use for `refactor/` branches — internal restructuring with no intended change 
 
 ### 🌐 Blast Radius
 
+**Door:** <one-way or two-way>
 <what this touches: modules, call sites, public vs internal surface. Where should a reviewer look hardest?>
 
 ---

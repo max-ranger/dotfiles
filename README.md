@@ -346,7 +346,7 @@ irm https://claude.ai/install.ps1 | iex              # Windows
   summary, where knowledge lives. ~30 lines; everything detailed is a rule.
 - [`claude/rules/`](claude/rules) — `~/.claude/rules/`. Always-on: `output.md` (verdict first,
   short, scannable), `simplicity.md` (the ladder), `git.md`, `docs.md` (the in-repo docs layout
-  and SDLC chain). Path-scoped (load only when matching files are touched): `csharp.md`,
+  and SDLC chain), `testing.md` (tests worth keeping). Path-scoped (load only when matching files are touched): `csharp.md`,
   `dart.md`, `typescript.md`, `vue.md`, `web-interface.md`.
 - [`claude/settings.json`](claude/settings.json) — model, output style, `enabledPlugins`,
   `extraKnownMarketplaces` (incl. this repo as marketplace `ranger`), flags. No hooks: they
@@ -406,7 +406,9 @@ All PreToolUse decisions are JSON on stdout with `exit 0` — `exit 2` would dis
 and turn every ask into a silent block.
 
 **Skills** (`skills/`): `intent` (`/intent` → `docs/specs/<feature>/intent.md`), `spec`
-(`/spec` → `spec.md`, stops for approval), `adr` (`/adr` → `docs/decisions/NNNN-slug.md`),
+(`/spec` → `spec.md`, one grill round, then stops for approval), `grill` (stress-test a plan or
+stack choice in batched rounds with recommended answers), `adr` (`/adr` →
+`docs/decisions/NNNN-slug.md`), `diagnosing-bugs` (red-capable loop before any hypothesis),
 `pr-draft` (`/pr`, own), `emil-design-eng` (vendored, see credits).
 **Agent** (`agents/verifier.md`): fresh-context verifier — proves the spec's acceptance
 section with real command output, never edits.

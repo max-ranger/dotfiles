@@ -42,7 +42,7 @@ objective. No signal → it isn't a loop, it's vibes with extra steps.
 
 - [ ] **Define "done"** as a command that exits 0/1 (or a number to hit). Say it out loud.
 - [ ] **Make the signal honest** — tests must actually run (not skip), build must really fail on error.
-- [ ] **Bound it** — max iterations, a token budget, or a clear exit condition. Unbounded loops burn money.
+- [ ] **Bound it** — max iterations, a token budget, or a clear exit condition. Unbounded loops burn money. Default for fix loops: three failed fixes means stop, question the approach or the premise, and ask; never stack a fourth fix on three that did not work.
 - [ ] **Gate the side effects** — hooks block the irreversible steps so the loop can run hot without risk.
 - [ ] **Keep diffs small** — one logical change per iteration, so a red signal points at one cause.
 - [ ] **Verify before claiming** — paste the green output; never assert success from memory.

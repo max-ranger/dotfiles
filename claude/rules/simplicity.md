@@ -12,4 +12,6 @@ Read the code the change touches and trace the real flow first. Then climb this 
 
 Never on the chopping block: trust-boundary validation, data-loss handling, security, accessibility, and the project's design system (a native element never beats an existing component from the project's own system).
 
+Three tests for any module or abstraction: the deletion test (delete it; if complexity vanishes it was a pass-through, if it reappears across N callers it earned its keep), the interface is the test surface (needing to test past the interface means the module is the wrong shape), and one adapter is a hypothetical seam, two adapters are a real one (no seam until something actually varies across it).
+
 Deliberate shortcuts get a `// ranger: shortcut — <why>` marker so they can be found later. No speculative abstractions, no "while I'm here" refactors, no config for a single use.

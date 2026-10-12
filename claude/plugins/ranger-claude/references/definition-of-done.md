@@ -65,3 +65,17 @@ Tailor the list to the project once, then reuse it unchanged. A Definition of Do
 - A different bar applied depending on deadline pressure.
 - Acceptance criteria treated as the whole bar, with no standing quality floor.
 - "Done" declared before human review on changes that need it.
+
+## Claims and their evidence
+
+A claim without fresh evidence is a guess. (From obra/superpowers `skills/verification-before-completion`, MIT.)
+
+| Claim | Requires | Not sufficient |
+|---|---|---|
+| Tests pass | Test command output: 0 failures | A previous run, "should pass" |
+| Linter clean | Linter output: 0 errors | A partial check |
+| Build succeeds | Build command: exit 0 | Linter passing, logs look fine |
+| Bug fixed | The original symptom retested: gone | Code changed, assumed fixed |
+| Regression test works | Revert the fix → test fails → restore → passes | Test passes once |
+| Agent completed | The VCS diff shows the changes | The agent's own "success" |
+| Requirements met | Line-by-line checklist against the spec | Tests passing |

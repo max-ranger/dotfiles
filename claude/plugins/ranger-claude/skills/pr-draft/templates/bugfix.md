@@ -32,7 +32,7 @@ Use for `fix/` and `bugfix/` branches.
 
 ### 🧪 Verification & Regression
 
-**Fixed:** <steps proving the bug is gone on this branch>
+**Fixed:** <the exact test that failed before the fix and passes now, by name — or the command that showed the symptom and its output after>
 
 **Regression watch:** <adjacent behavior a reviewer should re-check to confirm nothing else broke>
 
@@ -49,5 +49,6 @@ Use for `fix/` and `bugfix/` branches.
 
 ### 💥 Risk & Side Effects
 
-<blast radius of the fix, edge cases considered — or "Low, isolated to the affected path">
+**Door:** <one-way or two-way>
+**Blast radius:** <what else this touches, edge cases considered — or "Low, isolated to the affected path">
 ```
