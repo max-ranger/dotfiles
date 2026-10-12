@@ -9,7 +9,6 @@
     "context7@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "impeccable@impeccable": true,
-    "warp@claude-code-warp": true,
     "ranger-claude@ranger": true
   },
   "extraKnownMarketplaces": {
@@ -17,12 +16,6 @@
       "source": {
         "source": "github",
         "repo": "pbakaus/impeccable"
-      }
-    },
-    "claude-code-warp": {
-      "source": {
-        "source": "github",
-        "repo": "warpdotdev/claude-code-warp"
       }
     },
     "ranger": {

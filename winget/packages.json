@@ -44,9 +44,6 @@
           "PackageIdentifier": "Microsoft.VisualStudioCode"
         },
         {
-          "PackageIdentifier": "Warp.Warp"
-        },
-        {
           "PackageIdentifier": "Docker.DockerDesktop"
         },
         {
