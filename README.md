@@ -156,7 +156,6 @@ Only tools that are wired into the shell, required by a repo, or used by a hook.
 | App | What it's for |
 |---|---|
 | `visual-studio-code` | Primary editor / IDE (see VS Code section) |
-| `warp` | Rust-based terminal |
 | `orbstack` | Fast, light Docker Desktop replacement |
 | `postgres-app` | One-click PostgreSQL on macOS |
 | `fork` | Git GUI client |
@@ -453,10 +452,9 @@ is the spec file.
 ### 🧩 Third-party plugins still in use
 
 From `claude-plugins-official`: `frontend-design`, `claude-md-management`,
-`claude-code-setup`, `context7`, `typescript-lsp`. Marketplaces: `impeccable`
-([pbakaus/impeccable](https://github.com/pbakaus/impeccable)), `warp`
-([warpdotdev/claude-code-warp](https://github.com/warpdotdev/claude-code-warp)). Kept because
-they are tools (LSP, live docs, large maintained design systems), not instructions.
+`claude-code-setup`, `context7`, `typescript-lsp`. Marketplace: `impeccable`
+([pbakaus/impeccable](https://github.com/pbakaus/impeccable)). Kept because they are tools
+(LSP, live docs, large maintained design systems), not instructions.
 
 > ✂️ Reviewed and not adopted (2026-10-08, `docs/decisions/0003`): ponytail (its ladder became
 > `rules/simplicity.md`), graphify, addyosmani/agent-skills and superpowers (five references
