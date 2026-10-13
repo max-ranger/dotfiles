@@ -263,7 +263,8 @@ $RECYCLE.BIN/
 # ── Claude / AI assistant files (personal — not for the repo) ─
 # Project memory lives at .claude/CLAUDE.md (auto-loaded like a root CLAUDE.md).
 # Tip: for shared repos, prefer .git/info/exclude so the rule stays local to you.
-.claude/
+.claude/*
+!.claude/settings.json
 CLAUDE.md
 CLAUDE.local.md
 .claudeignore
@@ -273,3 +274,6 @@ docs/superpowers/
 
 # Claude Code local settings may hold API keys — never commit, anywhere.
 **/settings.local.json
+
+# plan-mode drafts (plansDirectory); the accepted plan is copied to docs/specs/<feature>/plan.md
+docs/plans/
