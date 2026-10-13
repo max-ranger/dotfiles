@@ -133,4 +133,7 @@
   "claudeCode.preferredLocation": "sidebar",
   "security.workspace.trust.untrustedFiles": "open",
   "security.promptForLocalFileProtocolHandling": false,
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+  },
 }

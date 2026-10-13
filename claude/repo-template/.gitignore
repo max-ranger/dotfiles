@@ -1,6 +1,0 @@
-# plan-mode drafts (plansDirectory); the accepted plan is copied to docs/specs/<feature>/plan.md
-docs/plans/
-
-# Claude Code: personal files stay local, the shared settings are tracked
-.claude/*
-!.claude/settings.json

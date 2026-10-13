@@ -18,12 +18,12 @@ Windows 10/11 — Homebrew doesn't run on Windows, so winget is its stand-in the
 
 1. [⚡ Quick setup — zero to working](#-quick-setup--zero-to-working)
 2. [🍺 Homebrew — apps, CLIs & fonts](#-homebrew--apps-clis--fonts)
-3. [📜 Scripts — .NET SDK (outside brew)](#-scripts--net-sdk-outside-brew)
+3. [📜 Scripts — .NET SDK and the Windows move](#-scripts--net-sdk-and-the-windows-move)
 4. [🌿 Git — config, SSH keys & signed commits](#-git--config-ssh-keys--signed-commits)
 5. [🤖 Claude Code — plugin, rules & repo template](#-claude-code--plugin-rules--repo-template)
 6. [🧩 VS Code — settings, keybindings & extensions](#-vs-code--settings-keybindings--extensions)
 7. [🐚 PowerShell — profile (Windows)](#-powershell--profile-windows)
-8. [🗂️ Workspace layout — `~/Code`](#️-workspace-layout--code)
+8. [📁 Workspace layout — `~/Code`](#-workspace-layout--code)
 9. [🔄 Maintaining this repo](#-maintaining-this-repo)
 10. [🙏 Credits — vendored third-party content](#-credits--vendored-third-party-content)
 
@@ -182,7 +182,7 @@ Only tools that are wired into the shell, required by a repo, or used by a hook.
 
 ---
 
-## 📜 Scripts — .NET SDK (outside brew)
+## 📜 Scripts — .NET SDK and the Windows move
 
 **Why a script and not brew?** A few things are better installed from their vendor than from
 Homebrew. The **.NET SDK** is the main one: Microsoft ships an official installer that handles
@@ -239,6 +239,20 @@ same channel the SDK was originally installed from:
 ```powershell
 # Windows
 winget upgrade Microsoft.DotNet.SDK.10
+```
+
+### 🪟 Moving a Windows machine to `C:\Code`
+
+[`scripts/migrate-windows.ps1`](scripts/migrate-windows.ps1) takes a machine from the old
+`C:\Dev\{ranger,clients,sandbox}` layout to the flat one described under
+[Workspace layout](#-workspace-layout--code): it moves the repos, repairs git worktrees, renames
+Claude Code's per-project state, zips the old notes vault and uninstalls basic-memory, copies the
+Claude config from this repo and installs the plugin. Dry run by default; close the editors and
+every Claude session before `-Apply`.
+
+```powershell
+pwsh -File scripts\migrate-windows.ps1            # prints every move and rename
+pwsh -File scripts\migrate-windows.ps1 -Apply     # executes
 ```
 
 ---
@@ -315,6 +329,10 @@ and covers: secrets & `.env*`, keys/certs, `appsettings*.json`, `node_modules` &
 (`dist/`, `bin/`, `obj/`), test/coverage artifacts, IDE folders, OS junk, and local Claude/AI
 files. Lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`) stay **committed**.
 
+Two rules in it carry the Claude setup: `.claude/*` with `!.claude/settings.json` keeps everything
+in `.claude/` personal except the shared project settings, and `docs/plans/` is ignored because
+plan-mode drafts are scratch ([`docs/decisions/0017`](docs/decisions/0017-project-settings-committed-plan-drafts-scratch.md)).
+
 ```bash
 cp ~/Code/ranger-ecosystem/dotfiles/git/gitignore ./.gitignore          # macOS / Linux
 ```
@@ -345,9 +363,10 @@ irm https://claude.ai/install.ps1 | iex              # Windows
 - [`claude/CLAUDE.md`](claude/CLAUDE.md) — global instructions: tone, workflow, the gate
   summary, where knowledge lives. ~30 lines; everything detailed is a rule.
 - [`claude/rules/`](claude/rules) — `~/.claude/rules/`. Always-on: `output.md` (verdict first,
-  short, scannable), `simplicity.md` (the ladder), `git.md`, `docs.md` (the in-repo docs layout
-  and SDLC chain), `testing.md` (tests worth keeping). Path-scoped (load only when matching files are touched): `csharp.md`,
-  `dart.md`, `typescript.md`, `vue.md`, `web-interface.md`.
+  short, scannable), `simplicity.md` (the ladder and the three module tests), `git.md`, `docs.md`
+  (the in-repo docs layout and SDLC chain), `testing.md` (tests worth keeping). Path-scoped, loaded
+  only when matching files are touched: `csharp.md`, `dart.md`, `typescript.md`, `vue.md`,
+  `web-interface.md`.
 - [`claude/settings.json`](claude/settings.json) — model, output style, `enabledPlugins`,
   `extraKnownMarketplaces` (incl. this repo as marketplace `ranger`), flags. No hooks: they
   live in the plugin.
@@ -400,7 +419,7 @@ claude plugin update ranger-claude@ranger
 | `format-on-save` | PostToolUse Edit/Write | prettier / rustfmt / gofmt / dart format |
 | `track-edits` · `track-skills` · `track-tests` | PostToolUse | markers under `.git/ranger/` for the gates |
 | `verify-gate` | Stop | **block (max 2×) when code was edited and no test ran after the last edit** |
-| `project-context` | SessionStart | points at `docs/overview.md`, the handbook, legacy notes |
+| `project-context` | SessionStart | points at the repo's `docs/overview.md` and at the handbook repo |
 
 All PreToolUse decisions are JSON on stdout with `exit 0` — `exit 2` would discard the JSON
 and turn every ask into a silent block.
@@ -417,21 +436,27 @@ section with real command output, never edits.
 ### 📐 How a change flows
 
 Fix or chore: just do it — commit (review gate) → stop (verify gate) → `/pr`.
-Feature-sized: `/intent` → `/spec` (approve) → **plan mode** (writes to `docs/plans/`, accepted
-plan copied to `specs/<feature>/plan.md`) → build → verifier agent → `/code-review` → `/pr`.
-Decisions a future reader would question → `/adr`. Full rule: `claude/rules/docs.md`.
+Feature-sized: `/intent` → `/spec` (one grill round, then approve) → **plan mode** (drafts into
+`docs/plans/`, accepted plan copied to `specs/<feature>/plan.md`) → build → verifier agent →
+`/code-review` → `/pr`.
+Beside the chain: `/grill` to attack a plan or a stack choice before it costs anything,
+`diagnosing-bugs` when something is broken and the cause is not obvious, `/adr` for decisions a
+future reader would question. Full rule: `claude/rules/docs.md`.
 
 ### 🧠 Per-project template
 
 [`claude/repo-template/`](claude/repo-template) seeds a new repo:
 
-- `CLAUDE.md` → `.claude/CLAUDE.md` — project, commands, gotchas. No stack conventions (those
-  are global path rules), no architecture prose (that's `docs/architecture.md`).
-- `.claude/settings.json` — committed: `plansDirectory: ./docs/plans` (drafts, gitignored), enables
-  `ranger-claude@ranger` from the GitHub marketplace so cloud sessions get the gates too. The
-  repo's `.gitignore` keeps the rest of `.claude/` personal (`.claude/*` + `!.claude/settings.json`).
+- `.claude/CLAUDE.md` — project, commands, gotchas. No stack conventions (those are global path
+  rules), no architecture prose (that's `docs/architecture.md`). Personal by default; a repo
+  whose rules must survive a fresh clone commits it with `!.claude/CLAUDE.md` in its `.gitignore`.
+- `.claude/settings.json` — committed: `plansDirectory: ./docs/plans`, and `ranger-claude@ranger`
+  from the GitHub marketplace so cloud sessions get the gates too.
 - `docs/` — `overview.md` (hub), `architecture.md`, `review.md` (review policy), `decisions/0001`,
-  `specs/_template/{intent,spec,plan}.md`, `plans/`.
+  `specs/_template/{intent,spec,plan}.md`.
+
+The template carries no `.gitignore`: copy [`git/gitignore`](git/gitignore) first (see the Git
+section). It already tracks `.claude/settings.json` and ignores `docs/plans/`.
 
 ```bash
 # macOS / Linux — inside the new repo
@@ -450,7 +475,8 @@ Knowledge rule: *describes one repo → that repo's `docs/`; spans repos or has 
 [`claude/cowork-template/project-instructions.md`](claude/cowork-template/project-instructions.md)
 — for a Cowork project whose folder is the repo: sparring-partner role, "Cowork never writes
 code", and what it writes under `docs/` (intent, spec, ADRs, hub). The handoff to Claude Code
-is the spec file.
+is the spec file. It opens with a one-time re-point prompt for a project that used to live on the
+retired notes vault.
 
 ### 🧩 Third-party plugins still in use
 
@@ -459,19 +485,22 @@ From `claude-plugins-official`: `frontend-design`, `claude-md-management`,
 ([pbakaus/impeccable](https://github.com/pbakaus/impeccable)). Kept because they are tools
 (LSP, live docs, large maintained design systems), not instructions.
 
-> ✂️ Reviewed and not adopted (2026-10-08, `docs/decisions/0003`): ponytail (its ladder became
-> `rules/simplicity.md`), graphify, addyosmani/agent-skills and superpowers (five references
-> vendored instead), i-have-adhd (its rules became `rules/output.md`). Earlier prunes: see
-> `docs/decisions/`.
+> ✂️ Reviewed and not installed. 2026-10-08 (`docs/decisions/0003`): ponytail (its ladder became
+> `rules/simplicity.md`), graphify, addyosmani/agent-skills (five references vendored instead),
+> i-have-adhd (its rules became `rules/output.md`). 2026-10-12
+> ([`docs/decisions/0016`](docs/decisions/0016-second-review-cherry-pick-text-install-nothing.md)):
+> obra/superpowers and mattpocock/skills (sixteen pieces of text cherry-picked into plugin 1.1.0),
+> markitdown, Unlimited-OCR, openai/whisper, and the Artcraft apps (watch, re-check in 2027).
+> Earlier prunes: see `docs/decisions/`.
 
 ---
 
 ## 🧩 VS Code — settings, keybindings & extensions
 
 **What it is:** [Visual Studio Code](https://code.visualstudio.com) is the primary editor.
-Install all the extensions below and it becomes a **basic but fully functioning IDE** for this
-stack — **.NET / C# · PostgreSQL · Docker · Vue.js · Tailwind** — with formatting, linting,
-IntelliSense, and Git tooling wired up. 🚀
+Install the extensions below and it is a working editor for **.NET / C# · TypeScript ·
+Tailwind**, with formatting, linting, IntelliSense and Git tooling wired up. There is no Vue,
+Docker or PostgreSQL extension in the list; Rider and WebStorm cover those.
 
 > Extensions are **not** copied here — they install via the Brewfile (`vscode "…"` lines). Only
 > `settings.json` and `keybindings.json` live in this folder.
@@ -496,22 +525,22 @@ Copy-Item vscode\keybindings.json "$env:APPDATA\Code\User\keybindings.json"
 - ↹ **Indent:** 4 spaces, no auto-detect; trim trailing whitespace.
 - ✨ **Format on save** via Prettier for JS/TS(X) + Astro; **ESLint** `fixAll` + add-missing-imports
   on save (other languages don't auto-format).
-- 🤝 **GitHub Copilot** + next-edit suggestions on; **Claude Code** docked in the sidebar.
-- 🌳 **GitLens / git-graph** tuned; `.env*` files highlighted as makefiles for visibility.
+- 🤖 **Claude Code** docked in the sidebar. The Copilot and GitLens keys in the file are inert:
+  neither extension is in the Brewfile.
+- 🌳 **Git Graph** as the Git view; `.env*` files highlighted as makefiles for visibility.
 
 ### ⌨️ Keybindings ([`vscode/keybindings.json`](vscode/keybindings.json))
 
-Rebinds **column (box) selection** to `Shift+Cmd+↑/↓` (from the default `Shift+Alt+Cmd+↑/↓`) for
-faster multi-cursor editing.
-
-> 🪟 The keybindings use `cmd` (macOS). On Windows, swap `cmd` → `ctrl` in the copied file.
+Rebinds **column (box) selection** to `Shift+Ctrl+↑/↓` and removes it from `Shift+Alt+Ctrl+↑/↓`,
+for faster multi-cursor editing. The file uses `ctrl` on both platforms, so it copies to Windows
+unchanged.
 
 ### 🧰 Extensions (installed via the Brewfile)
 
 | Group | Extensions |
 |---|---|
 | **.NET / C#** | C# Dev Kit, C#, .NET Runtime |
-| **Vue / Web / TS** | ESLint, Prettier, npm-intellisense, JS snippets, pretty-ts-errors, auto-close/rename-tag, styled-components, MDX |
+| **Web / TS** | ESLint, Prettier, npm-intellisense, JS snippets, pretty-ts-errors, auto-close/rename-tag, styled-components, MDX |
 | **Tailwind** | Tailwind CSS IntelliSense, Tailwind Docs, Headwind, Tailwind Fold |
 | **Git** | Git Graph |
 | **AI** | Claude Code |
@@ -544,7 +573,7 @@ $docs = [Environment]::GetFolderPath('MyDocuments')
 
 ---
 
-## 🗂️ Workspace layout — `~/Code`
+## 📁 Workspace layout — `~/Code`
 
 One folder, flat by project. A repo sits directly under `~/Code`; the only grouping folder is
 `ranger-ecosystem/`, whose name is load-bearing (product repos reach their siblings through
@@ -583,7 +612,7 @@ When you improve a hook, skill, setting, or template:
    `claude plugin update ranger-claude@ranger` — the plugin is a cached copy, even from the
    local checkout. Other machines run the same command after `git pull`.
    Test a hook before committing: pipe a synthetic JSON input into the script
-   (`printf '{"tool_input":{"command":"git commit -m x"},"cwd":"."}' | bash scripts/review-gate.sh`).
+   (`printf '{"tool_input":{"command":"git commit -m x"},"cwd":"."}' | bash claude/plugins/ranger-claude/scripts/review-gate.sh`).
 
 Refresh the Brewfile (and tracked VS Code extensions) from the current Mac:
 
@@ -620,5 +649,11 @@ auto-fetch.
 - `references/` — [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)
   (MIT, pinned `1401c8b`): definition of done, spec and plan skeletons, interview method,
   fresh-context review
+- `skills/grill`, `skills/diagnosing-bugs`, `rules/testing.md`, the module tests in
+  `rules/simplicity.md`, the merge-danger section of the PR templates —
+  [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, pinned `49dd158`), distilled
+- `references/writing-good-tests.md`, the claims-and-evidence table, the plan additions, the
+  builder check, two verifier clauses — [obra/superpowers](https://github.com/obra/superpowers)
+  (MIT, pinned `bb92a77`), distilled
 - `rules/simplicity.md` — ladder idea from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT), rewritten
 - `rules/output.md` — ideas from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT), rewritten
