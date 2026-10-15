@@ -410,7 +410,7 @@ claude plugin update ranger-claude@ranger
 
 | Gate | Event | What it does |
 |---|---|---|
-| `security-gate` | PreToolUse Bash | deny/ask on force-push, `rm -rf ~`, DROP TABLE, publish, pipe-to-shell… |
+| `security-gate` | PreToolUse Bash | deny/ask on force-push, `rm -rf ~`, DROP TABLE, publish, pipe-to-shell…; a push to `main` is denied in repos with a `develop` branch (release PRs only), asked elsewhere |
 | `secure-commits` | PreToolUse `git commit` | deny `.env`/key files; ask on secret-looking diffs |
 | `commit-hygiene` | PreToolUse `git commit` | ask when junk (`.DS_Store`, logs, scratch) is staged |
 | `review-gate` | PreToolUse `git commit` | **deny until `/code-review` ran since the last commit** (docs-only commits exempt; `RANGER_SKIP_REVIEW=1` bypass) |
