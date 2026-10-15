@@ -20,18 +20,23 @@ ask()  { emit ask  "DANGER: $1"; }
 C="$HOOK_COMMAND"
 
 # ── Git push protections ──
+# A repo with a develop branch takes main only through release PRs (develop → main, merged on GitHub once the release
+# gate is green): a push to main is denied there. Elsewhere it is asked.
+uses_develop() { git show-ref --verify --quiet refs/heads/develop || git show-ref --verify --quiet refs/remotes/origin/develop; }
 if echo "$C" | grep -qE '(^|[;&|()]+[[:space:]]*)git[[:space:]]+push'; then
+  if echo "$C" | grep -qE 'git[[:space:]]+push.*(-[a-zA-Z]*f([[:space:]]|$)|--force([[:space:]]|$))' && ! echo "$C" | grep -q '\-\-force-with-lease'; then
+    deny "force push blocked. Use --force-with-lease."
+  fi
   if echo "$C" | grep -qE 'git[[:space:]]+push.*(origin[[:space:]]+|:)(main|master)(\b|$)'; then
+    uses_develop && deny "pushing to main in a repo with a develop branch: main only takes release PRs from develop. Push to develop (or a branch) and open a release PR."
     ask "pushing to main/master. Fine for personal repos; use a branch + PR for shared/client repos. Confirm?"
   fi
   if echo "$C" | grep -qE 'git[[:space:]]+push[[:space:]]*($|[;&|])'; then
     CB=$(git branch --show-current 2>/dev/null)
     if [ "$CB" = "main" ] || [ "$CB" = "master" ]; then
+      uses_develop && deny "you are on $CB in a repo with a develop branch: main only takes release PRs from develop. Switch to develop."
       ask "you are on $CB. Confirm push?"
     fi
-  fi
-  if echo "$C" | grep -qE 'git[[:space:]]+push.*(-[a-zA-Z]*f([[:space:]]|$)|--force([[:space:]]|$))' && ! echo "$C" | grep -q '\-\-force-with-lease'; then
-    deny "force push blocked. Use --force-with-lease."
   fi
 fi
 
