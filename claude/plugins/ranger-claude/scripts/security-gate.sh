@@ -2,6 +2,7 @@
 # Blocks dangerous shell commands (PreToolUse Bash).
 
 source "$(dirname "$0")/_parse-input.sh"
+source "$(dirname "$0")/_git-cmd.sh"
 [ -z "$HOOK_COMMAND" ] && exit 0
 
 emit() {
@@ -15,30 +16,59 @@ emit() {
   exit 0
 }
 deny() { emit deny "DANGER: $1"; }
-ask()  { emit ask  "DANGER: $1"; }
+# An ask waits until every check has run, so a deny later in the command still wins.
+ASK=""
+ask()  { [ -n "$ASK" ] || ASK="$1"; }
 
 C="$HOOK_COMMAND"
+# Every git invocation in the command, with the repo it targets (git -C, cd …&&).
+gc_parse "$C" "$HOOK_CWD"
 
 # ── Git push protections ──
 # A repo with a develop branch takes main only through release PRs (develop → main, merged on GitHub once the release
 # gate is green): a push to main is denied there. Elsewhere it is asked.
-uses_develop() { git show-ref --verify --quiet refs/heads/develop || git show-ref --verify --quiet refs/remotes/origin/develop; }
-if echo "$C" | grep -qE '(^|[;&|()]+[[:space:]]*)git[[:space:]]+push'; then
-  if echo "$C" | grep -qE 'git[[:space:]]+push.*(-[a-zA-Z]*f([[:space:]]|$)|--force([[:space:]]|$))' && ! echo "$C" | grep -q '\-\-force-with-lease'; then
-    deny "force push blocked. Use --force-with-lease."
-  fi
-  if echo "$C" | grep -qE 'git[[:space:]]+push.*(origin[[:space:]]+|:)(main|master)(\b|$)'; then
-    uses_develop && deny "pushing to main in a repo with a develop branch: main only takes release PRs from develop. Push to develop (or a branch) and open a release PR."
+uses_develop() { gc_git "$1" show-ref --verify --quiet refs/heads/develop || gc_git "$1" show-ref --verify --quiet refs/remotes/origin/develop; }
+for i in $(gc_find push); do
+  # refspecs: the arguments that are neither options nor option values, after the
+  # remote (which --repo names instead)
+  gc_argv "$i"; POS=(); SKIP=0; REPO=0
+  for a in "${GC_ARGV[@]}"; do
+    if [ "$SKIP" = 1 ]; then SKIP=0
+    else
+      case $a in
+        --repo) SKIP=1; REPO=1 ;;
+        --repo=*) REPO=1 ;;
+        -o|--push-option|--receive-pack|--exec) SKIP=1 ;;
+        -*) ;;
+        *) POS+=("$a") ;;
+      esac
+    fi
+  done
+  [ "$REPO" = 1 ] || POS=("${POS[@]:1}")
+  FORCE=0; TO_MAIN=0; CURRENT=0
+  gc_flag "$i" f --force && ! gc_flag "$i" '' --force-with-lease && FORCE=1
+  gc_flag "$i" '' --mirror && FORCE=1                # force-updates and deletes remote refs
+  gc_flag "$i" '' --all --branches && TO_MAIN=1      # every branch, main included
+  # nothing named (no refspec, no --all/--mirror/--tags): pushes the current branch
+  [ ${#POS[@]} -eq 0 ] && ! gc_flag "$i" '' --all --branches --mirror --tags && CURRENT=1
+  for r in "${POS[@]}"; do
+    case $r in +*) FORCE=1; r=${r#+} ;; esac       # +refspec force-pushes that ref
+    r=${r##*:}; r=${r#refs/heads/}
+    case $r in main|master) TO_MAIN=1 ;; HEAD) CURRENT=1 ;; esac
+  done
+  [ "$FORCE" = 1 ] && deny "force push blocked. Use --force-with-lease."
+  if [ "$TO_MAIN" = 1 ]; then
+    uses_develop "$i" && deny "pushing to main in a repo with a develop branch: main only takes release PRs from develop. Push to develop (or a branch) and open a release PR."
     ask "pushing to main/master. Fine for personal repos; use a branch + PR for shared/client repos. Confirm?"
   fi
-  if echo "$C" | grep -qE 'git[[:space:]]+push[[:space:]]*($|[;&|])'; then
-    CB=$(git branch --show-current 2>/dev/null)
+  if [ "$CURRENT" = 1 ]; then
+    CB=$(gc_git "$i" branch --show-current 2>/dev/null)
     if [ "$CB" = "main" ] || [ "$CB" = "master" ]; then
-      uses_develop && deny "you are on $CB in a repo with a develop branch: main only takes release PRs from develop. Switch to develop."
+      uses_develop "$i" && deny "you are on $CB in a repo with a develop branch: main only takes release PRs from develop. Switch to develop."
       ask "you are on $CB. Confirm push?"
     fi
   fi
-fi
+done
 
 # ── rm -rf on broad paths ──
 if echo "$C" | grep -qE 'rm[[:space:]]+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)[[:space:]]+(/([[:space:]]|$|\*)|~/?(\*|$|[[:space:]])|\$HOME|\.\./\.\.)'; then
@@ -46,9 +76,20 @@ if echo "$C" | grep -qE 'rm[[:space:]]+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z
 fi
 
 # ── Git destructive (ask first) ──
-echo "$C" | grep -qE 'git[[:space:]]+reset[[:space:]]+--hard' && ask "git reset --hard discards uncommitted work. Confirm?"
-echo "$C" | grep -qE 'git[[:space:]]+clean[[:space:]]+-[a-zA-Z]*f' && ask "git clean -f permanently deletes untracked files. Confirm?"
-echo "$C" | grep -qE 'git[[:space:]]+branch[[:space:]]+-D' && ask "git branch -D force-deletes unmerged branch. Confirm?"
+# Each also keeps its loose text match from before the parser: an ask costs one
+# confirmation, and the match covers what the parser does not follow
+# (`xargs git branch -D`, `sudo git reset --hard`), quoted text included.
+RESET="git reset --hard discards uncommitted work. Confirm?"
+CLEAN="git clean -f permanently deletes untracked files. Confirm?"
+BRANCH_D="git branch -D force-deletes unmerged branch. Confirm?"
+for i in $(gc_find reset); do gc_flag "$i" '' --hard && ask "$RESET"; done
+for i in $(gc_find clean); do gc_flag "$i" f --force && ask "$CLEAN"; done
+for i in $(gc_find branch); do
+  if gc_flag "$i" D || { gc_flag "$i" d --delete && gc_flag "$i" f --force; }; then ask "$BRANCH_D"; fi
+done
+echo "$C" | grep -qE 'git[[:space:]]+reset[[:space:]]+--hard' && ask "$RESET"
+echo "$C" | grep -qE 'git[[:space:]]+clean[[:space:]]+-[a-zA-Z]*f' && ask "$CLEAN"
+echo "$C" | grep -qE 'git[[:space:]]+branch[[:space:]]+-D' && ask "$BRANCH_D"
 
 # ── SQL destructive ──
 echo "$C" | grep -qiE 'DROP[[:space:]]+(TABLE|DATABASE|SCHEMA)[[:space:]]' && deny "DROP TABLE/DATABASE/SCHEMA blocked."
@@ -66,4 +107,5 @@ echo "$C" | grep -qE 'chmod[[:space:]]+(-R[[:space:]]+)?777' && ask "chmod 777 g
 echo "$C" | grep -qE '(^|[;&|])[[:space:]]*(npm|yarn|pnpm|bun)[[:space:]]+publish' && deny "package publish blocked. Use CI."
 echo "$C" | grep -qE '(^|[;&|])[[:space:]]*cargo[[:space:]]+publish' && deny "cargo publish blocked. Use CI."
 
+[ -n "$ASK" ] && emit ask "DANGER: $ASK"
 exit 0

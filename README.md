@@ -413,8 +413,8 @@ claude plugin update ranger-claude@ranger
 | `security-gate` | PreToolUse Bash | deny/ask on force-push, `rm -rf ~`, DROP TABLE, publish, pipe-to-shell…; a push to `main` is denied in repos with a `develop` branch (release PRs only), asked elsewhere |
 | `secure-commits` | PreToolUse `git commit` | deny `.env`/key files; ask on secret-looking diffs |
 | `commit-hygiene` | PreToolUse `git commit` | ask when junk (`.DS_Store`, logs, scratch) is staged |
-| `review-gate` | PreToolUse `git commit` | **deny until `/code-review` ran since the last commit** (docs-only commits exempt; `RANGER_SKIP_REVIEW=1` bypass) |
-| `pre-commit-checks` | PreToolUse `git commit` | eslint + tests (JS), `flutter analyze` + tests (Dart); failures block |
+| `review-gate` | PreToolUse `git commit` | **deny until `/code-review` ran since the last commit** in the committed repo (a review counts only for the session's own repo; docs-only commits exempt, shell and PowerShell scripts count as source; `RANGER_SKIP_REVIEW=1` bypass) |
+| `pre-commit-checks` | PreToolUse `git commit` | eslint + tests (JS), `flutter analyze` + tests (Dart) in the session's repo; failures block |
 | `design-pretrigger` | PreToolUse Edit/Write | once per session: first UI-file edit is denied with "decide whether `emil-design-eng` / `impeccable` runs first" |
 | `format-on-save` | PostToolUse Edit/Write | prettier / rustfmt / gofmt / dart format |
 | `track-edits` · `track-skills` · `track-tests` | PostToolUse | markers under `.git/ranger/` for the gates |
@@ -423,6 +423,19 @@ claude plugin update ranger-claude@ranger
 
 All PreToolUse decisions are JSON on stdout with `exit 0` — `exit 2` would discard the JSON
 and turn every ask into a silent block.
+The git checks (`security-gate`'s push/reset/clean/branch rules and every `git commit` gate) parse
+the command with [`scripts/_git-cmd.sh`](claude/plugins/ranger-claude/scripts/_git-cmd.sh): they
+fire on every git invocation in it — global options before the subcommand (`git -C <repo>`, `-c`,
+`--git-dir`, `--no-pager`), `cd <repo> &&`, `;`/`&&`/`|` chains, subshells, `$( )`, `bash -c`,
+`bash <<EOF` — and check each one against the repo it targets. Quoted text and other heredoc
+bodies are data: `echo "git commit"` fires no commit gate. The reset/clean/branch asks keep their
+loose text match as a fail-safe (`xargs git branch -D` still asks). The commit gates also count
+what an earlier `git add` / `git stage` for the same repo in the command (or `commit -a`) will
+stage, from a `git add --dry-run` of its arguments, so `git add -A && git commit` is judged on
+what it commits; the real index is never touched. In `security-gate` a deny
+anywhere in the command beats an ask. `pre-commit-checks` runs lint/tests only for a commit in
+the session's own repo: for another repo it would execute that repo's code before the command is
+approved. Why: [ADR 0018](docs/decisions/0018-git-gates-parse-the-command.md).
 
 **Skills** (`skills/`): `intent` (`/intent` → `docs/specs/<feature>/intent.md`), `spec`
 (`/spec` → `spec.md`, one grill round, then stops for approval), `grill` (stress-test a plan or
@@ -613,6 +626,8 @@ When you improve a hook, skill, setting, or template:
    local checkout. Other machines run the same command after `git pull`.
    Test a hook before committing: pipe a synthetic JSON input into the script
    (`printf '{"tool_input":{"command":"git commit -m x"},"cwd":"."}' | bash claude/plugins/ranger-claude/scripts/review-gate.sh`).
+   The git gates have a suite that does this against throwaway repos:
+   `bash claude/plugins/ranger-claude/tests/git-gates.test.sh`.
 
 Refresh the Brewfile (and tracked VS Code extensions) from the current Mac:
 
