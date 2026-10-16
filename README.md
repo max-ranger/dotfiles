@@ -596,7 +596,7 @@ One folder, flat by project. A repo sits directly under `~/Code`; the only group
 ~/Code/
   handbook/             cross-repo decisions, shared-stack as-built, non-code projects (private repo)
   <product>/            one folder per product repo
-  ranger-ecosystem/     dotfiles · ranger-infra · ranger-vue · ranger-dotnet · ranger-app-template · daily-triage
+  ranger-ecosystem/     dotfiles · ranger-infra · ranger-vue · ranger-dotnet · ranger-app-template
   sandbox/              throwaways
   archive/              inactive checkouts
   assets/               brand assets and test data that must stay outside git (each with a README)
