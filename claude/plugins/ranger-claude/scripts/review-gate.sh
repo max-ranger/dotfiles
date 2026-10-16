@@ -21,9 +21,8 @@ for i in $COMMITS; do
   gc_opts "$i"; mk_repo "${GC_OPTS[@]}"
   [ -n "$MK_DIR" ] || continue
 
-  STAGED=$(gc_git "$i" diff --cached --name-only 2>/dev/null)
-  # `git commit -a` stages tracked changes at commit time: include them.
-  gc_flag "$i" a --all && STAGED="$STAGED"$'\n'"$(gc_git "$i" diff --name-only 2>/dev/null)"
+  # the index plus what an earlier `git add` or `commit -a` adds to it at commit time
+  STAGED=$( { gc_git "$i" diff --cached --name-only 2>/dev/null; gc_pending "$i"; } | sort -u)
   CODE=$(printf '%s\n' "$STAGED" | while IFS= read -r f; do [ -n "$f" ] && mk_is_code "$f" && printf '%s\n' "$f"; done)
   [ -z "$CODE" ] && continue
 

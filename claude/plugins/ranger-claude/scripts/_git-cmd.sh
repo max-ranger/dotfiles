@@ -7,6 +7,7 @@
 #   for i in $(gc_find commit); do             # every `git … commit` in the command
 #     gc_git "$i" diff --cached --name-only    # git, pointed at that invocation's repo
 #     gc_flag "$i" a --all && …                # -a, a cluster like -am, or --all
+#     gc_pending "$i"                          # paths an earlier `git add` / -a adds
 #   done
 #
 # Understood: quoting ('…', "…", $'…', \), comments, ; && || | & and newlines,
@@ -334,6 +335,35 @@ gc_opts() {
   GC_OPTS=(-C "${GC_DIR[$1]}")
   if [ -n "${GC_GITDIR[$1]}" ]; then GC_OPTS+=("--git-dir=${GC_GITDIR[$1]}"); fi
   if [ -n "${GC_WT[$1]}" ]; then GC_OPTS+=("--work-tree=${GC_WT[$1]}"); fi
+}
+
+# gc_pending <i> [added]: the root-relative paths commit <i> takes beyond the current
+# index. The gates run before the command, so `git add -A && git commit` would be judged
+# on the index from before the add: this adds what each earlier `git add` / `git stage`
+# for the same repo would stage (a `git add --dry-run` of its own arguments, in its own
+# directory) and, for `commit -a`, the tracked changes. "added" leaves out deletions.
+# The dry-runs use a scratch copy of the index: `add --dry-run` still takes index.lock,
+# and the gates run in parallel (an IDE may hold it too). GIT_EDITOR=false: `add -e`
+# would open an editor even in a dry-run.
+# ranger: shortcut — `commit <pathspec>`/-i/-o, `git rm`/`mv` and a `reset` between the
+# add and the commit are not modelled; the last one over-includes, the safe direction.
+gc_pending() {
+  local i=$1 j gd keep='add|remove' idx
+  [ "$2" = added ] && keep='add'
+  gd=$(gc_git "$i" rev-parse --absolute-git-dir 2>/dev/null) || return 0
+  idx=$(mktemp "${TMPDIR:-/tmp}/ranger-index.XXXXXX") || return 0
+  cp "$gd/index" "$idx" 2>/dev/null || rm -f "$idx"   # no index yet: start from empty
+  {
+    export GIT_INDEX_FILE="$idx" GIT_EDITOR=false
+    for ((j = 0; j < i; j++)); do
+      case ${GC_SUB[j]} in add|stage) ;; *) continue ;; esac
+      [ "$(gc_git "$j" rev-parse --absolute-git-dir 2>/dev/null)" = "$gd" ] || continue
+      gc_argv "$j"
+      gc_git "$j" add --dry-run "${GC_ARGV[@]}" 2>/dev/null
+    done
+    if gc_flag "$i" a --all; then gc_git "$i" add --dry-run -u 2>/dev/null; fi
+  } | sed -nE "s/^($keep) '(.*)'\$/\\2/p" | sort -u
+  rm -f "$idx"
 }
 
 # gc_show <i>: that selection as a shell-quoted command prefix, for messages.

@@ -27,6 +27,22 @@ echo 'SECRET=1' > "$R/.env"; : > "$R/.DS_Store"; echo 'export const a = 1' > "$R
 echo '{"scripts":{"test":"exit 1"}}' > "$R/package.json"
 git -C "$R" add -f .env .DS_Store app.ts package.json
 
+# A: nothing staged; what a `git add` in the command would bring is in the worktree:
+# a .env, a .DS_Store, app.ts, new.js with a token, a modified config.js with a key,
+# docs.md, sub/page.ts, and a deleted id.pem (removing a key file is not staging one). Its eslint always fails, so pre-commit denies any staged JS/TS.
+# The secret literals are built at run time so this file does not trip the secret scan.
+A="$T/adds"
+git init -q -b feature "$A"
+printf 'node_modules/\n' > "$A/.gitignore"; echo '{"name":"a"}' > "$A/package.json"
+echo 'export default {}' > "$A/config.js"; echo a > "$A/README.md"; echo k > "$A/id.pem"
+git -C "$A" add -A && git -C "$A" commit -qm init && rm "$A/id.pem"
+mkdir -p "$A/sub" "$A/node_modules/.bin"
+printf '#!/bin/sh\nexit 1\n' > "$A/node_modules/.bin/eslint"; chmod +x "$A/node_modules/.bin/eslint"
+printf 'export const aws = "%s%s"\n' AKIA ABCDEFGHIJKLMNOP >> "$A/config.js"
+printf 'export const t = "%s%s"\n' ghp_ abcdefghijklmnopqrstuvwxyz0123 > "$A/new.js"
+echo 'SECRET=1' > "$A/.env"; : > "$A/.DS_Store"; echo 'export const a = 1' > "$A/app.ts"
+echo '# notes' > "$A/docs.md"; echo 'export const p = 1' > "$A/sub/page.ts"
+
 PRE=deny; command -v npm >/dev/null 2>&1 || { PRE=allow; echo "npm not on PATH: pre-commit cases expect allow"; }
 GATES="security-gate secure-commits commit-hygiene review-gate pre-commit-checks"
 PASS=0; FAIL=0
@@ -133,6 +149,41 @@ expect "sudo git reset --hard (loose)"      "$S" "sudo git reset --hard"        
 expect "quoted reset still asks (loose)"    "$S" "echo \"git reset --hard\""               ask - - - -
 expect "ask then deny: deny wins"           "$S" "git -C '$S' push origin main; git -C '$R' push --force" deny - - - -
 expect "reset --hard in a substitution"     "$S" "echo \"\$(git -C '$R' reset --hard)\""     ask - - - -
+
+# ── git add … && git commit: judged on what the add stages, not the index before it ──
+expect "A: nothing staged"                  "$A" "git commit -m x"                         allow allow allow allow allow
+expect "A: add -A && commit"                "$A" "git add -A && git commit -m x"           allow deny ask deny deny
+expect "A: add docs.md && commit"           "$A" "git add docs.md && git commit -m x"      allow allow allow allow allow
+expect "A: add modified config.js (key)"    "$A" "git add config.js && git commit -m x"    allow ask allow deny deny
+expect "A: add new.js (token, new file)"    "$A" "git add new.js; git commit -m x"         allow ask allow deny deny
+expect "A: stage .DS_Store && commit"       "$A" "git stage .DS_Store && git commit -m x"  allow allow ask allow allow
+expect "A: cd sub && add . && commit"       "$A" "cd sub && git add . && git commit -m x"  allow allow allow deny deny
+expect "A: commit -am (tracked config.js)"  "$A" "git commit -am x"                        allow ask allow deny deny
+expect "A: add -u (id.pem deleted)"         "$A" "git add -u && git commit -m x"           allow ask allow deny deny
+expect "A: add after the commit"            "$A" "git commit -m x && git add -A"           allow allow allow allow allow
+expect "A: add in another repo"             "$A" "git -C '$S' add -A && git commit -m x"   allow allow allow allow allow
+expect "A from S: -C add -A && -C commit"   "$S" "git -C '$A' add -A && git -C '$A' commit -m x" allow deny ask deny allow
+# another git process (an IDE, a parallel gate) holds A's index.lock: same decisions
+: > "$A/.git/index.lock"
+expect "A: add -A && commit, index locked"  "$A" "git add -A && git commit -m x"           allow deny ask deny deny
+rm -f "$A/.git/index.lock"
+# the gates run in parallel in Claude Code
+for g in secure-commits commit-hygiene review-gate pre-commit-checks; do
+  decide "$g" "$A" "git add -A && git commit -m x" > "$T/par.$g" &
+done
+wait
+for g in secure-commits:deny commit-hygiene:ask review-gate:deny pre-commit-checks:deny; do
+  got=$(cat "$T/par.${g%%:*}")
+  if [ "$got" = "${g#*:}" ]; then PASS=$((PASS + 1))
+  else FAIL=$((FAIL + 1)); printf 'FAIL  %-44s %-18s want %-5s got %s\n' "A: gates in parallel" "${g%%:*}" "${g#*:}" "$got"; fi
+done
+# `git add -e` must not open an editor from a hook: this one leaves a marker and fails
+export GIT_EDITOR="touch '$T/editor-ran'; false"
+expect "A: add -e && commit"                "$A" "git add -e && git commit -m x"           allow allow allow allow allow
+unset GIT_EDITOR
+if [ ! -e "$T/editor-ran" ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL  a gate opened an editor for git add -e"; fi
+STAGED_AFTER=$(git -C "$A" diff --cached --name-only)
+if [ -z "$STAGED_AFTER" ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL  the gates changed A's real index: $STAGED_AFTER"; fi
 
 # ── review marker belongs to the repo of the session that ran /code-review ──
 skill() {

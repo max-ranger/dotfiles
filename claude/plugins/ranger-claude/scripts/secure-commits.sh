@@ -26,9 +26,24 @@ deny() { emit deny "DANGER - SecureCommits: $1"; }
 ASK=""
 ask()  { [ -n "$ASK" ] || ASK="$1"; }
 
+# The diff the pending paths bring (worktree against the index), new files in full:
+# they are marked intent-to-add in a scratch copy of the index, never the real one.
+pending_diff() {
+  local idx
+  idx=$(mktemp "${TMPDIR:-/tmp}/ranger-index.XXXXXX") || return 0
+  cp "$(gc_git "$1" rev-parse --absolute-git-dir 2>/dev/null)/index" "$idx" 2>/dev/null || rm -f "$idx"
+  gc_opts "$1"
+  top0() { printf '%s\n' "$1" | sed 's/^/:(top,literal)/' | tr '\n' '\0'; }  # root-relative pathspecs
+  top0 "$2" | GIT_INDEX_FILE="$idx" xargs -0 git "${GC_OPTS[@]}" add -N -f -- >/dev/null 2>&1
+  top0 "$2" | GIT_INDEX_FILE="$idx" xargs -0 git "${GC_OPTS[@]}" diff -- 2>/dev/null
+  rm -f "$idx"
+}
+
 scan() {
-  local i="$1" STAGED BAD_ENV BAD_KEYS LIST ADDED M=""
-  STAGED=$(gc_git "$i" diff --cached --name-only 2>/dev/null)
+  local i="$1" STAGED PENDING BAD_ENV BAD_KEYS LIST ADDED REVIEW M=""
+  # what the commit takes: the index plus what an earlier `git add` / -a adds to it
+  PENDING=$(gc_pending "$i" added)
+  STAGED=$( { gc_git "$i" diff --cached --name-only 2>/dev/null; printf '%s\n' "$PENDING"; } | sed '/^$/d')
   [ -z "$STAGED" ] && return
 
   # ── .env files (allow .example/.sample/.template/.dist variants) ──
@@ -46,7 +61,8 @@ scan() {
   fi
 
   # ── scan staged diff (added lines only) ──
-  ADDED=$(gc_git "$i" diff --cached 2>/dev/null | grep -E '^\+[^+]' || true)
+  ADDED=$( { gc_git "$i" diff --cached 2>/dev/null; [ -z "$PENDING" ] || pending_diff "$i" "$PENDING"; } \
+    | grep -E '^\+[^+]' || true)
   [ -z "$ADDED" ] && return
 
   echo "$ADDED" | grep -qE 'AKIA[0-9A-Z]{16}' && M="$M AWS-key;"
@@ -64,7 +80,9 @@ scan() {
     fi
   fi
 
-  [ -n "$M" ] && ask "possible secret(s) in staged diff:$M Run $(gc_show "$i") diff --cached to review."
+  REVIEW="$(gc_show "$i") diff --cached"
+  [ -n "$PENDING" ] && REVIEW="$(gc_show "$i") diff HEAD, and read the new files the earlier git add stages,"
+  [ -n "$M" ] && ask "possible secret(s) in the diff this commit takes:$M Run $REVIEW to review."
 }
 
 for i in $COMMITS; do scan "$i"; done

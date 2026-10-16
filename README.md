@@ -429,7 +429,10 @@ fire on every git invocation in it — global options before the subcommand (`gi
 `--git-dir`, `--no-pager`), `cd <repo> &&`, `;`/`&&`/`|` chains, subshells, `$( )`, `bash -c`,
 `bash <<EOF` — and check each one against the repo it targets. Quoted text and other heredoc
 bodies are data: `echo "git commit"` fires no commit gate. The reset/clean/branch asks keep their
-loose text match as a fail-safe (`xargs git branch -D` still asks). In `security-gate` a deny
+loose text match as a fail-safe (`xargs git branch -D` still asks). The commit gates also count
+what an earlier `git add` / `git stage` for the same repo in the command (or `commit -a`) will
+stage, from a `git add --dry-run` of its arguments, so `git add -A && git commit` is judged on
+what it commits; the real index is never touched. In `security-gate` a deny
 anywhere in the command beats an ask. `pre-commit-checks` runs lint/tests only for a commit in
 the session's own repo: for another repo it would execute that repo's code before the command is
 approved. Why: [ADR 0018](docs/decisions/0018-git-gates-parse-the-command.md).

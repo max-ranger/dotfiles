@@ -39,10 +39,12 @@ check_repo() {
   fi
   [ -n "$CHECKED" ] && return                          # one run per command
   CHECKED=1
+  local PENDING                                          # what an earlier `git add` / -a adds
+  PENDING=$(gc_pending "$i" added)
 
   # --- Flutter / Dart (pubspec.yaml projects) ---
   if [ -f "$ROOT/pubspec.yaml" ]; then
-    STAGED_DART=$(gc_git "$i" diff --cached --name-only --diff-filter=ACMR 2>/dev/null \
+    STAGED_DART=$( { gc_git "$i" diff --cached --name-only --diff-filter=ACMR 2>/dev/null; printf '%s\n' "$PENDING"; } \
       | grep -E '\.dart$' || true)
 
     if [ -n "$STAGED_DART" ]; then
@@ -66,8 +68,8 @@ check_repo() {
 
   [ -f "$ROOT/package.json" ] || return
 
-  STAGED_JS=$(gc_git "$i" diff --cached --name-only --diff-filter=ACMR 2>/dev/null \
-    | grep -E '\.(js|jsx|ts|tsx|vue|mjs|cjs)$' || true)
+  STAGED_JS=$( { gc_git "$i" diff --cached --name-only --diff-filter=ACMR 2>/dev/null; printf '%s\n' "$PENDING"; } \
+    | grep -E '\.(js|jsx|ts|tsx|vue|mjs|cjs)$' | sort -u || true)
 
   if [ -n "$STAGED_JS" ]; then
     ESLINT_BIN=""

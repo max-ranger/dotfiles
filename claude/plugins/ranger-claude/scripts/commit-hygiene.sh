@@ -24,7 +24,8 @@ ask() {
 }
 
 for i in $COMMITS; do
-  STAGED=$(gc_git "$i" diff --cached --name-only 2>/dev/null)
+  # the index plus what an earlier `git add` / -a in the command adds to it
+  STAGED=$( { gc_git "$i" diff --cached --name-only 2>/dev/null; gc_pending "$i" added; } | sed '/^$/d')
   [ -z "$STAGED" ] && continue
 
   # Patterns that are almost never meant to be committed. Ask-only, so the bar for
