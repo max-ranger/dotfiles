@@ -2,7 +2,7 @@
 # Shared helper: reads stdin JSON, exports HOOK_* vars.
 # Pure sed/bash extraction — no node/python dependency.
 # Only fields actually consumed by other hooks are extracted:
-#   tool_input.command, tool_input.file_path, message
+#   tool_input.command, tool_input.file_path, message, cwd (falls back to $PWD)
 # Values are JSON-decoded for the four common escapes (\" \\ \n \t \r).
 # Multi-byte / \uXXXX sequences are passed through literally.
 
@@ -27,5 +27,7 @@ _json_decode() {
 HOOK_COMMAND=$(_json_decode "$(_json_extract command)")
 HOOK_FILE_PATH=$(_json_decode "$(_json_extract file_path)")
 HOOK_MESSAGE=$(_json_decode "$(_json_extract message)")
+HOOK_CWD=$(_json_decode "$(_json_extract cwd)")
+[ -z "$HOOK_CWD" ] && HOOK_CWD=$PWD
 
-export HOOK_COMMAND HOOK_FILE_PATH HOOK_MESSAGE
+export HOOK_COMMAND HOOK_FILE_PATH HOOK_MESSAGE HOOK_CWD

@@ -2,12 +2,14 @@
 # Scans staged content for secrets before `git commit` (PreToolUse Bash).
 
 source "$(dirname "$0")/_parse-input.sh"
+source "$(dirname "$0")/_git-cmd.sh"
 [ -z "$HOOK_COMMAND" ] && exit 0
 
-# Only trigger on git commit
-if ! echo "$HOOK_COMMAND" | grep -qE '(^|[;&|()]+[[:space:]]*)git[[:space:]]+commit(\b|$)'; then
-  exit 0
-fi
+# Only trigger on git commit: every `git … commit` in the command, scanned in the
+# repo it targets (git -C <repo>, cd <repo> &&).
+gc_parse "$HOOK_COMMAND" "$HOOK_CWD"
+COMMITS=$(gc_find commit)
+[ -z "$COMMITS" ] && exit 0
 
 emit() {
   local decision="$1" reason="$2"
@@ -20,44 +22,51 @@ emit() {
   exit 0
 }
 deny() { emit deny "DANGER - SecureCommits: $1"; }
-ask()  { emit ask  "SecureCommits: $1"; }
+# An ask waits until every commit is scanned, so a deny for a later one still wins.
+ASK=""
+ask()  { [ -n "$ASK" ] || ASK="$1"; }
 
-STAGED=$(git diff --cached --name-only 2>/dev/null)
-[ -z "$STAGED" ] && exit 0
+scan() {
+  local i="$1" STAGED BAD_ENV BAD_KEYS LIST ADDED M=""
+  STAGED=$(gc_git "$i" diff --cached --name-only 2>/dev/null)
+  [ -z "$STAGED" ] && return
 
-# ── .env files (allow .example/.sample/.template/.dist variants) ──
-BAD_ENV=$(echo "$STAGED" | grep -E '(^|/)\.env($|\.[^/]+$)' | grep -vE '\.(example|sample|template|dist)(\.|$)' || true)
-if [ -n "$BAD_ENV" ]; then
-  LIST=$(echo "$BAD_ENV" | tr '\n' ',' | sed 's/,$//')
-  deny ".env file(s) staged: $LIST. Use .env.example instead."
-fi
-
-# ── key/credential files ──
-BAD_KEYS=$(echo "$STAGED" | grep -iE '\.(pem|pfx|p12|keystore|jks)$|(^|/)id_rsa$|(^|/)id_ed25519$' || true)
-if [ -n "$BAD_KEYS" ]; then
-  LIST=$(echo "$BAD_KEYS" | tr '\n' ',' | sed 's/,$//')
-  deny "credential file(s) staged: $LIST."
-fi
-
-# ── scan staged diff (added lines only) ──
-ADDED=$(git diff --cached 2>/dev/null | grep -E '^\+[^+]' || true)
-[ -z "$ADDED" ] && exit 0
-
-M=""
-echo "$ADDED" | grep -qE 'AKIA[0-9A-Z]{16}' && M="$M AWS-key;"
-echo "$ADDED" | grep -qiE '(aws_secret_access_key|aws_secret)[[:space:]]*[=:][[:space:]]*["\x27]?[A-Za-z0-9/+=]{40}' && M="$M AWS-secret;"
-echo "$ADDED" | grep -qE '(ghp_|gho_|ghs_|ghr_|github_pat_)[a-zA-Z0-9_]{20,}' && M="$M GitHub-token;"
-echo "$ADDED" | grep -qE 'sk-(ant-|proj-)?[a-zA-Z0-9_-]{20,}' && M="$M API-key(sk-);"
-echo "$ADDED" | grep -qE '(sk|rk|pk)_(live|test)_[a-zA-Z0-9]{20,}' && M="$M Stripe-key;"
-echo "$ADDED" | grep -qE 'xox[bpras]-[0-9a-zA-Z-]{10,}' && M="$M Slack-token;"
-echo "$ADDED" | grep -qE -- '-----BEGIN[[:space:]]+(RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----' && M="$M private-key;"
-echo "$ADDED" | grep -qE '(mongodb|postgres|postgresql|mysql|redis|amqp)(\+[a-z]+)?://[^:[:space:]/@]+:[^@[:space:]]+@[^[:space:]/]+' && M="$M conn-string-with-creds;"
-
-if echo "$ADDED" | grep -qiE '(password|secret|api[_-]?key|api[_-]?token)[[:space:]]*[=:][[:space:]]*["\x27][^"\x27$\{]{12,}["\x27]'; then
-  if ! echo "$ADDED" | grep -qiE 'process\.env|os\.environ|getenv|\$\{|env\(|ENV\[|import\.meta\.env'; then
-    M="$M hardcoded-credential-literal;"
+  # ── .env files (allow .example/.sample/.template/.dist variants) ──
+  BAD_ENV=$(echo "$STAGED" | grep -E '(^|/)\.env($|\.[^/]+$)' | grep -vE '\.(example|sample|template|dist)(\.|$)' || true)
+  if [ -n "$BAD_ENV" ]; then
+    LIST=$(echo "$BAD_ENV" | tr '\n' ',' | sed 's/,$//')
+    deny ".env file(s) staged: $LIST. Use .env.example instead."
   fi
-fi
 
-[ -n "$M" ] && ask "possible secret(s) in staged diff:$M Run git diff --cached to review."
+  # ── key/credential files ──
+  BAD_KEYS=$(echo "$STAGED" | grep -iE '\.(pem|pfx|p12|keystore|jks)$|(^|/)id_rsa$|(^|/)id_ed25519$' || true)
+  if [ -n "$BAD_KEYS" ]; then
+    LIST=$(echo "$BAD_KEYS" | tr '\n' ',' | sed 's/,$//')
+    deny "credential file(s) staged: $LIST."
+  fi
+
+  # ── scan staged diff (added lines only) ──
+  ADDED=$(gc_git "$i" diff --cached 2>/dev/null | grep -E '^\+[^+]' || true)
+  [ -z "$ADDED" ] && return
+
+  echo "$ADDED" | grep -qE 'AKIA[0-9A-Z]{16}' && M="$M AWS-key;"
+  echo "$ADDED" | grep -qiE '(aws_secret_access_key|aws_secret)[[:space:]]*[=:][[:space:]]*["\x27]?[A-Za-z0-9/+=]{40}' && M="$M AWS-secret;"
+  echo "$ADDED" | grep -qE '(ghp_|gho_|ghs_|ghr_|github_pat_)[a-zA-Z0-9_]{20,}' && M="$M GitHub-token;"
+  echo "$ADDED" | grep -qE 'sk-(ant-|proj-)?[a-zA-Z0-9_-]{20,}' && M="$M API-key(sk-);"
+  echo "$ADDED" | grep -qE '(sk|rk|pk)_(live|test)_[a-zA-Z0-9]{20,}' && M="$M Stripe-key;"
+  echo "$ADDED" | grep -qE 'xox[bpras]-[0-9a-zA-Z-]{10,}' && M="$M Slack-token;"
+  echo "$ADDED" | grep -qE -- '-----BEGIN[[:space:]]+(RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----' && M="$M private-key;"
+  echo "$ADDED" | grep -qE '(mongodb|postgres|postgresql|mysql|redis|amqp)(\+[a-z]+)?://[^:[:space:]/@]+:[^@[:space:]]+@[^[:space:]/]+' && M="$M conn-string-with-creds;"
+
+  if echo "$ADDED" | grep -qiE '(password|secret|api[_-]?key|api[_-]?token)[[:space:]]*[=:][[:space:]]*["\x27][^"\x27$\{]{12,}["\x27]'; then
+    if ! echo "$ADDED" | grep -qiE 'process\.env|os\.environ|getenv|\$\{|env\(|ENV\[|import\.meta\.env'; then
+      M="$M hardcoded-credential-literal;"
+    fi
+  fi
+
+  [ -n "$M" ] && ask "possible secret(s) in staged diff:$M Run $(gc_show "$i") diff --cached to review."
+}
+
+for i in $COMMITS; do scan "$i"; done
+[ -n "$ASK" ] && emit ask "SecureCommits: $ASK"
 exit 0
