@@ -14,8 +14,14 @@ COMMITS=$(gc_find commit)
 
 emit() {
   local decision="$1" reason="$2"
+  # The reason is tool output: its newlines, tabs and colour codes would make the JSON
+  # invalid, and Claude Code then drops the deny and runs the commit.
+  reason=$(printf '%s' "$reason" | sed $'s/\033\\[[0-9;]*[A-Za-z]//g' | tr -d '\000-\010\013\014\016-\037')
   reason=${reason//\\/\\\\}
   reason=${reason//\"/\\\"}
+  reason=${reason//$'\n'/\\n}
+  reason=${reason//$'\t'/\\t}
+  reason=${reason//$'\r'/}
   printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' "$decision" "$reason"
   # exit 0 so the deny + the lint/test output (the reason) actually reach Claude.
   # exit 2 discards the JSON and reads empty stderr — the commit gets blocked with
@@ -26,6 +32,9 @@ emit() {
 # Lint and tests run only for a commit in the session's own repo: for one in another
 # repo (git -C, cd) this hook would run that repo's code before the command is approved.
 SESSION_ROOT=$(git -C "$HOOK_CWD" rev-parse --show-toplevel 2>/dev/null)
+# Real newlines, never `\n` + printf %b: %b would also expand the backslashes in the tool
+# output (C:\Dev\…\tests turns into a tab, and a \c cuts the reason off).
+NL=$'\n'
 FAILURES=""
 CHECKED=""
 check_repo() {
@@ -52,13 +61,13 @@ check_repo() {
         ANALYZE_OUTPUT=$(cd "$ROOT" && flutter analyze --no-pub 2>&1)
         ANALYZE_STATUS=$?
         if [ "$ANALYZE_STATUS" -ne 0 ]; then
-          FAILURES="${FAILURES}flutter analyze failed:\n$(printf '%s' "$ANALYZE_OUTPUT" | tail -40)\n\n"
+          FAILURES="${FAILURES}flutter analyze failed:${NL}$(printf '%s' "$ANALYZE_OUTPUT" | tail -40)${NL}${NL}"
         fi
 
         DART_TEST_OUTPUT=$(cd "$ROOT" && flutter test 2>&1)
         DART_TEST_STATUS=$?
         if [ "$DART_TEST_STATUS" -ne 0 ]; then
-          FAILURES="${FAILURES}flutter tests failed:\n$(printf '%s' "$DART_TEST_OUTPUT" | tail -40)\n\n"
+          FAILURES="${FAILURES}flutter tests failed:${NL}$(printf '%s' "$DART_TEST_OUTPUT" | tail -40)${NL}${NL}"
         fi
       else
         echo "[pre-commit-checks] flutter not on PATH — skipping Dart checks" >&2
@@ -80,7 +89,7 @@ check_repo() {
       LINT_OUTPUT=$(cd "$ROOT" && echo "$STAGED_JS" | xargs "$ESLINT_BIN" --max-warnings=0 2>&1)
       LINT_STATUS=$?
       if [ "$LINT_STATUS" -ne 0 ]; then
-        FAILURES="${FAILURES}eslint failed:\n$(printf '%s' "$LINT_OUTPUT" | tail -40)\n\n"
+        FAILURES="${FAILURES}eslint failed:${NL}$(printf '%s' "$LINT_OUTPUT" | tail -40)${NL}${NL}"
       fi
     fi
   fi
@@ -100,7 +109,7 @@ check_repo() {
       TEST_OUTPUT=$(cd "$ROOT" && eval "$TEST_RUNNER" 2>&1)
       TEST_STATUS=$?
       if [ "$TEST_STATUS" -ne 0 ]; then
-        FAILURES="${FAILURES}tests failed:\n$(printf '%s' "$TEST_OUTPUT" | tail -40)\n"
+        FAILURES="${FAILURES}tests failed:${NL}$(printf '%s' "$TEST_OUTPUT" | tail -40)${NL}"
       fi
     fi
   fi
@@ -109,7 +118,7 @@ check_repo() {
 for i in $COMMITS; do check_repo "$i"; done
 
 if [ -n "$FAILURES" ]; then
-  emit deny "PreCommit: $(printf '%b' "$FAILURES")"
+  emit deny "PreCommit: $FAILURES"
 fi
 
 exit 0

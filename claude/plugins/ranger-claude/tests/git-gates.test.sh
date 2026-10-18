@@ -18,13 +18,13 @@ git -C "$S" add lib.sh && git -C "$S" commit -qm init
 echo 'echo changed' >> "$S/lib.sh"
 # R: the repo a command targets (a space in its path), on main with a develop branch,
 # with a .env (secret scan: deny), .DS_Store (hygiene: ask), app.ts (review: deny) and a
-# package.json whose tests fail (pre-commit: deny) staged.
+# package.json whose tests fail with two lines of output (pre-commit: deny, as valid JSON) staged.
 R="$T/tar get"
 git init -q -b main "$R"
 echo r > "$R/README.md"
 git -C "$R" add README.md && git -C "$R" commit -qm init && git -C "$R" branch develop
 echo 'SECRET=1' > "$R/.env"; : > "$R/.DS_Store"; echo 'export const a = 1' > "$R/app.ts"
-echo '{"scripts":{"test":"exit 1"}}' > "$R/package.json"
+echo '{"scripts":{"test":"echo first line; echo second line; exit 1"}}' > "$R/package.json"
 git -C "$R" add -f .env .DS_Store app.ts package.json
 
 # A: nothing staged; what a `git add` in the command would bring is in the worktree:
