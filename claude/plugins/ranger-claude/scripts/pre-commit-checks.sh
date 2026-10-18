@@ -1,5 +1,5 @@
 #!/bin/bash
-# Runs eslint + tests before `git commit` (PreToolUse Bash).
+# Runs lint + tests before `git commit` (PreToolUse Bash): flutter, dotnet, eslint, npm.
 # Tools must already be installed in the project — missing tools are reported
 # but never block. Failures block the commit so they get fixed first.
 
@@ -27,6 +27,22 @@ emit() {
   # exit 2 discards the JSON and reads empty stderr — the commit gets blocked with
   # no visible reason, so the failure can't be fixed. (Matches security-gate.sh.)
   exit 0
+}
+
+# dotnet_solution_dir <root> <root-relative path>: the folder of the nearest *.slnx / *.sln
+# above the path, up to <root> (src/backend in the ranger-app template, backend/ in cerberus).
+# ranger: shortcut — a project with no solution above it is not checked; every .NET repo
+# here has one, and a lone .csproj would need its own test-project discovery.
+dotnet_solution_dir() {
+  local root="$1" dir f
+  dir=$(dirname "$root/$2")
+  while :; do
+    for f in "$dir"/*.slnx "$dir"/*.sln; do
+      [ -e "$f" ] && { printf '%s\n' "$dir"; return; }
+    done
+    [ "$dir" = "$root" ] || [ "$dir" = "/" ] && return
+    dir=$(dirname "$dir")
+  done
 }
 
 # Lint and tests run only for a commit in the session's own repo: for one in another
@@ -72,6 +88,43 @@ check_repo() {
       else
         echo "[pre-commit-checks] flutter not on PATH — skipping Dart checks" >&2
       fi
+    fi
+  fi
+
+  # --- .NET: `dotnet test` (build + every test) in each solution a staged file belongs to ---
+  # Deletions count: removing a type breaks the build as surely as editing one. So do the
+  # files that steer the build: .editorconfig (EnforceCodeStyleInBuild), the SDK pin, feeds.
+  local STAGED_DOTNET DOTNET_DIRS SLN_DIR SLN_COUNT SLN_FILE DOTNET_OUTPUT DOTNET_STATUS
+  STAGED_DOTNET=$( { gc_git "$i" diff --cached --name-only --diff-filter=ACMRD 2>/dev/null; gc_pending "$i"; } \
+    | grep -iE '\.(cs|csproj|props|targets|slnx|sln)$|(^|/)(\.editorconfig|global\.json|nuget\.config|packages\.lock\.json)$' \
+    | sort -u || true)
+
+  if [ -n "$STAGED_DOTNET" ]; then
+    if command -v dotnet >/dev/null 2>&1; then
+      DOTNET_DIRS=$(while IFS= read -r f; do dotnet_solution_dir "$ROOT" "$f"; done <<< "$STAGED_DOTNET" | sort -u)
+      while IFS= read -r SLN_DIR; do
+        [ -n "$SLN_DIR" ] || continue
+        SLN_COUNT=0
+        for SLN_FILE in "$SLN_DIR"/*.slnx "$SLN_DIR"/*.sln; do [ -e "$SLN_FILE" ] && SLN_COUNT=$((SLN_COUNT + 1)); done
+        if [ "$SLN_COUNT" -gt 1 ]; then                # a bare `dotnet test` needs exactly one
+          echo "[pre-commit-checks] several solutions in ${SLN_DIR#"$ROOT"/} — skipping dotnet test there" >&2
+          continue
+        fi
+        # No extra flags: under Microsoft.Testing.Platform (global.json "test.runner") they reach
+        # the test apps, which exit 5 on any they don't know (-nologo included). stdin is the
+        # loop's list of folders: anything in the run that reads it would eat the rest.
+        DOTNET_OUTPUT=$(cd "$SLN_DIR" && dotnet test 2>&1 </dev/null)
+        DOTNET_STATUS=$?
+        if [ "$DOTNET_STATUS" -ne 0 ]; then
+          # Stack frames and build progress ("  Project -> path") would push the failing test
+          # out of the last 40 lines.
+          FAILURES="${FAILURES}dotnet test failed in ${SLN_DIR#"$ROOT"/}:${NL}$(printf '%s\n' "$DOTNET_OUTPUT" \
+            | grep -vE '^[[:space:]]+at |^--- End of stack trace|^[[:space:]]*$|^[[:space:]]+[^[:space:]]+ -> |^Test run for |^A total of [0-9]+ test files' \
+            | tail -40)${NL}${NL}"
+        fi
+      done <<< "$DOTNET_DIRS"
+    else
+      echo "[pre-commit-checks] dotnet not on PATH — skipping .NET checks" >&2
     fi
   fi
 
