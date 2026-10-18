@@ -7,6 +7,7 @@
 #   for i in $(gc_find commit); do             # every `git … commit` in the command
 #     gc_git "$i" diff --cached --name-only    # git, pointed at that invocation's repo
 #     gc_flag "$i" a --all && …                # -a, a cluster like -am, or --all
+#     gc_known "$i" || …                       # its repo is a guess (a variable path)
 #     gc_pending "$i"                          # paths an earlier `git add` / -a adds
 #   done
 #
@@ -21,8 +22,10 @@
 # and every flag (-p, -P, --no-pager, --bare, …).
 # Quoted text is data: `echo "git commit"` is not a git invocation.
 # Not understood: git or shell aliases, functions, GIT_DIR=… prefixes, and
-# variables other than $HOME: a `-C "$X"` or `cd "$X"` keeps the previous
-# directory, so the gate falls back to the session's repo.
+# variables other than $HOME: a `-C "$X"`, `cd "$X"` or `cd -` keeps the previous
+# directory (the session's repo, for callers that need one) and marks the
+# invocation's repo unknown (GC_KNOWN=0), so a gate can ask instead of judging the
+# wrong repo. An absolute path later in the command makes it known again.
 #
 # bash 3.2 (macOS /bin/bash): no namerefs, no associative arrays. The parser's
 # helpers share state through bash's dynamic scoping (the callers' locals). It runs
@@ -196,8 +199,9 @@ _gc_tok() {
   _gc_end; _P=$((n + 1))
 }
 
-# _gc_path <base> <path>: resolve <path> against <base> into _GC_R. Fails for a
-# path whose value is not known here ($VAR other than $HOME, a substitution).
+# _gc_path <base> <path>: resolve <path> against <base> into _GC_R; _GC_ABS=1 when
+# the result does not depend on <base>. Fails for a path whose value is not known
+# here ($VAR other than $HOME, a substitution).
 # ranger: shortcut — callers then keep the previous directory (the session's repo,
 # the pre-parser behaviour) instead of tracking assignments made in the command.
 _gc_path() {
@@ -209,21 +213,22 @@ _gc_path() {
   esac
   case $p in *'$'*) return 1 ;; esac
   case $p in
-    '') _GC_R=$1 ;;
-    /*|[A-Za-z]:[\\/]*) _GC_R=$p ;;
-    *) _GC_R=$1/$p ;;
+    '') _GC_R=$1; _GC_ABS=0 ;;
+    /*|[A-Za-z]:[\\/]*) _GC_R=$p; _GC_ABS=1 ;;
+    *) _GC_R=$1/$p; _GC_ABS=0 ;;
   esac
 }
 
-# _gc_git <arg>...: record one git invocation (in _gc_cmd's dir).
+# _gc_git <arg>...: record one git invocation (in _gc_cmd's dir; known as _gc_cmd's).
 _gc_git() {
-  local d=$dir gd='' wt='' a args=''
+  local d=$dir k=$known gd='' wt='' a args=''
   while [ $# -gt 0 ]; do
     case $1 in
       -C|-c|--git-dir|--work-tree|--namespace|--config-env|--attr-source)
         [ $# -ge 2 ] || return 0
         case $1 in
-          -C) _gc_path "$d" "$2" && d=$_GC_R ;;  # each -C is relative to the one before
+          -C)                                   # each -C is relative to the one before
+            if _gc_path "$d" "$2"; then d=$_GC_R; [ "$_GC_ABS" = 0 ] || k=1; else k=0; fi ;;
           --git-dir) gd=$2 ;;
           --work-tree) wt=$2 ;;
         esac
@@ -236,16 +241,18 @@ _gc_git() {
   done
   [ $# -gt 0 ] || return 0
   # a relative --git-dir / --work-tree is relative to the final -C directory
-  if [ -n "$gd" ]; then _gc_path "$d" "$gd" && gd=$_GC_R || gd=''; fi
+  if [ -n "$gd" ]; then
+    if _gc_path "$d" "$gd"; then gd=$_GC_R; [ "$_GC_ABS" = 0 ] || k=1; else gd=''; k=0; fi
+  fi
   if [ -n "$wt" ]; then _gc_path "$d" "$wt" && wt=$_GC_R || wt=''; fi
   GC_SUB[GC_N]=$1; shift
   for a in "$@"; do args+=$a$_GC_US; done
-  GC_DIR[GC_N]=$d; GC_GITDIR[GC_N]=$gd; GC_WT[GC_N]=$wt; GC_ARGS[GC_N]=$args
+  GC_DIR[GC_N]=$d; GC_KNOWN[GC_N]=$k; GC_GITDIR[GC_N]=$gd; GC_WT[GC_N]=$wt; GC_ARGS[GC_N]=$args
   GC_N=$((GC_N + 1))
 }
 
-# _gc_simple <word>...: one simple command (reads and moves _gc_cmd's dir, reads
-# its bodies).
+# _gc_simple <word>...: one simple command (reads and moves _gc_cmd's dir and
+# known, reads its bodies).
 _gc_simple() {
   local b
   while [ $# -gt 0 ]; do                     # keywords, NAME=value, wrappers
@@ -266,40 +273,43 @@ _gc_simple() {
   case $cmd in
     cd|pushd)
       while [[ $1 == -?* ]]; do shift; done
-      if [ $# -eq 0 ]; then dir=$HOME
-      elif [ "$1" != - ] && _gc_path "$dir" "$1"; then dir=$_GC_R; fi ;;
+      if [ $# -eq 0 ]; then dir=$HOME; known=1
+      elif [ "$1" != - ] && _gc_path "$dir" "$1"; then dir=$_GC_R; [ "$_GC_ABS" = 0 ] || known=1
+      else known=0; fi ;;
     git|git.exe) _gc_git "$@" ;;
     bash|sh|zsh|dash|ksh)
       while [[ $1 == -* ]]; do
-        case $1 in --*) ;; *c*) [ $# -ge 2 ] && _gc_cmd "$2" "$dir" $((depth + 1)); return 0 ;; esac
+        case $1 in --*) ;; *c*) [ $# -ge 2 ] && _gc_cmd "$2" "$dir" $((depth + 1)) "$known"; return 0 ;; esac
         shift
       done
       if [ $# -eq 0 ]; then                  # script on stdin: its heredoc / here-string
-        for b in "${bodies[@]}"; do _gc_cmd "$b" "$dir" $((depth + 1)); done
+        for b in "${bodies[@]}"; do _gc_cmd "$b" "$dir" $((depth + 1)) "$known"; done
       fi ;;
-    eval) _gc_cmd "$*" "$dir" $((depth + 1)) ;;
+    eval) _gc_cmd "$*" "$dir" $((depth + 1)) "$known" ;;
   esac
 }
 
-# _gc_cmd <string> <dir> <depth>: parse a command string that runs in <dir>.
+# _gc_cmd <string> <dir> <depth> [<known>]: parse a command string that runs in
+# <dir>; known=0 when <dir> is only the fallback for a path not known here.
 _gc_cmd() {
   [ "$3" -gt 8 ] && return 0
-  local dir=$2 depth=$3 t
+  local dir=$2 depth=$3 known=${4:-1} t top
   local -a _T=() words=() stack=() bodies=()
   _gc_tok "$1" 0 1
   for t in "${_T[@]}" 'O;'; do
     case $t in
       W*) words+=("${t:1}") ;;
-      S*) _gc_cmd "${t:1}" "$dir" $((depth + 1)) ;;
+      S*) _gc_cmd "${t:1}" "$dir" $((depth + 1)) "$known" ;;
       H*) bodies+=("${t:1}") ;;
       O*)
         [ ${#words[@]} -gt 0 ] && _gc_simple "${words[@]}"
         words=(); bodies=()
         case $t in
-          'O(') stack+=("$dir") ;;
+          'O(') stack+=("$known$dir") ;;           # known (one digit), then the dir
           'O)')
             if [ ${#stack[@]} -gt 0 ]; then
-              dir=${stack[${#stack[@]}-1]}; unset "stack[${#stack[@]}-1]"
+              top=${stack[${#stack[@]}-1]}; unset "stack[${#stack[@]}-1]"
+              known=${top:0:1}; dir=${top:1}
             fi ;;
         esac ;;
     esac
@@ -307,12 +317,13 @@ _gc_cmd() {
 }
 
 # gc_parse <command> <session cwd>: find the git invocations. Sets GC_N and, per
-# invocation, GC_SUB (subcommand), GC_DIR (directory git runs in), GC_GITDIR and
+# invocation, GC_SUB (subcommand), GC_DIR (directory git runs in), GC_KNOWN (0 when
+# GC_DIR is only the fallback for a path not known here, else 1), GC_GITDIR and
 # GC_WT (--git-dir / --work-tree, absolute, or empty), GC_ARGS (packed; gc_argv).
 gc_parse() {
   local LC_ALL=C                             # byte offsets: no per-access UTF-8 scan
-  GC_N=0; GC_SUB=(); GC_DIR=(); GC_GITDIR=(); GC_WT=(); GC_ARGS=()
-  case $1 in *git*) _gc_cmd "$1" "${2:-$PWD}" 0 ;; esac
+  GC_N=0; GC_SUB=(); GC_DIR=(); GC_KNOWN=(); GC_GITDIR=(); GC_WT=(); GC_ARGS=()
+  case $1 in *git*) _gc_cmd "$1" "${2:-$PWD}" 0 1 ;; esac
 }
 
 # gc_find <subcommand>: the indices of the invocations that run it, one per line.
@@ -322,6 +333,9 @@ gc_find() {
     if [ "${GC_SUB[i]}" = "$1" ]; then printf '%s\n' "$i"; fi
   done
 }
+
+# gc_known <i>: is the invocation's repo known (no variable path or `cd -` on the way)?
+gc_known() { [ "${GC_KNOWN[$1]}" = 1 ]; }
 
 # gc_argv <i>: GC_ARGV=(the arguments after the subcommand).
 gc_argv() {

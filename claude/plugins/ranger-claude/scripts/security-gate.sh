@@ -57,6 +57,12 @@ for i in $(gc_find push); do
     case $r in main|master) TO_MAIN=1 ;; HEAD) CURRENT=1 ;; esac
   done
   [ "$FORCE" = 1 ] && deny "force push blocked. Use --force-with-lease."
+  # A variable or `cd -` hides the repo: the session's repo would be the wrong one to judge (deny or allow by
+  # accident), so the push is asked.
+  if ! gc_known "$i" && { [ "$TO_MAIN" = 1 ] || [ "$CURRENT" = 1 ]; }; then
+    ask "this push's repo is not known before it runs (a variable or cd - on the way to it), so its develop branch cannot be checked. A repo with develop takes main only through release PRs. Confirm the push?"
+    continue
+  fi
   if [ "$TO_MAIN" = 1 ]; then
     uses_develop "$i" && deny "pushing to main in a repo with a develop branch: main only takes release PRs from develop. Push to develop (or a branch) and open a release PR."
     ask "pushing to main/master. Fine for personal repos; use a branch + PR for shared/client repos. Confirm?"

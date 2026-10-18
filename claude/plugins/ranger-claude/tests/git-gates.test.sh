@@ -135,6 +135,29 @@ git -C '$R' push --force
 EOF"                                                                                   deny - - - -
 expect "bash <<< runs a force push"         "$S" "bash <<< \"git -C '$R' push --force\""  deny - - - -
 
+# ── push to a repo the parser cannot resolve (a variable, cd -): ask, never judge the session's repo ──
+expect "loop var -C push main, session R"   "$R" "for d in '$S'; do git -C \$d push origin main; done" ask - - - -
+expect "-C \"\$X\" push main, session R"      "$R" "git -C \"\$X\" push origin main"          ask - - - -
+expect "cd \$X && git push, session R"       "$R" "cd \$X && git push"                       ask - - - -
+expect "cd - && git push, session S"        "$S" "cd - && git push"                         ask - - - -
+expect "cd \$X && git -C . push main, R"      "$R" "cd \$X && git -C . push origin main"       ask - - - -
+expect "cd \$X && git -C R push main"        "$S" "cd \$X && git -C '$R' push origin main"    deny - - - -
+expect "cd \$X; cd R && git push main"       "$S" "cd \$X; cd '$R' && git push origin main"   deny - - - -
+expect "cd R && git push origin main"       "$S" "cd '$R' && git push origin main"          deny - - - -
+expect "(cd \$X && …); git push main, R"     "$R" "(cd \$X && git status); git push origin main" deny - - - -
+expect "-C \$X push --force"                 "$S" "git -C \$X push --force"                  deny - - - -
+expect "-C \$X push origin feature"          "$S" "git -C \$X push origin feature"           allow - - - -
+expect "--git-dir=\$G push main, session R"   "$R" "git --git-dir=\$G push origin main"        ask - - - -
+expect "cd \$X && --git-dir=R push main"     "$S" "cd \$X && git --git-dir='$R/.git' push origin main" deny - - - -
+expect "cd \$X && bash -c push main, R"      "$R" "cd \$X && bash -c 'git push origin main'"  ask - - - -
+expect "cd \$X && bash <<EOF push main, R"   "$R" "cd \$X && bash <<'EOF'
+git push origin main
+EOF"                                                                                   ask - - - -
+expect "cd \$X && eval push main, R"         "$R" "cd \$X && eval git push origin main"       ask - - - -
+expect "cd \$X && \$(push main), R"           "$R" "cd \$X && echo \$(git push origin main)"   ask - - - -
+HOME="$R" \
+expect "cd \$X; cd && push main, HOME=R"     "$S" "cd \$X; cd && git push origin main"        deny - - - -
+
 # ── destructive asks ──
 expect "plain branch -D"                    "$S" "git branch -D x"                         ask - - - -
 expect "git -C R branch -D"                 "$S" "git -C '$R' branch -D x"                  ask - - - -
