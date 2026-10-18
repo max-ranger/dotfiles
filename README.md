@@ -414,9 +414,9 @@ claude plugin update ranger-claude@ranger
 | `secure-commits` | PreToolUse `git commit` | deny `.env`/key files; ask on secret-looking diffs |
 | `commit-hygiene` | PreToolUse `git commit` | ask when junk (`.DS_Store`, logs, scratch) is staged |
 | `review-gate` | PreToolUse `git commit` | **deny until `/code-review` ran since the last commit** in the committed repo (a review counts only for the session's own repo; docs-only commits exempt, shell and PowerShell scripts count as source; `RANGER_SKIP_REVIEW=1` bypass) |
-| `pre-commit-checks` | PreToolUse `git commit` | eslint + tests (JS), `flutter analyze` + tests (Dart) in the session's repo; failures block |
+| `pre-commit-checks` | PreToolUse `git commit` | eslint + tests (JS), `flutter analyze` + tests (Dart), `dotnet test` in the solution folder above each staged C#, MSBuild or build-config file (.NET) in the session's repo; failures block |
 | `design-pretrigger` | PreToolUse Edit/Write | once per session: first UI-file edit is denied with "decide whether `emil-design-eng` / `impeccable` runs first" |
-| `format-on-save` | PostToolUse Edit/Write | prettier / rustfmt / gofmt / dart format |
+| `format-on-save` | PostToolUse Edit/Write | prettier / rustfmt / gofmt / dart format / `dotnet format whitespace` (C#, when an `.editorconfig` is above the file) |
 | `track-edits` · `track-skills` · `track-tests` | PostToolUse | markers under `.git/ranger/` for the gates |
 | `verify-gate` | Stop | **block (max 2×) when code was edited and no test ran after the last edit** |
 | `project-context` | SessionStart | points at the repo's `docs/overview.md` and at the handbook repo |
@@ -627,7 +627,8 @@ When you improve a hook, skill, setting, or template:
    Test a hook before committing: pipe a synthetic JSON input into the script
    (`printf '{"tool_input":{"command":"git commit -m x"},"cwd":"."}' | bash claude/plugins/ranger-claude/scripts/review-gate.sh`).
    The git gates have a suite that does this against throwaway repos:
-   `bash claude/plugins/ranger-claude/tests/git-gates.test.sh`.
+   `bash claude/plugins/ranger-claude/tests/git-gates.test.sh`; C# format on save has
+   `tests/format-on-save.test.sh` (needs the .NET SDK).
 
 Refresh the Brewfile (and tracked VS Code extensions) from the current Mac:
 

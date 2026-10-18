@@ -7,10 +7,30 @@ source "$(dirname "$0")/_parse-input.sh"
 
 EXTENSION="${HOOK_FILE_PATH##*.}"
 
+# find_up <dir> <file>: the nearest folder at or above <dir> that holds <file>.
+find_up() {
+  local dir="$1"
+  while [ "$dir" != "/" ] && [ "$dir" != "." ] && [ -n "$dir" ]; do
+    if [ -f "$dir/$2" ]; then echo "$dir"; return; fi
+    dir=$(dirname "$dir")
+  done
+}
+
 case "$EXTENSION" in
   rs) command -v rustfmt >/dev/null 2>&1 && rustfmt "$HOOK_FILE_PATH" 2>/dev/null || true; exit 0 ;;
   go) command -v gofmt >/dev/null 2>&1 && gofmt -w "$HOOK_FILE_PATH" 2>/dev/null || true; exit 0 ;;
   dart) command -v dart >/dev/null 2>&1 && dart format "$HOOK_FILE_PATH" >/dev/null 2>&1 || true; exit 0 ;;
+  cs)
+    # Whitespace only, in folder mode: no restore or build (~1 s), the rules come from the
+    # .editorconfig, which is also the opt-in. Style and analyzer rules stay with the build
+    # (EnforceCodeStyleInBuild). Backslashes: a Windows path, which dirname can't split.
+    command -v dotnet >/dev/null 2>&1 || exit 0
+    CS_FILE=${HOOK_FILE_PATH//\\//}
+    CS_DIR=$(dirname "$CS_FILE")
+    [ -n "$(find_up "$CS_DIR" .editorconfig)" ] || exit 0
+    (cd "$CS_DIR" && dotnet format whitespace . --folder --include "$(basename "$CS_FILE")") >/dev/null 2>&1 || \
+      echo "[format-on-save] dotnet format failed for $HOOK_FILE_PATH"
+    exit 0 ;;
 esac
 
 case "$EXTENSION" in
@@ -18,15 +38,7 @@ case "$EXTENSION" in
   *) exit 0 ;;
 esac
 
-find_project_root() {
-  local dir="$1"
-  while [ "$dir" != "/" ] && [ "$dir" != "." ] && [ -n "$dir" ]; do
-    if [ -f "$dir/package.json" ]; then echo "$dir"; return; fi
-    dir=$(dirname "$dir")
-  done
-}
-
-ROOT=$(find_project_root "$(dirname "$HOOK_FILE_PATH")")
+ROOT=$(find_up "$(dirname "$HOOK_FILE_PATH")" package.json)
 [ -z "$ROOT" ] && exit 0
 
 REL="${HOOK_FILE_PATH#$ROOT/}"

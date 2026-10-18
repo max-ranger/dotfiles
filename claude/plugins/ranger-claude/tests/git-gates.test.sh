@@ -18,13 +18,13 @@ git -C "$S" add lib.sh && git -C "$S" commit -qm init
 echo 'echo changed' >> "$S/lib.sh"
 # R: the repo a command targets (a space in its path), on main with a develop branch,
 # with a .env (secret scan: deny), .DS_Store (hygiene: ask), app.ts (review: deny) and a
-# package.json whose tests fail (pre-commit: deny) staged.
+# package.json whose tests fail with two lines of output (pre-commit: deny, as valid JSON) staged.
 R="$T/tar get"
 git init -q -b main "$R"
 echo r > "$R/README.md"
 git -C "$R" add README.md && git -C "$R" commit -qm init && git -C "$R" branch develop
 echo 'SECRET=1' > "$R/.env"; : > "$R/.DS_Store"; echo 'export const a = 1' > "$R/app.ts"
-echo '{"scripts":{"test":"exit 1"}}' > "$R/package.json"
+echo '{"scripts":{"test":"echo first line; echo second line; exit 1"}}' > "$R/package.json"
 git -C "$R" add -f .env .DS_Store app.ts package.json
 
 # A: nothing staged; what a `git add` in the command would bring is in the worktree:
@@ -196,6 +196,71 @@ expect "review in S, commit -a in S"        "$S" "git commit -am x"             
 expect "RANGER_SKIP_REVIEW=1 bypass"        "$S" "RANGER_SKIP_REVIEW=1 git -C '$R' commit -m x" - - - allow -
 skill "$R"
 expect "review in R, commit in R from S"    "$S" "git -C '$R' commit -m x"                  - - - allow -
+
+# ── .NET: dotnet test runs in the solution folder above each staged C#/MSBuild file ──
+# D keeps its solutions one level down (like the template's src/backend), in two folders.
+# A stub dotnet reads stdin (as a build or test host may), logs the folder it ran in and
+# its arguments, prints a stack frame and a Windows path, and exits with $DOTNET_STUB_EXIT.
+D="$T/dot net"
+git init -q -b feature "$D"
+mkdir -p "$D/backend/App" "$D/tools" "$T/stub"
+echo '<Solution />' > "$D/backend/App.slnx"; echo 'class A {}' > "$D/backend/App/A.cs"
+echo '<Solution />' > "$D/tools/Tools.slnx"; echo 'class T {}' > "$D/tools/T.cs"
+echo 'root = true' > "$D/backend/.editorconfig"; echo d > "$D/README.md"
+git -C "$D" add -A && git -C "$D" commit -qm init
+cat > "$T/stub/dotnet" <<EOF
+#!/bin/sh
+cat > /dev/null
+echo "\$(pwd -P) \$*" >> "$T/dotnet-ran"
+echo "  Failed Probe_fails [1 ms]"
+echo "   at Probe.Fails() in /src/ProbeTests.cs:line 3"
+printf '%s\n' 'C:\Dev\tests\X.cs(3,1): error CS1002'
+exit "\${DOTNET_STUB_EXIT:-0}"
+EOF
+chmod +x "$T/stub/dotnet"
+OLD_PATH=$PATH; PATH="$T/stub:$PATH"
+ran_in() {  # ran_in <label> <folder>... | none: the folders the stub ran in (with `test`) since the last check
+  local label=$1 want='' got='' d; shift
+  if [ "$1" != none ]; then for d in "$@"; do want+="$(cd "$d" && pwd -P) test"$'\n'; done; fi
+  [ -f "$T/dotnet-ran" ] && got=$(sort "$T/dotnet-ran")$'\n'
+  want=$(printf '%s' "$want" | sort)$'\n'; [ "$want" = $'\n' ] && want=''
+  if [ "$got" = "$want" ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); printf 'FAIL  %s: dotnet ran\n%swant\n%s' "$label" "$got" "$want"; fi
+  rm -f "$T/dotnet-ran"
+}
+reason_has() {  # reason_has <label> <cwd> <command> <text>...: the deny reason holds each text, no stack frame
+  local label=$1 out t; out=$(cd "$2" && jq -nc --arg c "$3" --arg d "$2" \
+    '{session_id:"test",cwd:$d,hook_event_name:"PreToolUse",tool_name:"Bash",tool_input:{command:$c}}' \
+    | bash "$SCRIPTS/pre-commit-checks.sh" 2>/dev/null | jq -r '.hookSpecificOutput.permissionDecisionReason')
+  shift 3; rm -f "$T/dotnet-ran"
+  for t in "$@"; do
+    case $out in *"$t"*) PASS=$((PASS + 1)) ;; *) FAIL=$((FAIL + 1)); printf 'FAIL  %s: reason lacks %s:\n%s\n' "$label" "$t" "$out" ;; esac
+  done
+  case $out in *"at Probe.Fails"*) FAIL=$((FAIL + 1)); echo "FAIL  $label: stack frame kept in the reason" ;; *) PASS=$((PASS + 1)) ;; esac
+}
+echo 'class A { int b; }' > "$D/backend/App/A.cs"
+export DOTNET_STUB_EXIT=1
+expect "D: commit -am, tests fail"          "$D" "git commit -am x"                        - - - - deny
+ran_in "D: commit -am, tests fail" "$D/backend"
+reason_has "D: reason names folder and test" "$D" "git commit -am x" "dotnet test failed in backend:" "Failed Probe_fails" 'C:\Dev\tests\X.cs(3,1)'
+echo 'class T { int b; }' > "$D/tools/T.cs"
+expect "D: two solution folders"            "$D" "git commit -am x"                        - - - - deny
+ran_in "D: two solution folders" "$D/backend" "$D/tools"
+git -C "$D" checkout -q -- .
+rm "$D/backend/App/A.cs"
+expect "D: commit -am deleting A.cs"        "$D" "git commit -am x"                        - - - - deny
+ran_in "D: commit -am deleting A.cs" "$D/backend"
+git -C "$D" checkout -q -- .
+echo 'indent_size = 4' >> "$D/backend/.editorconfig"
+expect "D: .editorconfig only"              "$D" "git commit -am x"                        - - - - deny
+ran_in "D: .editorconfig only" "$D/backend"
+git -C "$D" checkout -q -- .; echo changed >> "$D/README.md"
+expect "D: README only, no dotnet run"      "$D" "git commit -am x"                        - - - - allow
+ran_in "D: README only, no dotnet run" none
+echo 'class A { int c; }' > "$D/backend/App/A.cs"
+export DOTNET_STUB_EXIT=0
+expect "D: commit -am, tests pass"          "$D" "git commit -am x"                        - - - - allow
+ran_in "D: commit -am, tests pass" "$D/backend"
+unset DOTNET_STUB_EXIT; PATH=$OLD_PATH
 
 echo "$PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
