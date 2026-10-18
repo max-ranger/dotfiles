@@ -1,6 +1,6 @@
 ---
 name: intent
-description: Use when a change bigger than half a day is about to start and nobody has written down why — "/intent", "new feature", "let's plan X", "I want to build", a vague ask that would otherwise go straight to code.
+description: Use when a change bigger than half a day is about to start and nobody has written down why — "/intent", "new feature", "add a feature/view", "let's plan X", "I want to build", a vague ask that would otherwise go straight to code. Not for fixes or chores; not when docs/specs/<feature>/intent.md already exists (spec).
 ---
 
 # Intent
@@ -9,6 +9,7 @@ Capture *why* before *what*. Output is `docs/specs/<feature>/intent.md`; nothing
 
 ## Process
 
+0. Size gate: fixes, chores and changes under half a day get no intent file. Say so in one line and proceed without one. An existing `intent.md` for the feature means the next step is `/spec`, not a second interview.
 1. Read `docs/overview.md` and `docs/architecture.md` if they exist. Skip the interview for anything you can answer from the repo.
 2. Hypothesize the intent with a confidence number ("I think you want X, ~70%").
 3. Ask **one** question at a time, each with your best guess attached, so a "yes" is enough. Stop asking at ~95% confidence or when the user says "go". Method: `${CLAUDE_PLUGIN_ROOT}/references/interview-method.md`.
@@ -23,7 +24,7 @@ Capture *why* before *what*. Output is `docs/specs/<feature>/intent.md`; nothing
 # Intent: <title>
 
 Status: draft | ready
-Author: <user>
+Author: <git config user.name; never asked>
 
 ## Problem
 <what hurts today, for whom, evidence>
@@ -40,5 +41,3 @@ Author: <user>
 ## Open questions
 - [ ] <question> — owner, needed by
 ```
-
-Fixes, chores and small changes do not get an intent file; say so and proceed without one.

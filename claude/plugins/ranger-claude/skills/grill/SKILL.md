@@ -1,6 +1,6 @@
 ---
 name: grill
-description: Use when Max wants a plan, stack choice, design or idea stress-tested before it costs weeks — "grill this", "poke holes", "what am I missing", "challenge the premise" — or before a spec is approved.
+description: Stress-test a plan, stack choice, design or idea before it costs weeks — "grill this", "poke holes", "what am I missing", "challenge the premise", "is this a good idea", "sanity check", "what do you think of this plan", "before I commit to X". Not for a bug (diagnosing-bugs) or while writing a spec (spec runs one round itself).
 ---
 
 # Grill

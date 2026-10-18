@@ -11,10 +11,11 @@ Offer an ADR when all three hold: the choice is hard to reverse, a future reader
 
 ## Process
 
-1. Find the next number: highest `NNNN` in `docs/decisions/` + 1 (start at `0001`). Slug from the title, no date in the filename.
+1. Search `docs/decisions/` for the same decision first. An accepted ADR that already says it: point to it and stop. One that this changes: supersede it (step 3), never write a duplicate. Then find the next number: highest `NNNN` + 1 (start at `0001`). Slug from the title, no date in the filename.
 2. Write the file from the template below. Context and consequences matter more than the decision line; a reader must be able to disagree with reasons.
 3. If this supersedes an earlier ADR, set that ADR's status to `superseded by NNNN` (that status line is the only edit an accepted ADR ever gets).
 4. Link it from `docs/overview.md` only if it changes how the project is described there.
+5. Reply with the file path and the decision line, nothing more.
 
 ## File
 
