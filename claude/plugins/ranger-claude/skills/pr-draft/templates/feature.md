@@ -21,6 +21,8 @@ Use for new functionality (`feature/`, `feat/`) and as the generic fallback for 
 
 ### 📷 Screenshots & Recordings
 
+<Only if UI files changed — otherwise remove this section.>
+
 |         |         |
 |  :----  | :-----: |
 | Before | _to be added_ |

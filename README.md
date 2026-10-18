@@ -630,6 +630,9 @@ When you improve a hook, skill, setting, or template:
    The git gates have a suite that does this against throwaway repos:
    `bash claude/plugins/ranger-claude/tests/git-gates.test.sh`; C# format on save has
    `tests/format-on-save.test.sh` (needs the .NET SDK).
+   Skill changes: check them against
+   [`references/writing-for-baseline-delta.md`](claude/plugins/ranger-claude/references/writing-for-baseline-delta.md)
+   first; the description decides whether a skill ever loads.
 
 Refresh the Brewfile (and tracked VS Code extensions) from the current Mac:
 
@@ -660,7 +663,9 @@ Windows manifest stays in lockstep.
 Pinned copies inside the plugin; re-sync deliberately against a re-reviewed commit, never
 auto-fetch.
 
-- `skills/emil-design-eng` — [emilkowalski/skill](https://github.com/emilkowalski/skill)
+- `skills/emil-design-eng` — [emilkowalski/skill](https://github.com/emilkowalski/skill); local
+  patch: our own `description` (when to load it, vs `impeccable`) and the course-promo
+  "Initial Response" block removed
 - `claude/rules/web-interface.md` — [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)
   (`command.md`, MIT, pinned `e3d624b`, brand-voice rules pruned)
 - `references/` — [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)
@@ -672,5 +677,7 @@ auto-fetch.
 - `references/writing-good-tests.md`, the claims-and-evidence table, the plan additions, the
   builder check, two verifier clauses — [obra/superpowers](https://github.com/obra/superpowers)
   (MIT, pinned `bb92a77`), distilled
+- `references/writing-for-baseline-delta.md` — [dotnet/skills](https://github.com/dotnet/skills)
+  (MIT, pinned `10d85e2`), verbatim: how to write a skill that beats the model without it
 - `rules/simplicity.md` — ladder idea from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT), rewritten
 - `rules/output.md` — ideas from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT), rewritten

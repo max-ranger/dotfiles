@@ -1,11 +1,13 @@
 ---
 name: diagnosing-bugs
-description: Use when something is broken, throwing, failing, flaky or slow and the cause is not obvious after one look — "debug this", "why does this fail", a stack trace, a regression, a performance drop.
+description: Diagnose before fixing — something is broken, crashing, throwing, failing (tests, build, CI), flaky or slow, or a fix didn't hold. "debug this", "why does this fail", "it still crashes", "the fix doesn't work", "CI is still red", a stack trace, a regression, a performance drop. Not for a cause the error line already names; fix that directly.
 ---
 
 # Diagnosing bugs
 
 The skill is the feedback loop. Everything after it is mechanical.
+
+**Fast path:** the error names the cause and one edit fixes it → regression test, fix, rerun (step 5), skip steps 3–4. A fix that did not hold is never the fast path.
 
 ## 1. Build a red-capable loop first
 
