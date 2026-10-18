@@ -368,8 +368,9 @@ irm https://claude.ai/install.ps1 | iex              # Windows
   only when matching files are touched: `csharp.md`, `dart.md`, `typescript.md`, `vue.md`,
   `web-interface.md`.
 - [`claude/settings.json`](claude/settings.json) — model, output style, `enabledPlugins`,
-  `extraKnownMarketplaces` (incl. this repo as marketplace `ranger`), flags. No hooks: they
-  live in the plugin.
+  `extraKnownMarketplaces` (incl. this repo as marketplace `ranger`), flags, and the `permissions.allow`
+  list for unattended runs (GitHub secrets, Zero deploys, `infra/bin` env push and provisioning,
+  ghcr pushes, `docker --context ranger` on the box). No hooks: they live in the plugin.
 - [`claude/docs/loop-engineering.md`](claude/docs/loop-engineering.md) — on-demand reference
   for unattended loops. [`claude/prompts/`](claude/prompts) — paste-in prompt snippets.
 

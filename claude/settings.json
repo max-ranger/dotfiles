@@ -29,5 +29,20 @@
   "theme": "auto",
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
-  "skipWorkflowUsageWarning": true
+  "skipWorkflowUsageWarning": true,
+  "permissions": {
+    "allow": [
+      "Bash(gh secret set *)",
+      "Bash(gh secret delete *)",
+      "Bash(zero env remove *)",
+      "Bash(zero deploy *)",
+      "Bash(zero stop *)",
+      "Bash(zero start *)",
+      "Bash(infra/bin/env-push.sh *)",
+      "Bash(infra/bin/provision.sh *)",
+      "Bash(docker push ghcr.io/max-ranger/*)",
+      "Bash(docker --context ranger run *)",
+      "Bash(docker --context ranger exec ranger-postgres psql *)"
+    ]
+  }
 }
