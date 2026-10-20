@@ -364,7 +364,8 @@ irm https://claude.ai/install.ps1 | iex              # Windows
   summary, where knowledge lives. ~30 lines; everything detailed is a rule.
 - [`claude/rules/`](claude/rules) — `~/.claude/rules/`. Always-on: `output.md` (verdict first,
   short, scannable), `simplicity.md` (the ladder and the three module tests), `git.md`, `docs.md`
-  (the in-repo docs layout and SDLC chain), `testing.md` (tests worth keeping). Path-scoped, loaded
+  (the in-repo docs layout and SDLC chain), `testing.md` (tests worth keeping), `writing.md` (plain,
+  human-readable text). Path-scoped, loaded
   only when matching files are touched: `csharp.md`, `dart.md`, `typescript.md`, `vue.md`,
   `web-interface.md`.
 - [`claude/settings.json`](claude/settings.json) — model, output style, `enabledPlugins`,
@@ -685,3 +686,4 @@ auto-fetch.
   (MIT, pinned `10d85e2`), verbatim: how to write a skill that beats the model without it
 - `rules/simplicity.md` — ladder idea from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT), rewritten
 - `rules/output.md` — ideas from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT), rewritten
+- `rules/writing.md` — patterns from [blader/humanizer](https://github.com/blader/humanizer) (MIT), rewritten
