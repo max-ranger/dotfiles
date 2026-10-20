@@ -414,12 +414,12 @@ claude plugin update ranger-claude@ranger
 | `security-gate` | PreToolUse Bash | deny/ask on force-push, `rm -rf ~`, DROP TABLE, publish, pipe-to-shell…; a push to `main` is denied in repos with a `develop` branch (release PRs only), asked elsewhere and when a variable or `cd -` hides the repo |
 | `secure-commits` | PreToolUse `git commit` | deny `.env`/key files; ask on secret-looking diffs |
 | `commit-hygiene` | PreToolUse `git commit` | ask when junk (`.DS_Store`, logs, scratch) is staged |
-| `review-gate` | PreToolUse `git commit` | **deny until `/code-review` ran since the last commit** in the committed repo (a review counts only for the session's own repo; docs-only commits exempt, shell and PowerShell scripts count as source; `RANGER_SKIP_REVIEW=1` bypass) |
+| `review-gate` | PreToolUse `git commit` | **deny until `/code-review` ran since the last commit** in the committed repo (a review counts only for the session's own repo; docs-only commits exempt, shell and PowerShell scripts count as source; bypass only by launching Claude Code with `RANGER_SKIP_REVIEW=1`, never from a command or a settings file's `env`) |
 | `pre-commit-checks` | PreToolUse `git commit` | eslint + tests (JS), `flutter analyze` + tests (Dart), `dotnet test` in the solution folder above each staged C#, MSBuild or build-config file (.NET) in the session's repo; failures block |
 | `design-pretrigger` | PreToolUse Edit/Write | once per session: first UI-file edit is denied with "decide whether `emil-design-eng` / `impeccable` runs first" |
 | `format-on-save` | PostToolUse Edit/Write | prettier / rustfmt / gofmt / dart format / `dotnet format whitespace` (C#, when an `.editorconfig` is above the file) |
 | `track-edits` · `track-skills` · `track-tests` | PostToolUse | markers under `.git/ranger/` for the gates |
-| `verify-gate` | Stop | **block (max 2×) when code was edited and no test ran after the last edit** |
+| `verify-gate` | Stop | **block (max 2×) when code was edited and no test ran after the last edit**; a run counts only when a runner ran as a command and its failure would have failed the whole command (`npm test \| tail`, `; echo` or `\|\| true` hide it) |
 | `project-context` | SessionStart | points at the repo's `docs/overview.md` and at the handbook repo |
 
 All PreToolUse decisions are JSON on stdout with `exit 0` — `exit 2` would discard the JSON
@@ -437,6 +437,9 @@ what it commits; the real index is never touched. In `security-gate` a deny
 anywhere in the command beats an ask. `pre-commit-checks` runs lint/tests only for a commit in
 the session's own repo: for another repo it would execute that repo's code before the command is
 approved. Why: [ADR 0018](docs/decisions/0018-git-gates-parse-the-command.md).
+No gate accepts a bypass or evidence the agent can produce on its own: the review bypass comes
+only from the environment Claude Code was launched with, and a test run counts only when its
+failure would have failed the command. Why: [ADR 0019](docs/decisions/0019-gates-ignore-evidence-the-agent-forges.md).
 
 **Skills** (`skills/`): `intent` (`/intent` → `docs/specs/<feature>/intent.md`), `spec`
 (`/spec` → `spec.md`, one grill round, then stops for approval), `grill` (stress-test a plan or
@@ -628,7 +631,8 @@ When you improve a hook, skill, setting, or template:
    Test a hook before committing: pipe a synthetic JSON input into the script
    (`printf '{"tool_input":{"command":"git commit -m x"},"cwd":"."}' | bash claude/plugins/ranger-claude/scripts/review-gate.sh`).
    The git gates have a suite that does this against throwaway repos:
-   `bash claude/plugins/ranger-claude/tests/git-gates.test.sh`; C# format on save has
+   `bash claude/plugins/ranger-claude/tests/git-gates.test.sh`; the verify gate has
+   `tests/verify-gate.test.sh`; C# format on save has
    `tests/format-on-save.test.sh` (needs the .NET SDK).
    Skill changes: check them against
    [`references/writing-for-baseline-delta.md`](claude/plugins/ranger-claude/references/writing-for-baseline-delta.md)

@@ -24,5 +24,5 @@ COUNT=$(cat "$ATT" 2>/dev/null || echo 0)
 echo $((COUNT + 1)) > "$ATT"
 
 jq -nc --arg f "$(basename "$EDIT_FILE")" --arg n "$((COUNT + 1))" \
-  '{decision:"block",reason:("Verify gate (" + $n + "/2): source code was edited this session (last: " + $f + ") and no test run is recorded after that edit. Run the project test command now (plus build/lint where they exist), fix what fails, state the result with the real output in your final message, then stop. If the change is genuinely untestable here, say so explicitly and stop.")}'
+  '{decision:"block",reason:("Verify gate (" + $n + "/2): source code was edited this session (last: " + $f + ") and no test run is recorded after that edit. Run the project test command now (plus build/lint where they exist), fix what fails, state the result with the real output in your final message, then stop. A run counts only when its failure would fail the whole command: nothing after it but && (no | tail, ; or || true; put set -o pipefail before a pipe). If the change is genuinely untestable here, say so explicitly and stop.")}'
 exit 0

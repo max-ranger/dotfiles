@@ -8,6 +8,8 @@ T=$(mktemp -d "${TMPDIR:-/tmp}/ranger-gates.XXXXXX")
 trap 'rm -rf "$T"' EXIT
 # The machine's git config (signing, hooks, excludes) stays out of the throwaway repos.
 export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
+# a session launched with the review bypass must not turn every review case into allow
+unset RANGER_SKIP_REVIEW CLAUDE_PROJECT_DIR
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
 
 # S: the session's repo, on a feature branch, nothing staged, lib.sh modified (unstaged).
@@ -216,7 +218,16 @@ skill() {
 skill "$S"
 expect "review in S, commit in R"           "$S" "git -C '$R' commit -m x"                  - - - deny -
 expect "review in S, commit -a in S"        "$S" "git commit -am x"                        - - - allow -
-expect "RANGER_SKIP_REVIEW=1 bypass"        "$S" "RANGER_SKIP_REVIEW=1 git -C '$R' commit -m x" - - - allow -
+# the bypass is the person's: only the environment Claude Code was launched with counts,
+# never a variable the agent writes into its own command
+expect "inline RANGER_SKIP_REVIEW=1 ignored" "$S" "RANGER_SKIP_REVIEW=1 git -C '$R' commit -m x" - - - deny -
+expect "exported in command, ignored"       "$S" "export RANGER_SKIP_REVIEW=1; git -C '$R' commit -m x" - - - deny -
+export RANGER_SKIP_REVIEW=1
+expect "RANGER_SKIP_REVIEW=1 at launch"     "$S" "git -C '$R' commit -m x"                  - - - allow -
+mkdir -p "$S/.claude" && echo '{"env":{"RANGER_SKIP_REVIEW":"1"}}' > "$S/.claude/settings.local.json"
+expect "bypass set by project settings env" "$S" "git -C '$R' commit -m x"                  - - - deny -
+rm -rf "$S/.claude"
+unset RANGER_SKIP_REVIEW
 skill "$R"
 expect "review in R, commit in R from S"    "$S" "git -C '$R' commit -m x"                  - - - allow -
 
