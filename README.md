@@ -366,8 +366,8 @@ irm https://claude.ai/install.ps1 | iex              # Windows
   short, scannable), `simplicity.md` (the ladder and the three module tests), `git.md`, `docs.md`
   (the in-repo docs layout and SDLC chain), `testing.md` (tests worth keeping), `writing.md` (plain,
   human-readable text). Path-scoped, loaded
-  only when matching files are touched: `csharp.md`, `dart.md`, `typescript.md`, `vue.md`,
-  `web-interface.md`.
+  only when matching files are touched: `csharp.md`, `dart.md`, `flutter-ui.md`, `typescript.md`,
+  `vue.md`, `web-interface.md`.
 - [`claude/settings.json`](claude/settings.json) — model, output style, `enabledPlugins`,
   `extraKnownMarketplaces` (incl. this repo as marketplace `ranger`), flags, and the `permissions.allow`
   list for unattended runs (GitHub secrets, Zero deploys, `infra/bin` env push and provisioning,
@@ -687,3 +687,4 @@ auto-fetch.
 - `rules/simplicity.md` — ladder idea from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT), rewritten
 - `rules/output.md` — ideas from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT), rewritten
 - `rules/writing.md` — patterns from [blader/humanizer](https://github.com/blader/humanizer) (MIT), rewritten
+- `rules/flutter-ui.md` — [expo/skills](https://github.com/expo/skills) (MIT, pinned `7ddc1f5`), rewritten for Flutter
