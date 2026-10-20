@@ -9,7 +9,8 @@
     "context7@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "impeccable@impeccable": true,
-    "ranger-claude@ranger": true
+    "ranger-claude@ranger": true,
+    "dart-flutter@dart-flutter": true
   },
   "extraKnownMarketplaces": {
     "impeccable": {
@@ -22,6 +23,12 @@
       "source": {
         "source": "github",
         "repo": "max-ranger/dotfiles"
+      }
+    },
+    "dart-flutter": {
+      "source": {
+        "source": "github",
+        "repo": "flutter/agent-plugins"
       }
     }
   },

@@ -500,8 +500,13 @@ retired notes vault.
 
 From `claude-plugins-official`: `frontend-design`, `claude-md-management`,
 `claude-code-setup`, `context7`, `typescript-lsp`. Marketplace: `impeccable`
-([pbakaus/impeccable](https://github.com/pbakaus/impeccable)). Kept because they are tools
-(LSP, live docs, large maintained design systems), not instructions.
+([pbakaus/impeccable](https://github.com/pbakaus/impeccable)). Marketplace `dart-flutter`
+([flutter/agent-plugins](https://github.com/flutter/agent-plugins), the Flutter team's): the Dart
+MCP server (analyzer, tests, hot reload, widget tree) plus Flutter and Dart skills, whose stack
+defaults `rules/dart.md` overrides. Kept because they are tools (LSP, live docs, large maintained
+design systems, the Dart toolchain), not instructions.
+Per project, not global: Supabase's `supabase` and `postgres-best-practices`
+([supabase/agent-skills](https://github.com/supabase/agent-skills)) in Pegasus only.
 
 > ✂️ Reviewed and not installed. 2026-10-08 (`docs/decisions/0003`): ponytail (its ladder became
 > `rules/simplicity.md`), graphify, addyosmani/agent-skills (five references vendored instead),
