@@ -14,3 +14,4 @@ paths:
 - Never hand-edit `*.g.dart` / `*.freezed.dart` — re-run `build_runner`.
 - Widget tests target user-visible semantics; golden tests only for layout-critical custom widgets.
 - Playwright cannot drive Flutter (canvas rendering); e2e = `integration_test` or Patrol.
+- These rules beat the `dart-flutter` plugin's skills: Riverpod, not `ChangeNotifier` + provider/get_it. `freezed` + `json_serializable`, not hand-written `fromJson`. `mocktail`, not mockito. `very_good_analysis`, not `flutter_lints`. The repo's own HTTP client (dio or supabase_flutter), not `http`.
