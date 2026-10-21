@@ -94,6 +94,34 @@ expect "README.md"                                allow Edit  "$(edit "$P/README
 expect "a file named like a config, in src"       allow Edit  "$(edit "$P/src/app.ts" '.eslintrc' 'x')"
 expect "no file_path"                             allow Edit  "{old_string:\"a\",new_string:\"b\"}"
 
+# ── inline suppressions in code: ask when an edit adds one ──
+mkdir -p "$P/lib" "$P/Api"
+printf 'export const a = 1 // eslint-disable-line no-magic-numbers\n' > "$P/src/old.ts"
+echo "void main() {}" > "$P/lib/main.dart"; echo "class A {}" > "$P/Api/A.cs"; echo "x = 1" > "$P/src/tool.py"
+echo "<template><div /></template>" > "$P/src/Card.vue"
+expect "eslint-disable-next-line added"           ask   Edit  "$(edit "$P/src/app.ts" 'const a = 1' "$(printf '// eslint-disable-next-line no-console\nconst a = 1')")"
+expect "@ts-ignore added"                         ask   Edit  "$(edit "$P/src/app.ts" 'const a = 1' "$(printf '// @ts-ignore\nconst a = 1')")"
+expect "@ts-expect-error added"                   ask   Edit  "$(edit "$P/src/app.ts" 'const a = 1' "$(printf '// @ts-expect-error\nconst a = 1')")"
+expect "eslint-disable in a .vue template"        ask   Edit  "$(edit "$P/src/Card.vue" '<div />' '<!-- eslint-disable-next-line vue/no-v-html --><div />')"
+expect "Dart // ignore:"                          ask   Edit  "$(edit "$P/lib/main.dart" 'void main() {}' "$(printf '// ignore: avoid_print\nvoid main() {}')")"
+expect "Dart // ignore_for_file:"                 ask   Edit  "$(edit "$P/lib/main.dart" 'void main() {}' "$(printf '// ignore_for_file: type=lint\nvoid main() {}')")"
+expect "C# #pragma warning disable"               ask   Edit  "$(edit "$P/Api/A.cs" 'class A {}' "$(printf '#pragma warning disable CS8618\nclass A {}')")"
+expect "C# [SuppressMessage]"                     ask   Edit  "$(edit "$P/Api/A.cs" 'class A {}' '[SuppressMessage("Design", "CA1062")] class A {}')"
+expect "Python # noqa"                            ask   Edit  "$(edit "$P/src/tool.py" 'x = 1' 'x = 1  # noqa: E501')"
+expect "new file with @ts-nocheck"                ask   Write "$(write "$P/src/new.ts" "$(printf '// @ts-nocheck\nexport {}')")"
+expect "MultiEdit, second edit adds one"          ask   MultiEdit "{file_path:\"$P/src/app.ts\",edits:[{old_string:\"a\",new_string:\"b\"},{old_string:\"c\",new_string:\"// @ts-ignore\\nc\"}]}"
+expect "Write adds a second suppression"          ask   Write "$(write "$P/src/old.ts" "$(printf 'export const a = 1 // eslint-disable-line no-magic-numbers\n// @ts-ignore\nexport const b = 2\n')")"
+expect "Deno deno-lint-ignore"                    ask   Edit  "$(edit "$P/src/app.ts" 'const a = 1' "$(printf '// deno-lint-ignore no-explicit-any\nconst a = 1')")"
+expect "suppression kept as context"              allow Edit  "$(edit "$P/src/old.ts" 'export const a = 1 // eslint-disable-line no-magic-numbers' "$(printf 'export const a = 1 // eslint-disable-line no-magic-numbers\nexport const b = 2')")"
+expect "suppression removed"                      allow Edit  "$(edit "$P/src/old.ts" ' // eslint-disable-line no-magic-numbers' '')"
+expect "Write keeps the same suppressions"        allow Write "$(write "$P/src/old.ts" "$(printf 'export const a = 1 // eslint-disable-line no-magic-numbers\nexport const b = 2\n')")"
+expect "docs that mention @ts-ignore"             allow Edit  "$(edit "$P/README.md" '{}' 'Never use @ts-ignore or eslint-disable.')"
+expect "plain code edit"                          allow Edit  "$(edit "$P/src/app.ts" 'a' 'b')"
+
+# the reason names the suppression the edit added, not one it kept
+reason=$(cd "$T" && jq -nc --arg f "$P/src/old.ts" '{session_id:"test",tool_name:"Edit",tool_input:{file_path:$f,old_string:"export const a = 1 // eslint-disable-line no-magic-numbers",new_string:"// @ts-ignore\nexport const a = 1 // eslint-disable-line no-magic-numbers"}}' \
+  | bash "$SCRIPTS/config-protection.sh" | jq -r '.hookSpecificOutput.permissionDecisionReason')
+if printf '%s' "$reason" | grep -q '@ts-ignore'; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL  reason names the wrong suppression: $reason"; fi
 # the reason names the file
 reason=$(cd "$P" && jq -nc --arg f "$P/.editorconfig" '{session_id:"test",tool_name:"Edit",tool_input:{file_path:$f,old_string:"a",new_string:"b"}}' \
   | bash "$SCRIPTS/config-protection.sh" | jq -r '.hookSpecificOutput.permissionDecisionReason')

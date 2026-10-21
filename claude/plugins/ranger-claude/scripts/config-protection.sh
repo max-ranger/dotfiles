@@ -9,15 +9,41 @@
 #   .csproj): asks only when a check setting changes (strict flags, extends, NoWarn,
 #   Nullable, TreatWarningsAsErrors, ...), since paths and package versions change
 #   all the time.
-# Inline suppressions (eslint-disable, @ts-ignore, // ignore:) are out of scope.
+# Also asks when an edit to a code file adds an inline suppression (eslint-disable,
+# @ts-ignore, Dart's // ignore:, #pragma warning disable, # noqa, ...): the same
+# weakening, one line at a time.
 # Idea from affaan-m/ECC's config-protection hook, rewritten for these stacks.
 INPUT=$(cat)
 { IFS= read -r FILE; IFS= read -r CWD; } < <(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // "", .cwd // ""' 2>/dev/null | tr -d '\r')
 [ -z "$FILE" ] && exit 0
 [ -z "$CWD" ] && CWD=$PWD
 case $FILE in /*|[A-Za-z]:[\\/]*) ;; *) FILE="$CWD/$FILE" ;; esac
-[ -f "$FILE" ] || exit 0                                  # creating a config is fine
 NAME=${FILE##*[\\/]}
+
+# 1. Inline suppressions in a code file (new or existing): ask when an edit adds one.
+case $NAME in
+  *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.mts|*.cts|*.vue|*.svelte|*.dart|*.cs|*.razor|*.cshtml|*.py|*.sh|*.css|*.scss|*.less|*.html)
+    case $INPUT in *disable*|*ts-ignore*|*ts-expect-error*|*ts-nocheck*|*biome-ignore*|*ignore:*|*ignore_for_file*|*SuppressMessage*|*noqa*|*type:\ ignore*|*lint-ignore*)
+      SUPP='eslint-disable(?:-next-line|-line)?|stylelint-disable(?:-next-line|-line)?|@ts-(?:ignore|expect-error|nocheck)|biome-ignore|deno-lint-ignore(?:-file)?|//\s*ignore(?:_for_file)?:|#pragma\s+warning\s+disable|SuppressMessage|#nullable\s+disable|#\s*noqa|#\s*type:\s*ignore|pylint:\s*disable|shellcheck\s+disable'
+      OLDF=$FILE; [ -f "$FILE" ] || OLDF=/dev/null
+      # from the first edit (or Write) with more suppressions than it replaced: one it
+      # added (a kind the old text lacks), else the last one
+      ADDED=$(printf '%s' "$INPUT" | jq -r --arg re "$SUPP" --rawfile old "$OLDF" '
+        def n: [scan($re)] | length;
+        .tool_input as $t
+        | (if $t.content != null then [[$old, $t.content]]
+           else [$t, ($t.edits // [])[]] | map(select(.old_string != null) | [.old_string, (.new_string // "")]) end)
+        | map(select((.[0] | n) < (.[1] | n)) | ((.[1] | [scan($re)]) - (.[0] | [scan($re)]) | first) // (.[1] | [scan($re)] | last)) | first // empty' 2>/dev/null | tr -d '\r')
+      if [ -n "$ADDED" ]; then
+        jq -nc --arg f "$NAME" --arg s "$ADDED" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"ask",
+          permissionDecisionReason:("Suppression check: this edit adds " + $s + " to " + $f + ". Approve only if the warning is a false positive and the line says why. Otherwise the code should be fixed, not the check.")}}'
+        exit 0
+      fi ;;
+    esac ;;
+esac
+
+# 2. Lint, format and analyzer configs.
+[ -f "$FILE" ] || exit 0                                  # creating a config is fine
 DIR=${FILE%[\\/]*}; DIR=${DIR##*[\\/]}
 
 TS='"(?:strict\w*|alwaysStrict|noImplicit\w*|noUnused\w*|noUnchecked\w*|noFallthroughCasesInSwitch|noPropertyAccessFromIndexSignature|exactOptionalPropertyTypes|useUnknownInCatchVariables|allowUnreachableCode|allowUnusedLabels|skipLibCheck|checkJs|noEmitOnError|extends)"\s*:\s*[^,}\n]*'
