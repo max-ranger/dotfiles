@@ -418,6 +418,7 @@ claude plugin update ranger-claude@ranger
 | `review-gate` | PreToolUse `git commit` | **deny until `/code-review` ran since the last commit** in the committed repo (a review counts only for the session's own repo; docs-only commits exempt, shell and PowerShell scripts count as source; bypass only by launching Claude Code with `RANGER_SKIP_REVIEW=1`, never from a command or a settings file's `env`) |
 | `pre-commit-checks` | PreToolUse `git commit` | eslint + tests (JS), `flutter analyze` + tests (Dart), `dotnet test` in the solution folder above each staged C#, MSBuild or build-config file (.NET) in the session's repo; failures block |
 | `design-pretrigger` | PreToolUse Edit/Write | once per session: first UI-file edit is denied with "decide whether `emil-design-eng` / `impeccable` runs first" |
+| `config-protection` | PreToolUse Edit/Write | **ask before an edit to an existing lint, format or analyzer config** (ESLint, Prettier, Stylelint, Biome, `analysis_options.yaml`, `.editorconfig`, `*.globalconfig`, rulesets, Ruff, their ignore files, a shared `eslint` config package). tsconfigs, `Directory.Build.props` and `.csproj` ask only when a check setting changes (strict flags, `extends`, `NoWarn`, `Nullable`, `TreatWarningsAsErrors`…). Creating a config passes. Inline suppressions are out of scope |
 | `format-on-save` | PostToolUse Edit/Write | prettier / rustfmt / gofmt / dart format / `dotnet format whitespace` (C#, when an `.editorconfig` is above the file) |
 | `track-edits` · `track-skills` · `track-tests` | PostToolUse | markers under `.git/ranger/` for the gates |
 | `verify-gate` | Stop | **block (max 2×) when code was edited and no test ran after the last edit**; a run counts only when a runner ran as a command and its failure would have failed the whole command (`npm test \| tail`, `; echo` or `\|\| true` hide it) |
@@ -638,7 +639,7 @@ When you improve a hook, skill, setting, or template:
    (`printf '{"tool_input":{"command":"git commit -m x"},"cwd":"."}' | bash claude/plugins/ranger-claude/scripts/review-gate.sh`).
    The git gates have a suite that does this against throwaway repos:
    `bash claude/plugins/ranger-claude/tests/git-gates.test.sh`; the verify gate has
-   `tests/verify-gate.test.sh`; C# format on save has
+   `tests/verify-gate.test.sh`, config protection `tests/config-protection.test.sh`; C# format on save has
    `tests/format-on-save.test.sh` (needs the .NET SDK).
    Skill changes: check them against
    [`references/writing-for-baseline-delta.md`](claude/plugins/ranger-claude/references/writing-for-baseline-delta.md)
@@ -693,3 +694,4 @@ auto-fetch.
 - `rules/output.md` — ideas from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT), rewritten
 - `rules/writing.md` — patterns from [blader/humanizer](https://github.com/blader/humanizer) (MIT), rewritten
 - `rules/flutter-ui.md` — [expo/skills](https://github.com/expo/skills) (MIT, pinned `7ddc1f5`), rewritten for Flutter
+- `scripts/config-protection.sh` — idea from [affaan-m/ECC](https://github.com/affaan-m/ECC) (MIT), rewritten in bash for these stacks

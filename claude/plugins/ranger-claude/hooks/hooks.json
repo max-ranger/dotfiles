@@ -22,7 +22,8 @@
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/design-pretrigger.sh", "timeout": 5, "statusMessage": "DesignCheck" }
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/design-pretrigger.sh", "timeout": 5, "statusMessage": "DesignCheck" },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}\"/scripts/config-protection.sh", "timeout": 5, "statusMessage": "ConfigProtection" }
         ]
       }
     ],
