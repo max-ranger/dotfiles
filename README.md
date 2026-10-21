@@ -506,6 +506,11 @@ From `claude-plugins-official`: `frontend-design`, `claude-md-management`,
 MCP server (analyzer, tests, hot reload, widget tree) plus Flutter and Dart skills, whose stack
 defaults `rules/dart.md` overrides. Kept because they are tools (LSP, live docs, large maintained
 design systems, the Dart toolchain), not instructions.
+Marketplace `vue-skills` ([vuejs-ai/skills](https://github.com/vuejs-ai/skills), unofficial,
+eval-tested against a baseline): `vue-best-practices`, `vue-pinia-best-practices`,
+`vue-router-best-practices`, `vue-testing-best-practices`, `vue-debug-guides`,
+`create-adaptable-composable` (not the Options API or JSX ones); `rules/vue.md` overrides its
+props-destructure advice.
 Per project, not global: Supabase's `supabase` and `postgres-best-practices`
 ([supabase/agent-skills](https://github.com/supabase/agent-skills)) in Pegasus only.
 

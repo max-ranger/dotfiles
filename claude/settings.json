@@ -10,7 +10,13 @@
     "typescript-lsp@claude-plugins-official": true,
     "impeccable@impeccable": true,
     "ranger-claude@ranger": true,
-    "dart-flutter@dart-flutter": true
+    "dart-flutter@dart-flutter": true,
+    "vue-best-practices@vue-skills": true,
+    "vue-pinia-best-practices@vue-skills": true,
+    "vue-router-best-practices@vue-skills": true,
+    "vue-testing-best-practices@vue-skills": true,
+    "vue-debug-guides@vue-skills": true,
+    "create-adaptable-composable@vue-skills": true
   },
   "extraKnownMarketplaces": {
     "impeccable": {
@@ -29,6 +35,12 @@
       "source": {
         "source": "github",
         "repo": "flutter/agent-plugins"
+      }
+    },
+    "vue-skills": {
+      "source": {
+        "source": "github",
+        "repo": "vuejs-ai/skills"
       }
     }
   },
