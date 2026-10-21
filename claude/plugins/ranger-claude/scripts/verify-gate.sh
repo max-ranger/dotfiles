@@ -12,9 +12,16 @@ EDIT_SESSION=$(mk_field last-edit session)
 mk_has_tests || exit 0                                   # nothing to run here
 
 EDIT_TS=$(mk_field last-edit ts); EDIT_FILE=$(mk_field last-edit file)
-TEST_SESSION=$(mk_field tests session); TEST_TS=$(mk_field tests ts)
+# the test run recorded for the edited file's repo (track-tests files runs per repo)
+EDIT_REPO=$(mk_field last-edit repo)
+# a marker from before edits recorded their repo: the session's repo, as it was then
+[ -z "$EDIT_REPO" ] && EDIT_REPO=$(git -C "$MK_CWD" rev-parse --show-toplevel 2>/dev/null)
+KEY=$(printf '%s' "$EDIT_REPO" | cksum | cut -d' ' -f1)
+TEST_SESSION=$(mk_field "tests-$KEY" session); TEST_TS=$(mk_field "tests-$KEY" ts)
 ATT="$MK_DIR/verify-attempts-$MK_SESSION"
-if [ "$TEST_SESSION" = "$MK_SESSION" ] && [ "${TEST_TS:-0}" -ge "${EDIT_TS:-0}" ]; then
+# a run counts when it STARTED after the edit landed (sub-second stamps)
+if [ "$TEST_SESSION" = "$MK_SESSION" ] \
+   && jq -en --argjson t "${TEST_TS:-0}" --argjson e "${EDIT_TS:-0}" '$t >= $e' >/dev/null 2>&1; then
   rm -f "$ATT"                                           # tests ran after the edit: reset the budget
   exit 0
 fi
@@ -24,5 +31,5 @@ COUNT=$(cat "$ATT" 2>/dev/null || echo 0)
 echo $((COUNT + 1)) > "$ATT"
 
 jq -nc --arg f "$(basename "$EDIT_FILE")" --arg n "$((COUNT + 1))" \
-  '{decision:"block",reason:("Verify gate (" + $n + "/2): source code was edited this session (last: " + $f + ") and no test run is recorded after that edit. Run the project test command now (plus build/lint where they exist), fix what fails, state the result with the real output in your final message, then stop. A run counts only when its failure would fail the whole command: nothing after it but && (no | tail, ; or || true; put set -o pipefail before a pipe). If the change is genuinely untestable here, say so explicitly and stop.")}'
+  '{decision:"block",reason:("Verify gate (" + $n + "/2): source code was edited this session (last: " + $f + ") and no test run in its repo is recorded as started after that edit. Run the project test command now (plus build/lint where they exist), fix what fails, state the result with the real output in your final message, then stop. A run counts only when its failure would fail the whole command: nothing after it but && (no | tail, ; or || true; put set -o pipefail before a pipe). If the change is genuinely untestable here, say so explicitly and stop.")}'
 exit 0

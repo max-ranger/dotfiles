@@ -1,7 +1,7 @@
 # 0019. Gates ignore bypasses and evidence the agent can forge
 
 Date: 2026-10-20
-Status: accepted
+Status: accepted (known gaps closed by 0020)
 
 ## Context
 A review of affaan-m/ECC turned up two ways Claude could satisfy its own gates without doing the work.

@@ -420,8 +420,8 @@ claude plugin update ranger-claude@ranger
 | `design-pretrigger` | PreToolUse Edit/Write | once per session: first UI-file edit is denied with "decide whether `emil-design-eng` / `impeccable` runs first" |
 | `config-protection` | PreToolUse Edit/Write | **ask before an edit to an existing lint, format or analyzer config** (ESLint, Prettier, Stylelint, Biome, `analysis_options.yaml`, `.editorconfig`, `*.globalconfig`, rulesets, Ruff, their ignore files, a shared `eslint` config package). tsconfigs, `Directory.Build.props` and `.csproj` ask only when a check setting changes (strict flags, `extends`, `NoWarn`, `Nullable`, `TreatWarningsAsErrors`…). Creating a config passes. Inline suppressions are out of scope |
 | `format-on-save` | PostToolUse Edit/Write | prettier / rustfmt / gofmt / dart format / `dotnet format whitespace` (C#, when an `.editorconfig` is above the file) |
-| `track-edits` · `track-skills` · `track-tests` | PostToolUse | markers under `.git/ranger/` for the gates |
-| `verify-gate` | Stop | **block (max 2×) when code was edited and no test ran after the last edit**; a run counts only when a runner ran as a command and its failure would have failed the whole command (`npm test \| tail`, `; echo` or `\|\| true` hide it) |
+| `track-edits` · `track-skills` · `track-tests` | PostToolUse (and PreToolUse Bash for a test run's start) | markers under `.git/ranger/` for the gates |
+| `verify-gate` | Stop | **block (max 2×) when code was edited and no test ran after the last edit**; a run counts only when a runner ran as a command, its failure would have failed the whole command (`npm test \| tail`, `; echo` or `\|\| true` hide it), it started after the edit landed, and it ran in the edited file's repo |
 | `project-context` | SessionStart | points at the repo's `docs/overview.md` and at the handbook repo |
 
 All PreToolUse decisions are JSON on stdout with `exit 0` — `exit 2` would discard the JSON

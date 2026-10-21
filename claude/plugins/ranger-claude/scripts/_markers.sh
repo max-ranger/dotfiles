@@ -5,7 +5,7 @@
 #   source "$(dirname "$0")/_markers.sh"
 #   HOOK_INPUT=$(cat); mk_init "$HOOK_INPUT"      # sets MK_DIR, MK_SESSION, MK_CWD, MK_HEAD
 #   mk_repo -C /other/repo                          # re-points MK_GITDIR, MK_DIR, MK_HEAD
-#   mk_write review '{"skill":"code-review"}'      # adds head/session/ts automatically
+#   mk_write review '{"skill":"code-review"}'      # adds head/session/ts (sub-second) automatically
 #   mk_read  review                                 # prints the JSON or nothing
 #   mk_field review head                            # prints one field or nothing
 #
@@ -38,8 +38,11 @@ mk_repo() {
 mk_write() {
   local name="$1" extra="${2:-{\}}"
   [ -n "$MK_DIR" ] || return 0
-  jq -nc --arg h "$MK_HEAD" --arg s "$MK_SESSION" --argjson ts "$(date +%s)" --argjson x "$extra" \
-    '{head:$h,session:$s,ts:$ts} + $x' > "$MK_DIR/$name.json" 2>/dev/null
+  # ts: seconds with microseconds (jq's clock), so the verify gate can order an edit
+  # and a test run that land in the same second. A ts in $2 wins (track-tests passes
+  # the time a run started).
+  jq -nc --arg h "$MK_HEAD" --arg s "$MK_SESSION" --argjson x "$extra" \
+    '{head:$h,session:$s,ts:now} + $x' > "$MK_DIR/$name.json" 2>/dev/null
 }
 
 mk_read() { [ -n "$MK_DIR" ] && [ -f "$MK_DIR/$1.json" ] && cat "$MK_DIR/$1.json"; }
