@@ -46,8 +46,6 @@ cask "fork"
 cask "google-chrome"
 # JetBrains tools manager
 cask "jetbrains-toolbox"
-# Knowledge base that works on top of a local folder of plain text Markdown files
-cask "obsidian"
 # Replacement for Docker Desktop
 cask "orbstack"
 # App wrapper for Postgres

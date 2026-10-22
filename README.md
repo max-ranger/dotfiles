@@ -162,7 +162,6 @@ Only tools that are wired into the shell, required by a repo, or used by a hook.
 | `jetbrains-toolbox` | Manages Rider / WebStorm / etc. |
 | `flutter` | Flutter SDK |
 | `google-chrome` | Web browser |
-| `obsidian` | Markdown knowledge base — opens any repo's `docs/` as a vault |
 | `claude` | Anthropic's Claude desktop app |
 | `spotify` · `zoom` | Music · video calls |
 | `dockdoor` | Window peeking on Dock hover |
