@@ -1,6 +1,6 @@
-# pr-draft: creating the PR on Azure DevOps
+# pr: creating the PR on Azure DevOps
 
-Read by `pr-draft` Step 4 when the remote is Azure DevOps (`dev.azure.com` / `visualstudio.com`).
+Read by `pr` Step 4 when the remote is Azure DevOps (`dev.azure.com` / `visualstudio.com`).
 The org, project and repo come from the remote URL parsed in Step 1.
 
 **Azure DevOps, `az` available with the `azure-devops` extension:**
@@ -41,11 +41,10 @@ az repos pr create \
 
 <filled template body from Step 3>
 EOF
-)" \
-  --draft true
+)"
 ```
 
-The command returns JSON with `pullRequestId`. Report the draft PR URL to the user as
+The command returns JSON with `pullRequestId`. Report the PR URL to the user as
 `https://dev.azure.com/<org>/<project>/_git/<repo>/pullrequest/<pullRequestId>`.
 
 **Azure DevOps via REST — use this when the description is more than a few hundred characters.**
@@ -74,7 +73,6 @@ $pr = Send-Json Post "$base/pullrequests?api-version=7.1" @{
     targetRefName = "refs/heads/<base-branch>"
     title         = "<title>"
     description   = $desc
-    isDraft       = $true
 }
 
 # Optional: reviewer-facing overflow as the first comment thread (much larger limit)

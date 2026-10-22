@@ -7,7 +7,7 @@
     {
       "name": "ranger-claude",
       "source": "./claude/plugins/ranger-claude",
-      "description": "Hooks (security, commit, review and verify gates, design pre-trigger, project context), SDLC skills (intent, spec, adr, pr-draft), design skill, verifier agent.",
+      "description": "Hooks (security, commit, review and verify gates, design pre-trigger, project context), SDLC skills (intent, spec, adr, pr), design skill, verifier agent.",
       "category": "workflow",
       "tags": ["hooks", "sdlc", "gates", "solo-dev"]
     }

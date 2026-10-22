@@ -19,7 +19,7 @@ layout, per-stack conventions) and load on their own.
 - **Feature-sized work follows the SDLC chain** in `rules/docs.md`: `/intent` → `/spec` →
   plan mode → build → verify → `/pr`. Fixes and chores skip the artifacts.
 - **Skills are meant to fire:** `/code-review`, `/simplify`, `/security-review` on diffs;
-  `emil-design-eng` / `impeccable` before UI work; `pr-draft` for every PR; `/adr` for
+  `emil-design-eng` / `impeccable` before UI work; `/pr` for every PR; `/adr` for
   decisions a future reader would question.
 - **Unattended loops** (`/loop`, fan-out, agentic retries): state a machine-checkable
   success signal and a bound first. Reference: `~/.claude/docs/loop-engineering.md`.

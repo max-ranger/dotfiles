@@ -1,11 +1,11 @@
 ---
-name: pr-draft
-description: Use when the user wants to create a pull request, generate a PR description, write a draft PR, or asks for /pr-draft or /pr. Analyzes branch diff and commits to produce a filled PR and creates a draft PR via gh CLI (GitHub) or az repos (Azure DevOps).
+name: pr
+description: Use when the user wants to open a pull request or write a PR description — "/pr", "open a PR", "create a pull request", "PR this branch". Analyzes the branch diff and commits, fills the matching template, and opens a published PR, ready for review, via gh (GitHub) or az repos (Azure DevOps).
 ---
 
-# Draft PR Creator
+# PR Creator
 
-Generate a complete PR description from the current branch's changes and create a draft PR via `gh` (GitHub) or `az repos` (Azure DevOps) — whichever the remote calls for.
+Generate a complete PR description from the current branch's changes and open it as a published PR, ready for review, via `gh` (GitHub) or `az repos` (Azure DevOps) — whichever the remote calls for.
 
 ## Process
 
@@ -39,7 +39,7 @@ git rev-parse --abbrev-ref @{upstream} 2>/dev/null && echo "tracking" || echo "n
 
 **Remote host detection:** inspect the `origin` URL from above.
 - Contains `github.com` → **GitHub**.
-- Contains `dev.azure.com` or `visualstudio.com` → **Azure DevOps**. Read `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/azure-devops.md` now: its limits shape the body you write in Step 3. Parse organization/project/repository out of the URL — both remote formats appear in the wild:
+- Contains `dev.azure.com` or `visualstudio.com` → **Azure DevOps**. Read `${CLAUDE_PLUGIN_ROOT}/skills/pr/azure-devops.md` now: its limits shape the body you write in Step 3. Parse organization/project/repository out of the URL — both remote formats appear in the wild:
   - SSH: `git@ssh.dev.azure.com:v3/<org>/<project>/<repo>` (URL-decode `%20` in `<project>` back to spaces)
   - HTTPS: `https://dev.azure.com/<org>/<project>/_git/<repo>`
 
@@ -120,13 +120,13 @@ Both hosts:
 
 | PR type (from Step 2) | Template file |
 |---|---|
-| Feature | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/feature.md` |
-| Fix | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/bugfix.md` |
-| Hotfix | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/hotfix.md` |
-| Refactor | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/refactor.md` |
-| Chore | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/chore.md` |
-| Docs | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/feature.md` (trim to Description + Highlights) |
-| Change (fallback) | `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/templates/feature.md` |
+| Feature | `${CLAUDE_PLUGIN_ROOT}/skills/pr/templates/feature.md` |
+| Fix | `${CLAUDE_PLUGIN_ROOT}/skills/pr/templates/bugfix.md` |
+| Hotfix | `${CLAUDE_PLUGIN_ROOT}/skills/pr/templates/hotfix.md` |
+| Refactor | `${CLAUDE_PLUGIN_ROOT}/skills/pr/templates/refactor.md` |
+| Chore | `${CLAUDE_PLUGIN_ROOT}/skills/pr/templates/chore.md` |
+| Docs | `${CLAUDE_PLUGIN_ROOT}/skills/pr/templates/feature.md` (trim to Description + Highlights) |
+| Change (fallback) | `${CLAUDE_PLUGIN_ROOT}/skills/pr/templates/feature.md` |
 
 Read the chosen template file and use the fenced ```markdown block inside it as the body structure. Replace every `<…>` placeholder with real content derived from the actual changes; delete any section a template marks as optional when it doesn't apply.
 
@@ -153,18 +153,18 @@ Use the remote host detected in Step 1.
 # Push branch if not tracking remote
 git push -u origin <branch>
 
-# Create draft PR targeting the detected base branch.
+# Create the PR, published (never --draft), targeting the detected base branch.
 # The <title> goes ONLY in --title (GitHub renders it as the PR title). The body
 # starts directly at the first section — do NOT repeat the title as an H1 in the body.
-gh pr create --draft --base <base-branch> --title "<title>" --body "$(cat <<'EOF'
+gh pr create --base <base-branch> --title "<title>" --body "$(cat <<'EOF'
 <filled template body from Step 3 — starts with the first section, no title H1>
 EOF
 )"
 ```
 
-Report the draft PR URL to the user.
+Report the PR URL to the user.
 
-**Azure DevOps:** create it as `${CLAUDE_PLUGIN_ROOT}/skills/pr-draft/azure-devops.md` describes
+**Azure DevOps:** create it as `${CLAUDE_PLUGIN_ROOT}/skills/pr/azure-devops.md` describes
 (read in Step 1): `az repos pr create` for a short body, the REST call for a longer one.
 
 **Neither CLI is available for this remote's host:**
@@ -172,7 +172,7 @@ Report the draft PR URL to the user.
 Save the body to a file in the current working directory. Since the body no longer contains the title, put the title on the first line as an `# H1` in the saved file (so the file is self-describing), then report:
 ```
 PR description saved to pr-<ticket-or-slug>.md
-<gh|az> CLI not found — install it to create draft PRs directly, or paste the title + description manually.
+<gh|az> CLI not found — install it to create the PR directly, or paste the title + description manually.
 ```
 
 ### Step 5: Report to user
@@ -180,5 +180,5 @@ PR description saved to pr-<ticket-or-slug>.md
 Always end with:
 - The PR title
 - The base branch it targets
-- The draft PR URL (if created) or file path (if saved)
-- Reminder: "Review the draft, add reviewers, and publish when ready."
+- The PR URL (if created) or file path (if saved)
+- Reminder: "Add reviewers if the repo needs them. Merging stays with you."

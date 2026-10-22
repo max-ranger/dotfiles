@@ -446,7 +446,7 @@ failure would have failed the command. Why: [ADR 0019](docs/decisions/0019-gates
 (`/spec` → `spec.md`, one grill round, then stops for approval), `grill` (stress-test a plan or
 stack choice in batched rounds with recommended answers), `adr` (`/adr` →
 `docs/decisions/NNNN-slug.md`), `diagnosing-bugs` (red-capable loop before any hypothesis),
-`pr-draft` (`/pr`, own), `emil-design-eng` (vendored, see credits).
+`pr` (`/pr`, opens a published PR, own), `emil-design-eng` (vendored, see credits).
 **Agent** (`agents/verifier.md`): fresh-context verifier — proves the spec's acceptance
 section with real command output, never edits.
 **References** (`references/`): vendored, pinned material the skills cite (see credits).
