@@ -1,7 +1,7 @@
 {
   "name": "ranger-claude",
   "displayName": "Ranger Claude",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Deterministic gates + solo-dev SDLC skills for Claude Code. Hooks: security gate, secure commits, commit hygiene, pre-commit checks, format on save, review gate, verify gate, design pre-trigger, config and suppression protection, project context. Skills: intent, spec, grill, adr, diagnosing-bugs, pr, emil-design-eng. Agent: verifier.",
   "author": {
     "name": "Maximilian Ranger",

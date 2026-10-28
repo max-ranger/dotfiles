@@ -5,6 +5,7 @@
 **What:** <one sentence: what it is, for whom>
 **State:** <phase; what works; what is next>
 **Stack:** <runtime, framework, data store, hosting — one line each>
+**Load:** <who runs it and how many at once: one person running a script, or N users and M processes; reviews judge scale against this>
 
 ## Where things are
 

@@ -32,7 +32,7 @@ emit() {
 # dotnet_solution_dir <root> <root-relative path>: the folder of the nearest *.slnx / *.sln
 # above the path, up to <root> (src/backend in the ranger-app template, backend/ in cerberus).
 # ranger: shortcut — a project with no solution above it is not checked; every .NET repo
-# here has one, and a lone .csproj would need its own test-project discovery.
+# here has one. Upgrade (own test-project discovery) when a repo ships a lone .csproj.
 dotnet_solution_dir() {
   local root="$1" dir f
   dir=$(dirname "$root/$2")

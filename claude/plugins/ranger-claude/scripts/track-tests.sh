@@ -10,10 +10,10 @@
 # `npm test || true`, `npm test &` and `echo $(npm test)` hide the runner's exit status
 # and are not recorded, nor is a run after a `cd` to a path held in a variable.
 INPUT=$(cat)
-case $INPUT in *test*|*jest*|*pytest*|*phpunit*|*rspec*) ;; *) exit 0 ;; esac
+case $INPUT in *test*|*jest*|*phpunit*|*rspec*) ;; *) exit 0 ;; esac
 # the cheap check again, on the command alone (the JSON also holds paths and stdout)
 case $(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) in
-  *test*|*jest*|*pytest*|*phpunit*|*rspec*) ;; *) exit 0 ;;
+  *test*|*jest*|*phpunit*|*rspec*) ;; *) exit 0 ;;
 esac
 source "$(dirname "$0")/_markers.sh"
 mk_init "$INPUT"
@@ -33,7 +33,8 @@ if [ -n "$ID" ] && [ -f "$MK_DIR/test-start-$ID" ]; then
 fi
 
 # ranger: shortcut — quotes are blanked by regex, not tokenized like _git-cmd.sh does;
-# heredoc bodies stay text. A runner the pattern misses costs one verify-gate block.
+# heredoc bodies stay text. A runner the pattern misses costs one verify-gate block;
+# upgrade (tokenize with _git-cmd.sh) when that block recurs for one runner.
 read -r -d '' PROG <<'JQ'
   def ws: "[ \\t]+";
   def runner: "(?:(?:pnpm|npm|yarn|bun)(?:" + ws + "[^;&|\\n]*)?" + ws + "test(?::[\\w:-]+)?"
@@ -76,7 +77,7 @@ while IFS= read -r t; do
     '${HOME}'|'${HOME}/'*) t=$HOME${t#\$\{HOME\}} ;;
   esac
   case $t in
-    '~'|'~/'*) DIR=$HOME${t#\~} ;;
+    \~|\~/*) DIR=$HOME${t#\~} ;;
     /*|[A-Za-z]:[\\/]*) DIR=$t ;;
     *) DIR=$DIR/$t ;;
   esac

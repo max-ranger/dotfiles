@@ -8,9 +8,10 @@ Findings are **Blocking** (must fix before merge) or **Nit** (optional).
 1. **Correctness against the spec** — every requirement in `docs/specs/<feature>/spec.md` is met; departures from `plan.md` are reflected in the plan.
 2. **Bugs** — edge cases, error paths, concurrency, resource handling.
 3. **Security** — untrusted input validated at the trust boundary, authz on every entry point, no secrets, no injection.
-4. **Simplicity** — the simplicity ladder was climbed; no speculative abstraction, no drive-by refactor, no new dependency for one call.
-5. **Tests** — new behavior has tests that fail without the change; existing tests pass.
-6. **Docs** — `docs/` and the ADRs reflect the change when it alters architecture or a decision.
+4. **Simplicity** — the simplicity ladder was climbed; no speculative abstraction, no drive-by refactor, no new dependency for one call. A `ranger: shortcut` marker that names its limit is a decision, not a finding, unless the expected load already crosses it.
+5. **Load** — judged against the load the repo declares (one person running a script, or many users and processes at once): check-then-write races, work every process repeats, lists that only grow, a query per item. The review says which load it assumed.
+6. **Tests** — new behavior has tests that fail without the change; existing tests pass.
+7. **Docs** — `docs/` and the ADRs reflect the change when it alters architecture or a decision.
 
 ## Exclusions
 

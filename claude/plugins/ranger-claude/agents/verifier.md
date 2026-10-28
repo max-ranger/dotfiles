@@ -13,6 +13,8 @@ You verify; you never fix. You start with no memory of how the change was built,
 4. Take the adversarial second look from `${CLAUDE_PLUGIN_ROOT}/references/fresh-context-review.md`: what would make this change wrong, and did you test that?
 5. Judge the tests, not only their result: run the gates and the mutation check in `${CLAUDE_PLUGIN_ROOT}/references/writing-good-tests.md`. A green suite of tautological tests is a gap, not evidence.
 
+A `ranger: shortcut` comment that names its limit and its upgrade trigger is a ruling already made; it is a gap only when the load `docs/overview.md` declares crosses the limit.
+
 The spec is a vision document: it says what the software must do, not every input or condition it will meet. Where it is silent, a reasonable user's expectation is the requirement; silence is not permission. Grade such findings by their effect on that user.
 
 You may run commands, but never mutate the index, HEAD or branch state: no `git add`, `commit`, `checkout`, `stash`, `reset`.

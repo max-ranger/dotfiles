@@ -519,6 +519,8 @@ Per project, not global: Supabase's `supabase` and `postgres-best-practices`
 > ([`docs/decisions/0016`](docs/decisions/0016-second-review-cherry-pick-text-install-nothing.md)):
 > obra/superpowers and mattpocock/skills (sixteen pieces of text cherry-picked into plugin 1.1.0),
 > markitdown, Unlimited-OCR, openai/whisper, and the Artcraft apps (watch, re-check in 2027).
+> 2026-10-28 ([`docs/decisions/0021`](docs/decisions/0021-third-review-round-ponytail-5.md)): Ponytail 5
+> re-reviewed; six pieces of text distilled, the codebase map, band and levels not taken.
 > Earlier prunes: see `docs/decisions/`.
 
 ---
@@ -694,8 +696,11 @@ auto-fetch.
   (MIT, pinned `bb92a77`), distilled
 - `references/writing-for-baseline-delta.md` — [dotnet/skills](https://github.com/dotnet/skills)
   (MIT, pinned `10d85e2`), verbatim: how to write a skill that beats the model without it
-- `rules/simplicity.md` — ladder idea from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT), rewritten
-- `rules/output.md` — ideas from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT), rewritten
+- `rules/simplicity.md` — ladder idea from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT), rewritten;
+  the scope paragraph, the marker form and the load pass in the repo template's review policy from
+  Ponytail 5 (pinned `09c434a`), distilled
+- `rules/output.md` — ideas from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT), rewritten;
+  the not-checked line from Ponytail 5, distilled
 - `rules/writing.md` — patterns from [blader/humanizer](https://github.com/blader/humanizer) (MIT), rewritten
 - `rules/flutter-ui.md` — [expo/skills](https://github.com/expo/skills) (MIT, pinned `7ddc1f5`), rewritten for Flutter
 - `scripts/config-protection.sh` — idea from [affaan-m/ECC](https://github.com/affaan-m/ECC) (MIT), rewritten in bash for these stacks

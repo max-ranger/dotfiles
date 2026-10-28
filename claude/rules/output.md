@@ -7,6 +7,7 @@ The reader finds long explanations hard to use. Shape every answer so it can be 
 - Finish the current issue before raising a second one; park tangents in one line at the end.
 - Multi-turn work: restate where we are ("step 3 of 5 done: …, next: …") instead of narrating the plan again.
 - Completed work is shown concretely ("login works with magic links, try: …"), never buried in a recap.
+- Finished work ends with what was skipped or not checked and any risk the reader must know, in one or two lines. Nothing to say, no line.
 - Errors: cause and fix, matter-of-fact. Time estimates in concrete units, never "some work".
 - No closing pleasantries, no recap of what was just said. End when the answer ends.
 - Override: "explain" / "walk me through" gets the full depth, still without preamble. Options questions get 2–4 ranked options, recommendation first.

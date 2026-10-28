@@ -204,6 +204,7 @@ _gc_tok() {
 # here ($VAR other than $HOME, a substitution).
 # ranger: shortcut — callers then keep the previous directory (the session's repo,
 # the pre-parser behaviour) instead of tracking assignments made in the command.
+# Upgrade (track `VAR=…; cd $VAR`) when a gate judges the wrong repo because of it.
 _gc_path() {
   local p=$2
   case $p in
@@ -361,6 +362,7 @@ gc_opts() {
 # would open an editor even in a dry-run.
 # ranger: shortcut — `commit <pathspec>`/-i/-o, `git rm`/`mv` and a `reset` between the
 # add and the commit are not modelled; the last one over-includes, the safe direction.
+# Upgrade (model them) when such a command gets denied or asked in daily use.
 gc_pending() {
   local i=$1 j gd keep='add|remove' idx
   [ "$2" = added ] && keep='add'
@@ -394,6 +396,7 @@ gc_git() {
 # single-dash cluster (-f, -fu, -am).
 # ranger: shortcut — option values are not skipped, so a value like `-m "-a…"` can
 # match; every caller reads a match as the safer answer, so no per-command option table.
+# Upgrade (a per-command option table) when a false match blocks a legitimate commit.
 gc_flag() {
   local s=$2 a l
   gc_argv "$1"; shift 2
