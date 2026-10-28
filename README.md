@@ -41,6 +41,7 @@ per-tool copy steps for you. 🤖
 # 1. Homebrew (its installer also pulls in Xcode Command Line Tools → you get git for free)
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"        # add brew to PATH for this shell
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile   # …and for every new shell, ahead of /usr/bin
 
 # 2. Clone this repo (no SSH key yet? use the HTTPS line instead)
 mkdir -p ~/Code/ranger-ecosystem
