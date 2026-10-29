@@ -260,12 +260,12 @@ $RECYCLE.BIN/
 .worktrees/
 
 
-# ── Claude / AI assistant files (personal — not for the repo) ─
-# Project memory lives at .claude/CLAUDE.md (auto-loaded like a root CLAUDE.md).
-# Tip: for shared repos, prefer .git/info/exclude so the rule stays local to you.
+# ── Claude / AI assistant files ───────────────────────────────
+# CLAUDE.md and AGENTS.md (root, nested or .claude/CLAUDE.md) are the project's
+# agent guide and are committed. CLAUDE.local.md and the rest of .claude/ are personal.
 .claude/*
 !.claude/settings.json
-CLAUDE.md
+!.claude/CLAUDE.md
 CLAUDE.local.md
 .claudeignore
 .superpowers/

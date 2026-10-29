@@ -1,7 +1,7 @@
 # 0017. Project settings are committed; plan-mode drafts are gitignored scratch
 
 Date: 2026-10-13
-Status: accepted
+Status: accepted; superseded in part by 0022 (CLAUDE.md is committed)
 
 ## Context
 The canonical gitignore ignored `.claude/` wholesale, so no repo could carry a `.claude/settings.json`. Two things followed: plan mode wrote its files to `~/.claude/plans`, outside the repo it was planning for, and a cloud session started in a repo had no way to learn that the `ranger-claude` plugin belongs there. [0002](0002-knowledge-lives-in-git-basic-memory-retired.md) puts knowledge in git; the playbook this setup follows commits the plan next to the spec.
