@@ -1,7 +1,8 @@
 # 🧰 dotfiles
 
-> A reference for setting up a new machine the way I like it — **Claude Code, Homebrew, Git,
-> .NET, and VS Code**, each with notes on *what it's for* and *how to put it in place*.
+> A reference for setting up a new machine the way I like it — **Homebrew, Git, .NET, and
+> VS Code**, each with notes on *what it's for* and *how to put it in place*. The Claude Code
+> tooling (plugin, rules, templates) lives in [kitsune](https://github.com/max-ranger/kitsune).
 
 **📋 It's documentation, not an auto-syncing setup.** Nothing here is symlinked or run
 automatically. On a new machine you *copy* what you want into place. When you find a better way
@@ -20,12 +21,11 @@ Windows 10/11 — Homebrew doesn't run on Windows, so winget is its stand-in the
 2. [🍺 Homebrew — apps, CLIs & fonts](#-homebrew--apps-clis--fonts)
 3. [📜 Scripts — .NET SDK and the Windows move](#-scripts--net-sdk-and-the-windows-move)
 4. [🌿 Git — config, SSH keys & signed commits](#-git--config-ssh-keys--signed-commits)
-5. [🤖 Claude Code — plugin, rules & repo template](#-claude-code--plugin-rules--repo-template)
+5. [🤖 Claude Code — lives in kitsune](#-claude-code--lives-in-kitsune)
 6. [🧩 VS Code — settings, keybindings & extensions](#-vs-code--settings-keybindings--extensions)
 7. [🐚 PowerShell — profile (Windows)](#-powershell--profile-windows)
 8. [📁 Workspace layout — `~/Code`](#-workspace-layout--code)
 9. [🔄 Maintaining this repo](#-maintaining-this-repo)
-10. [🙏 Credits — vendored third-party content](#-credits--vendored-third-party-content)
 
 ---
 
@@ -59,9 +59,9 @@ claude
 
 Then, inside `claude`, just ask:
 
-> **"Set up this machine from these dotfiles — copy the Claude config and rules, install the
-> ranger-claude plugin, copy the VS Code and Git configs per the README, and run the .NET
-> install script."**
+> **"Set up this machine from these dotfiles — copy the VS Code and Git configs per the README,
+> run the .NET install script, then clone max-ranger/kitsune and follow its README for the
+> Claude Code config and the ranger-claude plugin."**
 
 Claude reads this README and runs the copy/install steps below for you. ✨
 
@@ -146,7 +146,7 @@ Only tools that are wired into the shell, required by a repo, or used by a hook.
 | `cocoapods` | iOS dependency manager (Pegasus builds) |
 | `fnm` · `pnpm` | Node version manager (`--use-on-cd`) + package manager |
 | `gh` · `git` · `git-filter-repo` | GitHub CLI, version control, history rewrite (break-glass) |
-| `jq` · `ripgrep` · `shellcheck` | JSON, search, and shell lint — the hooks depend on them |
+| `jq` · `ripgrep` · `shellcheck` | JSON, search, and shell lint — kitsune's hooks depend on them |
 | `starship` | The prompt |
 | `supabase` | Supabase CLI — local stack, migrations, type-gen (via `supabase/tap`) |
 | `uv` | Python tool runner (fast `pipx`) |
@@ -246,8 +246,8 @@ winget upgrade Microsoft.DotNet.SDK.10
 [`scripts/migrate-windows.ps1`](scripts/migrate-windows.ps1) takes a machine from the old
 `C:\Dev\{ranger,clients,sandbox}` layout to the flat one described under
 [Workspace layout](#-workspace-layout--code): it moves the repos, repairs git worktrees, renames
-Claude Code's per-project state, zips the old notes vault and uninstalls basic-memory, copies the
-Claude config from this repo and installs the plugin. Dry run by default; close the editors and
+Claude Code's per-project state, zips the old notes vault and uninstalls basic-memory, and installs
+the plugin from kitsune. Dry run by default; close the editors and
 every Claude session before `-Apply`.
 
 ```powershell
@@ -331,7 +331,7 @@ files. Lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`) stay **com
 
 Two rules in it carry the Claude setup: `.claude/*` with `!.claude/settings.json` keeps everything
 in `.claude/` personal except the shared project settings, and `docs/plans/` is ignored because
-plan-mode drafts are scratch ([`docs/decisions/0017`](docs/decisions/0017-project-settings-committed-plan-drafts-scratch.md)).
+plan-mode drafts are scratch ([kitsune ADR 0017](https://github.com/max-ranger/kitsune/blob/main/docs/decisions/0017-project-settings-committed-plan-drafts-scratch.md)).
 The root `CLAUDE.md` and `AGENTS.md` are committed. Only `CLAUDE.local.md` stays personal.
 
 ```bash
@@ -343,188 +343,21 @@ Copy-Item C:\Code\ranger-ecosystem\dotfiles\git\gitignore .\.gitignore   # Windo
 
 ---
 
-## 🤖 Claude Code — plugin, rules & repo template
+## 🤖 Claude Code — lives in kitsune
 
-**What it is:** [Claude Code](https://claude.com/claude-code) is Anthropic's agentic coding tool.
-This section is the global setup: a lean `CLAUDE.md`, always-on and path-scoped **rules**, and
-the **`ranger-claude` plugin** that carries every hook, skill and agent — installed from this
-repo's own marketplace, so a new machine, a cloud session and Cowork all get the same gates.
-
-**Install Claude Code:**
-
-```bash
-curl -fsSL https://claude.ai/install.sh | bash       # macOS / Linux
-```
-```powershell
-irm https://claude.ai/install.ps1 | iex              # Windows
-```
-
-### ⚙️ Config files
-
-- [`claude/CLAUDE.md`](claude/CLAUDE.md) — global instructions: tone, workflow, the gate
-  summary, where knowledge lives. ~30 lines; everything detailed is a rule.
-- [`claude/rules/`](claude/rules) — `~/.claude/rules/`. Always-on: `output.md` (verdict first,
-  short, scannable), `simplicity.md` (the ladder and the three module tests), `git.md`, `docs.md`
-  (the in-repo docs layout and SDLC chain), `testing.md` (tests worth keeping), `writing.md` (plain,
-  human-readable text). Path-scoped, loaded
-  only when matching files are touched: `csharp.md`, `dart.md`, `flutter-ui.md`, `typescript.md`,
-  `vue.md`, `web-interface.md`.
-- [`claude/settings.json`](claude/settings.json) — model, output style, `enabledPlugins`,
-  `extraKnownMarketplaces` (incl. this repo as marketplace `ranger`), flags, and the `permissions.allow`
-  list for unattended runs (GitHub secrets, Zero deploys, `infra/bin` env push and provisioning,
-  ghcr pushes, `docker --context ranger` on the box). No hooks: they live in the plugin.
-- [`claude/docs/loop-engineering.md`](claude/docs/loop-engineering.md) — on-demand reference
-  for unattended loops. [`claude/prompts/`](claude/prompts) — paste-in prompt snippets.
+The global `CLAUDE.md`, the rules, `settings.json`, the `ranger-claude` plugin (gates, SDLC
+skills, verifier agent), the repo template and the Cowork template moved to
+[kitsune](https://github.com/max-ranger/kitsune) on 2026-10-29
+([ADR 0024](docs/decisions/0024-claude-tooling-moved-to-kitsune.md)). Its README has the copy
+steps, the plugin install and the hook table.
 
 ```bash
-# macOS / Linux
-mkdir -p ~/.claude/rules ~/.claude/docs
-cp    claude/CLAUDE.md      ~/.claude/CLAUDE.md
-cp    claude/settings.json  ~/.claude/settings.json
-cp -R claude/rules/.        ~/.claude/rules/
-cp -R claude/docs/.         ~/.claude/docs/
-```
-```powershell
-# Windows
-"rules", "docs" | ForEach-Object { New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\$_" | Out-Null }
-Copy-Item claude\CLAUDE.md     "$env:USERPROFILE\.claude\CLAUDE.md"
-Copy-Item claude\settings.json "$env:USERPROFILE\.claude\settings.json"
-Copy-Item -Recurse -Force claude\rules\* "$env:USERPROFILE\.claude\rules\"
-Copy-Item -Recurse -Force claude\docs\*  "$env:USERPROFILE\.claude\docs\"
+git clone git@github.com:max-ranger/kitsune.git ~/Code/kitsune
+# then follow ~/Code/kitsune/README.md
 ```
 
-### 🔌 The `ranger-claude` plugin
-
-[`claude/plugins/ranger-claude/`](claude/plugins/ranger-claude) — one plugin, published by
-[`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) at the repo root
-(marketplace name `ranger`). `settings.json` already declares the marketplace and enables the
-plugin, so Claude Code installs it on startup; to force it:
-
-```bash
-claude plugin marketplace add max-ranger/dotfiles     # GitHub (new machines, cloud)
-claude plugin install ranger-claude@ranger
-# dev machine: point the marketplace at the checkout instead (no push needed to test)
-claude plugin marketplace add ~/Code/ranger-ecosystem/dotfiles
-# after editing the plugin: bump "version" in .claude-plugin/plugin.json, then
-claude plugin update ranger-claude@ranger
-```
-
-**Hooks** (`hooks/hooks.json` → `scripts/*.sh`, bash + jq, tested with synthetic input):
-
-| Gate | Event | What it does |
-|---|---|---|
-| `security-gate` | PreToolUse Bash | deny/ask on force-push, `rm -rf ~`, DROP TABLE, publish, pipe-to-shell…; a push to `main` is denied in repos with a `develop` branch (release PRs only), asked elsewhere and when a variable or `cd -` hides the repo |
-| `secure-commits` | PreToolUse `git commit` | deny `.env`/key files; ask on secret-looking diffs |
-| `commit-hygiene` | PreToolUse `git commit` | ask when junk (`.DS_Store`, logs, scratch) is staged |
-| `review-gate` | PreToolUse `git commit` | **deny until `/code-review` ran since the last commit** in the committed repo (a review counts only for the session's own repo; docs-only commits exempt, shell and PowerShell scripts count as source; bypass only by launching Claude Code with `RANGER_SKIP_REVIEW=1`, never from a command or a settings file's `env`) |
-| `pre-commit-checks` | PreToolUse `git commit` | eslint + tests (JS), `flutter analyze` + tests (Dart), `dotnet test` in the solution folder above each staged C#, MSBuild or build-config file (.NET) in the session's repo; failures block |
-| `design-pretrigger` | PreToolUse Edit/Write | once per session: first UI-file edit is denied with "decide whether `emil-design-eng` / `impeccable` runs first" |
-| `config-protection` | PreToolUse Edit/Write | **ask before an edit to an existing lint, format or analyzer config** (ESLint, Prettier, Stylelint, Biome, `analysis_options.yaml`, `.editorconfig`, `*.globalconfig`, rulesets, Ruff, their ignore files, a shared `eslint` config package). tsconfigs, `Directory.Build.props` and `.csproj` ask only when a check setting changes (strict flags, `extends`, `NoWarn`, `Nullable`, `TreatWarningsAsErrors`…). Creating a config passes. Also asks when an edit to a code file adds an inline suppression (`eslint-disable`, `@ts-ignore`, `@ts-expect-error`, Dart `// ignore:`, `#pragma warning disable`, `[SuppressMessage]`, `# noqa`…) |
-| `format-on-save` | PostToolUse Edit/Write | prettier / rustfmt / gofmt / dart format / `dotnet format whitespace` (C#, when an `.editorconfig` is above the file) |
-| `track-edits` · `track-skills` · `track-tests` | PostToolUse (and PreToolUse Bash for a test run's start) | markers under `.git/ranger/` for the gates |
-| `verify-gate` | Stop | **block (max 2×) when code was edited and no test ran after the last edit**; a run counts only when a runner ran as a command, its failure would have failed the whole command (`npm test \| tail`, `; echo` or `\|\| true` hide it), it started after the edit landed, and it ran in the edited file's repo |
-| `project-context` | SessionStart | points at the repo's `docs/overview.md` and at the handbook repo |
-
-All PreToolUse decisions are JSON on stdout with `exit 0` — `exit 2` would discard the JSON
-and turn every ask into a silent block.
-The git checks (`security-gate`'s push/reset/clean/branch rules and every `git commit` gate) parse
-the command with [`scripts/_git-cmd.sh`](claude/plugins/ranger-claude/scripts/_git-cmd.sh): they
-fire on every git invocation in it — global options before the subcommand (`git -C <repo>`, `-c`,
-`--git-dir`, `--no-pager`), `cd <repo> &&`, `;`/`&&`/`|` chains, subshells, `$( )`, `bash -c`,
-`bash <<EOF` — and check each one against the repo it targets. Quoted text and other heredoc
-bodies are data: `echo "git commit"` fires no commit gate. The reset/clean/branch asks keep their
-loose text match as a fail-safe (`xargs git branch -D` still asks). The commit gates also count
-what an earlier `git add` / `git stage` for the same repo in the command (or `commit -a`) will
-stage, from a `git add --dry-run` of its arguments, so `git add -A && git commit` is judged on
-what it commits; the real index is never touched. In `security-gate` a deny
-anywhere in the command beats an ask. `pre-commit-checks` runs lint/tests only for a commit in
-the session's own repo: for another repo it would execute that repo's code before the command is
-approved. Why: [ADR 0018](docs/decisions/0018-git-gates-parse-the-command.md).
-No gate accepts a bypass or evidence the agent can produce on its own: the review bypass comes
-only from the environment Claude Code was launched with, and a test run counts only when its
-failure would have failed the command. Why: [ADR 0019](docs/decisions/0019-gates-ignore-evidence-the-agent-forges.md).
-
-**Skills** (`skills/`): `intent` (`/intent` → `docs/specs/<feature>/intent.md`), `spec`
-(`/spec` → `spec.md`, one grill round, then stops for approval), `grill` (stress-test a plan or
-stack choice in batched rounds with recommended answers), `adr` (`/adr` →
-`docs/decisions/NNNN-slug.md`), `diagnosing-bugs` (red-capable loop before any hypothesis),
-`pr` (`/pr`, opens a published PR, own), `emil-design-eng` (vendored, see credits).
-**Agent** (`agents/verifier.md`): fresh-context verifier — proves the spec's acceptance
-section with real command output, never edits.
-**References** (`references/`): vendored, pinned material the skills cite (see credits).
-
-### 📐 How a change flows
-
-Fix or chore: just do it — commit (review gate) → stop (verify gate) → `/pr`.
-Feature-sized: `/intent` → `/spec` (one grill round, then approve) → **plan mode** (drafts into
-`docs/plans/`, accepted plan copied to `specs/<feature>/plan.md`) → build → verifier agent →
-`/code-review` → `/pr`.
-Beside the chain: `/grill` to attack a plan or a stack choice before it costs anything,
-`diagnosing-bugs` when something is broken and the cause is not obvious, `/adr` for decisions a
-future reader would question. Full rule: `claude/rules/docs.md`.
-
-### 🧠 Per-project template
-
-[`claude/repo-template/`](claude/repo-template) seeds a new repo:
-
-- `AGENTS.md` — the agent guide: project, commands, gotchas. No stack conventions (those are
-  global path rules), no architecture prose (that's `docs/architecture.md`).
-- `CLAUDE.md` — the single line `@AGENTS.md`, so Claude Code loads the same guide. Both sit in
-  the root and are committed. Personal notes go in `CLAUDE.local.md`, which stays ignored.
-- `.claude/settings.json` — committed: `plansDirectory: ./docs/plans`, and `ranger-claude@ranger`
-  from the GitHub marketplace so cloud sessions get the gates too.
-- `docs/` — `overview.md` (hub), `architecture.md`, `review.md` (review policy), `decisions/0001`,
-  `specs/_template/{intent,spec,plan}.md`.
-
-The template carries no `.gitignore`: copy [`git/gitignore`](git/gitignore) first (see the Git
-section). It already tracks `.claude/settings.json` and ignores `docs/plans/`.
-
-```bash
-# macOS / Linux — inside the new repo
-cp -R ~/Code/ranger-ecosystem/dotfiles/claude/repo-template/. .
-```
-```powershell
-# Windows
-Copy-Item -Recurse -Force C:\Code\ranger-ecosystem\dotfiles\claude\repo-template\* .
-```
-
-Knowledge rule: *describes one repo → that repo's `docs/`; spans repos or has no repo → the
-`handbook` repo.* No external memory tool.
-
-### ☁️ Cowork project-instructions template
-
-[`claude/cowork-template/project-instructions.md`](claude/cowork-template/project-instructions.md)
-— for a Cowork project whose folder is the repo: sparring-partner role, "Cowork never writes
-code", and what it writes under `docs/` (intent, spec, ADRs, hub). The handoff to Claude Code
-is the spec file. It opens with a one-time re-point prompt for a project that used to live on the
-retired notes vault.
-
-### 🧩 Third-party plugins still in use
-
-From `claude-plugins-official`: `frontend-design`, `claude-md-management`,
-`claude-code-setup`, `context7`, `typescript-lsp`. Marketplace: `impeccable`
-([pbakaus/impeccable](https://github.com/pbakaus/impeccable)). Marketplace `dart-flutter`
-([flutter/agent-plugins](https://github.com/flutter/agent-plugins), the Flutter team's): the Dart
-MCP server (analyzer, tests, hot reload, widget tree) plus Flutter and Dart skills, whose stack
-defaults `rules/dart.md` overrides. Kept because they are tools (LSP, live docs, large maintained
-design systems, the Dart toolchain), not instructions.
-Marketplace `vue-skills` ([vuejs-ai/skills](https://github.com/vuejs-ai/skills), unofficial,
-eval-tested against a baseline): `vue-best-practices`, `vue-pinia-best-practices`,
-`vue-router-best-practices`, `vue-testing-best-practices`, `vue-debug-guides`,
-`create-adaptable-composable` (not the Options API or JSX ones); `rules/vue.md` overrides its
-props-destructure advice.
-Per project, not global: Supabase's `supabase` and `postgres-best-practices`
-([supabase/agent-skills](https://github.com/supabase/agent-skills)) in Pegasus only.
-
-> ✂️ Reviewed and not installed. 2026-10-08 (`docs/decisions/0003`): ponytail (its ladder became
-> `rules/simplicity.md`), graphify, addyosmani/agent-skills (five references vendored instead),
-> i-have-adhd (its rules became `rules/output.md`). 2026-10-12
-> ([`docs/decisions/0016`](docs/decisions/0016-second-review-cherry-pick-text-install-nothing.md)):
-> obra/superpowers and mattpocock/skills (sixteen pieces of text cherry-picked into plugin 1.1.0),
-> markitdown, Unlimited-OCR, openai/whisper, and the Artcraft apps (watch, re-check in 2027).
-> 2026-10-28 ([`docs/decisions/0021`](docs/decisions/0021-third-review-round-ponytail-5.md)): Ponytail 5
-> re-reviewed; six pieces of text distilled, the codebase map, band and levels not taken.
-> Earlier prunes: see `docs/decisions/`.
+The marketplace is still named `ranger` and the plugin `ranger-claude`, so a repo's
+`.claude/settings.json` only changes its marketplace source to `max-ranger/kitsune`.
 
 ---
 
@@ -616,6 +449,7 @@ One folder, flat by project. A repo sits directly under `~/Code`; the only group
 ~/Code/
   handbook/             cross-repo decisions, shared-stack as-built, non-code projects (private repo)
   <product>/            one folder per product repo
+  kitsune/              Claude Code tooling and the agent OS
   ranger-ecosystem/     dotfiles · ranger-infra · ranger-vue · ranger-dotnet · ranger-app-template
   sandbox/              throwaways
   archive/              inactive checkouts
@@ -628,32 +462,19 @@ repo → `handbook/docs/`.* No notes outside git.
 
 > 🪟 Windows uses the same layout under `C:\Code`. [`scripts/migrate-windows.ps1`](scripts/migrate-windows.ps1)
 > performs the move from `C:\Dev` (dry run by default, `-Apply` to execute), renames Claude Code's
-> per-project state, retires basic-memory and installs the plugin — the same steps the Mac went through.
+> per-project state, retires basic-memory and installs the plugin from kitsune — the same steps the Mac went through.
 
 ---
 
 ## 🔄 Maintaining this repo
 
 Nothing is symlinked, so live files and this repo **don't sync automatically** — that's the point.
-When you improve a hook, skill, setting, or template:
+When you improve a setting, script, or template:
 
 1. ✏️ Make the change in the live location (or here in the repo).
 2. 🔁 Copy it the other way so both match — re-run the relevant command above, or copy the edited
    live file back into the repo.
 3. 💾 Commit and push from this repo.
-4. 🔌 Plugin changes (hooks, skills, agent): bump `version` in the plugin manifest and run
-   `claude plugin update ranger-claude@ranger` — the plugin is a cached copy, even from the
-   local checkout. Other machines run the same command after `git pull`.
-   Test a hook before committing: pipe a synthetic JSON input into the script
-   (`printf '{"tool_input":{"command":"git commit -m x"},"cwd":"."}' | bash claude/plugins/ranger-claude/scripts/review-gate.sh`).
-   The git gates have a suite that does this against throwaway repos:
-   `bash claude/plugins/ranger-claude/tests/git-gates.test.sh`; the verify gate has
-   `tests/verify-gate.test.sh`, config protection `tests/config-protection.test.sh`; C# format on save has
-   `tests/format-on-save.test.sh` (needs the .NET SDK).
-   Skill changes: check them against
-   [`references/writing-for-baseline-delta.md`](claude/plugins/ranger-claude/references/writing-for-baseline-delta.md)
-   first; the description decides whether a skill ever loads.
-
 Refresh the Brewfile (and tracked VS Code extensions) from the current Mac:
 
 ```bash
@@ -669,41 +490,10 @@ Windows manifest stays in lockstep.
 
 - `~/.claude/projects/` — per-project memory and history, machine-local.
 - `~/.claude/plugins/` — managed by Claude Code's plugin system, restored via `enabledPlugins`.
-- `.git/ranger/` in every repo — gate markers (reviewed HEAD, last edit, last test run), per worktree.
 - `~/.claude/cache/`, `~/.claude/telemetry/`, session state — ephemeral.
 - `~/.ssh/` keys and `~/.config/git/allowed_signers` — machine-local SSH identity/signer list.
 - age private keys (`sops/age/keys.txt` in your config dir) — back them up out of band; lose
   the key and every file encrypted to it is unrecoverable.
 - Anything matching `.gitignore` (env files, credentials, local overrides).
 
----
 
-## 🙏 Credits — vendored third-party content
-
-Pinned copies inside the plugin; re-sync deliberately against a re-reviewed commit, never
-auto-fetch.
-
-- `skills/emil-design-eng` — [emilkowalski/skill](https://github.com/emilkowalski/skill); local
-  patch: our own `description` (when to load it, vs `impeccable`) and the course-promo
-  "Initial Response" block removed
-- `claude/rules/web-interface.md` — [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)
-  (`command.md`, MIT, pinned `e3d624b`, brand-voice rules pruned)
-- `references/` — [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)
-  (MIT, pinned `1401c8b`): definition of done, spec and plan skeletons, interview method,
-  fresh-context review
-- `skills/grill`, `skills/diagnosing-bugs`, `rules/testing.md`, the module tests in
-  `rules/simplicity.md`, the merge-danger section of the PR templates —
-  [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, pinned `49dd158`), distilled
-- `references/writing-good-tests.md`, the claims-and-evidence table, the plan additions, the
-  builder check, two verifier clauses — [obra/superpowers](https://github.com/obra/superpowers)
-  (MIT, pinned `bb92a77`), distilled
-- `references/writing-for-baseline-delta.md` — [dotnet/skills](https://github.com/dotnet/skills)
-  (MIT, pinned `10d85e2`), verbatim: how to write a skill that beats the model without it
-- `rules/simplicity.md` — ladder idea from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT), rewritten;
-  the scope paragraph, the marker form and the load pass in the repo template's review policy from
-  Ponytail 5 (pinned `09c434a`), distilled
-- `rules/output.md` — ideas from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT), rewritten;
-  the not-checked line from Ponytail 5, distilled
-- `rules/writing.md` — patterns from [blader/humanizer](https://github.com/blader/humanizer) (MIT), rewritten
-- `rules/flutter-ui.md` — [expo/skills](https://github.com/expo/skills) (MIT, pinned `7ddc1f5`), rewritten for Flutter
-- `scripts/config-protection.sh` — idea from [affaan-m/ECC](https://github.com/affaan-m/ECC) (MIT), rewritten in bash for these stacks

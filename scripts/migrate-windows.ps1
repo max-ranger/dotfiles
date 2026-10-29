@@ -10,7 +10,7 @@
 
   Steps: (1) move repos, backups and assets; (2) rename Claude Code's per-project state folders
   and rewrite the project keys in ~/.claude.json; (3) zip + retire basic-memory;
-  (4) copy the Claude config from this repo and install the ranger-claude plugin;
+  (4) remove retired Claude hooks and skills and install the ranger-claude plugin from kitsune;
   (5) copy the PowerShell profile. Close VS Code, Rider and every Claude session first.
 
 .EXAMPLE
@@ -139,25 +139,21 @@ if (Get-Command uv -ErrorAction SilentlyContinue) { Do-Step "uv tool uninstall b
 if (Test-Path (Join-Path $home_ '.basic-memory')) { Do-Step "remove $home_\.basic-memory (index + logs; the notes are in the zip)" { Remove-Item -LiteralPath (Join-Path $home_ '.basic-memory') -Recurse -Force } }
 if ([Environment]::GetEnvironmentVariable('BASIC_MEMORY_HOME', 'User')) { Do-Step "remove the user environment variable BASIC_MEMORY_HOME" { [Environment]::SetEnvironmentVariable('BASIC_MEMORY_HOME', $null, 'User') } }
 
-# ------------------------------------------------- 4. Claude config + plugin from this repo
-Say "`n== 4. Claude Code config from $repo"
+# ------------------------------------------------- 4. Claude plugin from kitsune
+Say "`n== 4. Claude Code plugin from max-ranger/kitsune"
 $claude = Join-Path $home_ '.claude'
-Do-Step "copy CLAUDE.md, settings.json, rules\, docs\ into $claude (hooks\ and skills\ are retired there)" {
-  foreach ($d in 'rules', 'docs') { New-Item -ItemType Directory -Force (Join-Path $claude $d) | Out-Null }
-  Copy-Item (Join-Path $repo 'claude\CLAUDE.md') (Join-Path $claude 'CLAUDE.md') -Force
-  Copy-Item (Join-Path $repo 'claude\settings.json') (Join-Path $claude 'settings.json') -Force
-  Copy-Item (Join-Path $repo 'claude\rules\*') (Join-Path $claude 'rules') -Recurse -Force
-  Copy-Item (Join-Path $repo 'claude\docs\*') (Join-Path $claude 'docs') -Recurse -Force
+Do-Step "remove the retired hooks\ and skills from $claude" {
   foreach ($gone in 'hooks', 'skills\pr-draft', 'skills\emil-design-eng', 'skills\web-interface-guidelines', 'memory-queue') {
     $p = Join-Path $claude $gone; if (Test-Path $p) { Remove-Item -LiteralPath $p -Recurse -Force }
   }
 }
 if (Get-Command claude -ErrorAction SilentlyContinue) {
-  Do-Step "claude plugin marketplace add max-ranger/dotfiles; claude plugin install ranger-claude@ranger" {
-    try { & claude plugin marketplace add max-ranger/dotfiles 2>&1 | Out-Null } catch { }
+  Do-Step "claude plugin marketplace add max-ranger/kitsune; claude plugin install ranger-claude@ranger" {
+    try { & claude plugin marketplace add max-ranger/kitsune 2>&1 | Out-Null } catch { }
     try { & claude plugin install ranger-claude@ranger 2>&1 | Out-Host } catch { Say "  warn   $_" }
   }
 } else { Say "  skip   claude CLI not on PATH; run the two plugin commands after installing it" }
+Say "  note   CLAUDE.md, settings.json, rules and docs in $claude: copy them by hand, see the kitsune README"
 
 # ------------------------------------------------------------- 5. PowerShell profile
 Say "`n== 5. PowerShell profile"
