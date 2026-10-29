@@ -9,7 +9,7 @@
 - Decisions: [decisions/](decisions/)
 - Plugin: `claude/plugins/ranger-claude/` (hooks in `scripts/`, skills, agent, vendored references)
 - Global rules: `claude/rules/` → `~/.claude/rules/`
-- Repo template for new projects: `claude/repo-template/` (`.claude/CLAUDE.md`, `.claude/settings.json`, `docs/` skeleton); the gitignore comes from `git/gitignore`
+- Repo template for new projects: `claude/repo-template/` (root `AGENTS.md` and `CLAUDE.md`, `.claude/settings.json`, `docs/` skeleton); the gitignore comes from `git/gitignore`
 - Review policy: [review.md](review.md)
 
 ## Conventions worth knowing

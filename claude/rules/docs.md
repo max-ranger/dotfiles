@@ -12,6 +12,8 @@ docs/
   review.md              the review policy /code-review and the verifier follow
 ```
 
+The agent guide sits in the repo root and is committed: `AGENTS.md` holds it, `CLAUDE.md` is the single line `@AGENTS.md`. One of each per repo, never in `.claude/` or a subfolder. Personal notes go in `CLAUDE.local.md`, which is ignored.
+
 Scale by change size:
 - **Fix / chore / tiny change**: no artifacts. Commit message + PR carry the record.
 - **Feature-sized change** (more than ~half a day or touches a boundary): `/intent` → `/spec` → plan mode → build → verify → `/pr`. The spec is approved before code; if the implementation departs from the plan, the plan is updated in the same commit.

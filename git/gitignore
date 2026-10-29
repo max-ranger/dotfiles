@@ -261,11 +261,10 @@ $RECYCLE.BIN/
 
 
 # ── Claude / AI assistant files ───────────────────────────────
-# CLAUDE.md and AGENTS.md (root, nested or .claude/CLAUDE.md) are the project's
-# agent guide and are committed. CLAUDE.local.md and the rest of .claude/ are personal.
+# The agent guide is the root AGENTS.md plus a root CLAUDE.md that imports it, both
+# committed. CLAUDE.local.md and everything in .claude/ but settings.json are personal.
 .claude/*
 !.claude/settings.json
-!.claude/CLAUDE.md
 CLAUDE.local.md
 .claudeignore
 .superpowers/

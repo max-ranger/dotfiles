@@ -330,9 +330,9 @@ and covers: secrets & `.env*`, keys/certs, `appsettings*.json`, `node_modules` &
 files. Lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`) stay **committed**.
 
 Two rules in it carry the Claude setup: `.claude/*` with `!.claude/settings.json` keeps everything
-in `.claude/` personal except the shared project settings and `.claude/CLAUDE.md`, and `docs/plans/` is ignored because
+in `.claude/` personal except the shared project settings, and `docs/plans/` is ignored because
 plan-mode drafts are scratch ([`docs/decisions/0017`](docs/decisions/0017-project-settings-committed-plan-drafts-scratch.md)).
-`CLAUDE.md` and `AGENTS.md` are committed wherever they sit; only `CLAUDE.local.md` stays personal.
+The root `CLAUDE.md` and `AGENTS.md` are committed. Only `CLAUDE.local.md` stays personal.
 
 ```bash
 cp ~/Code/ranger-ecosystem/dotfiles/git/gitignore ./.gitignore          # macOS / Linux
@@ -467,16 +467,17 @@ future reader would question. Full rule: `claude/rules/docs.md`.
 
 [`claude/repo-template/`](claude/repo-template) seeds a new repo:
 
-- `.claude/CLAUDE.md` — project, commands, gotchas. No stack conventions (those are global path
-  rules), no architecture prose (that's `docs/architecture.md`). Committed; personal notes go
-  in `CLAUDE.local.md`, which stays ignored.
+- `AGENTS.md` — the agent guide: project, commands, gotchas. No stack conventions (those are
+  global path rules), no architecture prose (that's `docs/architecture.md`).
+- `CLAUDE.md` — the single line `@AGENTS.md`, so Claude Code loads the same guide. Both sit in
+  the root and are committed. Personal notes go in `CLAUDE.local.md`, which stays ignored.
 - `.claude/settings.json` — committed: `plansDirectory: ./docs/plans`, and `ranger-claude@ranger`
   from the GitHub marketplace so cloud sessions get the gates too.
 - `docs/` — `overview.md` (hub), `architecture.md`, `review.md` (review policy), `decisions/0001`,
   `specs/_template/{intent,spec,plan}.md`.
 
 The template carries no `.gitignore`: copy [`git/gitignore`](git/gitignore) first (see the Git
-section). It already tracks `.claude/settings.json` and `.claude/CLAUDE.md` and ignores `docs/plans/`.
+section). It already tracks `.claude/settings.json` and ignores `docs/plans/`.
 
 ```bash
 # macOS / Linux — inside the new repo

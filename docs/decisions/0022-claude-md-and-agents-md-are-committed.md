@@ -1,7 +1,7 @@
 # 0022. Commit CLAUDE.md and AGENTS.md as the project's agent guide
 
 Date: 2026-10-29
-Status: accepted
+Status: superseded by 0023
 
 ## Context
 The canonical gitignore ignored every `CLAUDE.md` and, through `.claude/*` from [0017](0017-project-settings-committed-plan-drafts-scratch.md), `.claude/CLAUDE.md` too. The idea was that the file held personal notes. That is no longer true. A repo's `CLAUDE.md` or `AGENTS.md` now holds project knowledge: the layout, the exact commands, the gotchas. A fresh clone or a cloud session without it starts blind. Three repos had already worked around the rule: ranger-app-template un-ignores `/CLAUDE.md` and `/AGENTS.md`, ranger-infra and handbook un-ignore `.claude/CLAUDE.md`. Claude Code keeps a separate file for personal notes, `CLAUDE.local.md`.

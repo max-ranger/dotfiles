@@ -1,8 +1,9 @@
-# CLAUDE.md
+# AGENTS.md
 
-> Project scaffold — fill the placeholders, delete what doesn't apply. Keep it to what Claude
-> can't infer from the code; architecture and decisions live in `docs/`, per-stack conventions
-> come from the global rules. When a correction reveals a project rule, record it here.
+> Agent guide for this repo: fill the placeholders, delete what doesn't apply. `CLAUDE.md` only
+> imports this file, so edit here. Keep it to what an agent can't infer from the code;
+> architecture and decisions live in `docs/`, per-stack conventions come from the global rules.
+> When a correction reveals a project rule, record it here.
 
 ## Project
 
