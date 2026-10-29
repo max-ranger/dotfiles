@@ -29,3 +29,8 @@ layout, per-stack conventions) and load on their own.
 Project knowledge lives in the repo (`docs/`), cross-repo and non-code knowledge in the
 `handbook` repo. No external memory tool, no notes outside git. Layout and what gets a
 file: `rules/docs.md`. Workspace: `~/Code`, flat by project; `ranger-ecosystem/` is the only group.
+
+**Output outside a repo:** when the working directory is `~`, `~/.claude` or another
+non-repo folder, files meant to be kept go to `~/.claude/output/YYYY-MM-DD-<slug>/`.
+Throwaway intermediates go to the session scratchpad or `$TMPDIR`. Never write loose files
+into `~` or the top level of `~/.claude`.
