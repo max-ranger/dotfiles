@@ -286,7 +286,7 @@ ssh-add ~/.ssh/ssh-key                  # load into the agent
 ssh-keygen -t ed25519 -C "you@example.com" -f $env:USERPROFILE\.ssh\ssh-key
 ```
 
-**Tell git to SSH-sign** (global; lives in `~/.gitconfig`, which this repo does not track):
+**Tell git to SSH-sign** (global; lives in `~/.config/git/config` on the Mac, which this repo does not track):
 
 ```bash
 git config --global gpg.format ssh
