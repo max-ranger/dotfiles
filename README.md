@@ -61,7 +61,7 @@ Then, inside `claude`, just ask:
 
 > **"Set up this machine from these dotfiles — copy the VS Code and Git configs per the README,
 > run the .NET install script, then clone max-ranger/kitsune and follow its README for the
-> Claude Code config and the ranger-claude plugin."**
+> Claude Code config and the kitsune plugin."**
 
 Claude reads this README and runs the copy/install steps below for you. ✨
 
@@ -345,7 +345,7 @@ Copy-Item C:\Code\ranger-ecosystem\dotfiles\git\gitignore .\.gitignore   # Windo
 
 ## 🤖 Claude Code — lives in kitsune
 
-The global `CLAUDE.md`, the rules, `settings.json`, the `ranger-claude` plugin (gates, SDLC
+The global `CLAUDE.md`, the rules, `settings.json`, the `kitsune` plugin (gates, SDLC
 skills, verifier agent), the repo template and the Cowork template moved to
 [kitsune](https://github.com/max-ranger/kitsune) on 2026-10-29
 ([ADR 0024](docs/decisions/0024-claude-tooling-moved-to-kitsune.md)). Its README has the copy
@@ -356,8 +356,8 @@ git clone git@github.com:max-ranger/kitsune.git ~/Code/kitsune
 # then follow ~/Code/kitsune/README.md
 ```
 
-The marketplace is still named `ranger` and the plugin `ranger-claude`, so a repo's
-`.claude/settings.json` only changes its marketplace source to `max-ranger/kitsune`.
+The marketplace is still named `ranger`. The plugin is `kitsune@ranger` since 2026-10-30 (kitsune ADR 0025),
+so a repo's `.claude/settings.json` names `kitsune@ranger` and the marketplace source `max-ranger/kitsune`.
 
 ---
 

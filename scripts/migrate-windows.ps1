@@ -10,7 +10,7 @@
 
   Steps: (1) move repos, backups and assets; (2) rename Claude Code's per-project state folders
   and rewrite the project keys in ~/.claude.json; (3) zip + retire basic-memory;
-  (4) remove retired Claude hooks and skills and install the ranger-claude plugin from kitsune;
+  (4) remove retired Claude hooks and skills and install the kitsune plugin from kitsune;
   (5) copy the PowerShell profile. Close VS Code, Rider and every Claude session first.
 
 .EXAMPLE
@@ -148,9 +148,9 @@ Do-Step "remove the retired hooks\ and skills from $claude" {
   }
 }
 if (Get-Command claude -ErrorAction SilentlyContinue) {
-  Do-Step "claude plugin marketplace add max-ranger/kitsune; claude plugin install ranger-claude@ranger" {
+  Do-Step "claude plugin marketplace add max-ranger/kitsune; claude plugin install kitsune@ranger" {
     try { & claude plugin marketplace add max-ranger/kitsune 2>&1 | Out-Null } catch { }
-    try { & claude plugin install ranger-claude@ranger 2>&1 | Out-Host } catch { Say "  warn   $_" }
+    try { & claude plugin install kitsune@ranger 2>&1 | Out-Host } catch { Say "  warn   $_" }
   }
 } else { Say "  skip   claude CLI not on PATH; run the two plugin commands after installing it" }
 Say "  note   CLAUDE.md, settings.json, rules and docs in $claude: copy them by hand, see the kitsune README"

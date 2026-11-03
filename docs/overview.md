@@ -7,7 +7,7 @@
 ## Where things are
 
 - Decisions: [decisions/](decisions/). Numbers missing here belong to the Claude tooling and live in kitsune.
-- Claude Code tooling: `~/Code/kitsune` (plugin `ranger-claude@ranger`, global rules, repo template)
+- Claude Code tooling: `~/Code/kitsune` (plugin `kitsune@ranger`, global rules, repo template)
 - Review policy: [review.md](review.md)
 
 ## Conventions worth knowing
